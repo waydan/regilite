@@ -1,7 +1,7 @@
 Summary
 -------
 
-`regestex` provides consice, type-safe, abstractions for interacting with hardware registers.
+``regestex`` provides consice, type-safe, abstractions for interacting with hardware registers.
 
 Examples
 ========
