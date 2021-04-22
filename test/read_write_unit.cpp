@@ -29,9 +29,9 @@ TEST(WriteToRegister, WriteMultipleBits)
 
 TEST(WriteToRegister, WritesDoNotAffectOtherBits)
 {
-    virtual_register = 0xFFFF'FFF0;
+    virtual_register = 0xFFF0;
     write(Enable{1}, Execute{1});
-    LONGS_EQUAL(0xFFFF'FFF0 | 3u, virtual_register);
+    LONGS_EQUAL(0xFFF0 | 3u, virtual_register);
 }
 
 TEST(WriteToRegister, MultibitFieldClearsUnsetBits)
@@ -39,4 +39,11 @@ TEST(WriteToRegister, MultibitFieldClearsUnsetBits)
     virtual_register = 0xFF;
     write(Mode{5});
     LONGS_EQUAL(0b11110111, virtual_register);
+}
+
+TEST(WriteToRegister, FieldsOfZerosClearBits)
+{
+    virtual_register = 0xFF;
+    write(Mode{0}, Execute{0}, Enable{0});
+    LONGS_EQUAL(0b11100000, virtual_register);
 }

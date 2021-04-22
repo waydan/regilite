@@ -15,7 +15,7 @@ struct BitMask {
     constexpr auto operator|(BitMask<other_mask>) noexcept
         -> BitMask<mask | other_mask>;
 
-    static constexpr std::uint32_t mask_value = mask;
+    static constexpr std::uint32_t value = mask;
     static constexpr unsigned char lsb = std::countr_zero(mask);
     static constexpr unsigned char msb = std::countl_zero(mask);
 };
@@ -42,8 +42,8 @@ struct Field {
     template <typename OtherMask>
     constexpr auto operator|(const Field<Reg, OtherMask>& other) const noexcept
     {
-        return Field<Reg, decltype(std::declval<Mask>() |
-                                   std::declval<OtherMask>())>{
+        return Field<Reg, decltype(std::declval<Mask>()
+                                   | std::declval<OtherMask>())>{
             value_ | other.value_, no_shift};
     }
 };
@@ -55,11 +55,12 @@ struct Register {
     static auto write(Field<Register, Mask> field)
     {
         const auto write_address = address();
-        const std::uint32_t read =
-            *reinterpret_cast<volatile std::uint32_t*>(write_address);
-        *reinterpret_cast<volatile std::uint32_t*>(write_address) =
-            read & ~Mask::mask_value | field.value_;
-        // return std::make_pair(value, write_address);
+        const std::uint32_t write_value =
+            *reinterpret_cast<volatile std::uint32_t*>(write_address)
+                & ~Mask::value
+            | field.value_;
+        *reinterpret_cast<volatile std::uint32_t*>(write_address) = write_value;
+        return std::make_pair(write_value, write_address);
     }
 };
 
