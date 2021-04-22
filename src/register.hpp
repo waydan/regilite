@@ -5,13 +5,22 @@
 
 namespace registex {
 
-template <std::uintptr_t (&address)()>
+template <std::uintptr_t (&address)(), std::size_t lsb>
 struct Field {
-    explicit constexpr Field(int){};
+    explicit constexpr Field(std::uint32_t value) : value_(value << lsb){};
 
-    static void write()
+    void write()
     {
-        *reinterpret_cast<volatile std::uint32_t*>(address()) = 1u;
+        *reinterpret_cast<volatile std::uint32_t*>(address()) = value_;
+    }
+
+    std::uint32_t value_;
+
+    template <std::size_t lsb_other>
+    constexpr auto
+    operator|(const Field<address, lsb_other>& other) const noexcept
+    {
+        return Field<address, lsb>{value_ | other.value_};
     }
 };
 
@@ -21,10 +30,11 @@ auto make_addr() -> std::uintptr_t
     return reinterpret_cast<std::uintptr_t>(&reg);
 };
 
-template <typename F>
-void write(F field)
+template <typename F, typename... Fs>
+void write(F field, Fs... fields)
 {
-    field.write();
+    auto joined_fields = (field | ... | fields);
+    joined_fields.write();
 };
 
 } // namespace registex
