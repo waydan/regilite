@@ -1,9 +1,16 @@
 #include "CppUTest/TestHarness.h"
 
 #include "register.hpp"
+#include <cstdint>
 
-TEST_GROUP(WriteFields){};
+std::uint32_t test_register;
 
-TEST(WriteFields, Pass) {
-  struct DummyRegister : registex::Register {};
-}
+TEST_GROUP(WriteFields)
+{
+    void setup() { test_register = 0u; };
+};
+
+TEST(WriteFields, Pass)
+{
+    class DummyRegister : registex::Register {};
+};
