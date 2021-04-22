@@ -3,14 +3,18 @@
 #include "register.hpp"
 #include <cstdint>
 
-std::uint32_t test_register;
+std::uint32_t virtual_register;
 
-TEST_GROUP(WriteFields)
+using Enable = registex::Field<
+    registex::make_addr<virtual_register>>;
+
+TEST_GROUP(WriteToRegister)
 {
-    void setup() { test_register = 0u; };
+    void setup() { virtual_register = 0u; };
 };
 
-TEST(WriteFields, Pass)
+TEST(WriteToRegister, WriteSingleBit)
 {
-    class DummyRegister : registex::Register {};
+    write(Enable{1});
+    CHECK_EQUAL(1u, virtual_register);
 };
