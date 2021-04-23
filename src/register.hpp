@@ -8,6 +8,19 @@
 
 namespace registex {
 
+template <typename Uint, typename>
+struct Action {
+    Uint value;
+    std::uintptr_t address;
+
+    explicit constexpr Action(Uint val, std::uintptr_t addr)
+        : value{val}, address{addr}
+    {}
+};
+
+template <typename Uint>
+using WriteAction = Action<Uint, struct Write_t>;
+
 template <std::uint32_t mask>
 struct BitMask {
 
@@ -60,7 +73,7 @@ struct Register {
                 & ~Mask::value
             | field.value_;
         *reinterpret_cast<volatile std::uint32_t*>(write_address) = write_value;
-        return std::make_pair(write_value, write_address);
+        return WriteAction<std::uint8_t>(write_value, write_address + 1);
     }
 };
 
@@ -75,8 +88,7 @@ auto make_addr() -> std::uintptr_t
 template <typename Reg, typename... Masks>
 auto write(Field<Reg, Masks>... fields)
 {
-    const auto joined_fields = (fields | ...);
-    return Reg::write(joined_fields);
+    return Reg::write((fields | ...));
 };
 
 } // namespace registex

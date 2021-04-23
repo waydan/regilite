@@ -2,24 +2,26 @@
 
 #include "register.hpp"
 #include <cstdint>
+#include <type_traits>
 
 std::uint32_t virtual_register;
 
-using Writeable = registex::Register<registex::make_addr<virtual_register>>;
-using Enable = registex::Field<Writeable, registex::mask_from_range<0, 0>>;
-using Execute = registex::Field<Writeable, registex::mask_from_range<1, 1>>;
-using Mode = registex::Field<Writeable, registex::mask_from_range<4, 2>>;
 
 TEST_GROUP(WriteToRegister)
 {
     void setup() { virtual_register = 0u; };
 };
 
+using Writeable = registex::Register<registex::make_addr<virtual_register>>;
+using Enable = registex::Field<Writeable, registex::mask_from_range<0, 0>>;
+
 TEST(WriteToRegister, WriteSingleBit)
 {
     write(Enable{1});
     LONGS_EQUAL(1u, virtual_register);
 }
+
+using Execute = registex::Field<Writeable, registex::mask_from_range<1, 1>>;
 
 TEST(WriteToRegister, WriteMultipleBits)
 {
@@ -34,6 +36,8 @@ TEST(WriteToRegister, WritesDoNotAffectOtherBits)
     LONGS_EQUAL(0xFFF0 | 3u, virtual_register);
 }
 
+using Mode = registex::Field<Writeable, registex::mask_from_range<4, 2>>;
+
 TEST(WriteToRegister, MultibitFieldClearsUnsetBits)
 {
     virtual_register = 0xFF;
@@ -41,9 +45,18 @@ TEST(WriteToRegister, MultibitFieldClearsUnsetBits)
     LONGS_EQUAL(0b11110111, virtual_register);
 }
 
-TEST(WriteToRegister, FieldsOfZerosClearBits)
+using Config = registex::Field<Writeable, registex::mask_from_range<11, 8>>;
+
+template <typename A, typename B>
+constexpr auto is_same_non_cv_type =
+    std::is_same_v<std::remove_cv_t<A>, std::remove_cv_t<B>>;
+
+TEST(WriteToRegister, WritesMinimalSizeWhenPossible)
 {
-    virtual_register = 0xFF;
-    write(Mode{0}, Execute{0}, Enable{0});
-    LONGS_EQUAL(0b11100000, virtual_register);
+    const auto action = write(Config{0b1111});
+    static_assert(is_same_non_cv_type<decltype(action),
+                                      registex::WriteAction<std::uint8_t>>);
+    LONGS_EQUAL(0b1111 << 8, virtual_register);
+    LONGS_EQUAL(reinterpret_cast<std::uintptr_t>(&virtual_register) + 1,
+                action.address);
 }
