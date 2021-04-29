@@ -8,6 +8,51 @@
 
 namespace registex {
 
+// [Pre => mask > 0]
+constexpr auto lsb(std::uint32_t mask) noexcept -> unsigned char
+{
+    return std::countr_zero(mask);
+}
+
+// [Pre => mask > 0]
+constexpr auto msb(std::uint32_t mask) noexcept -> unsigned char
+{
+    return sizeof(mask) * 8 - (std::countl_zero(mask) + 1);
+}
+
+constexpr auto mask_from_range(unsigned char msb, unsigned char lsb) noexcept
+    -> std::uint32_t
+{
+    return (~std::uint32_t{1u} << msb) ^ (~std::uint32_t{0u} << lsb);
+}
+
+constexpr auto min_pow_8(std::uint32_t mask) noexcept -> unsigned char
+{
+    return (msb(mask) ^ lsb(mask)) / 8;
+}
+
+template <unsigned char exp>
+struct Block;
+
+template <>
+struct Block<0> {
+    using type = std::uint8_t;
+};
+
+template <>
+struct Block<1> {
+    using type = std::uint16_t;
+};
+
+template <>
+struct Block<2> {
+    using type = std::uint32_t;
+};
+
+template <unsigned char exp>
+using Block_t = typename Block<exp>::type;
+
+
 template <typename Uint, typename>
 struct Action {
     Uint value;
@@ -21,56 +66,36 @@ struct Action {
 template <typename Uint>
 using WriteAction = Action<Uint, struct Write_t>;
 
-template <std::uint32_t mask>
-struct BitMask {
-
-    template <std::uint32_t other_mask>
-    constexpr auto operator|(BitMask<other_mask>) noexcept
-        -> BitMask<mask | other_mask>;
-
-    static constexpr std::uint32_t value = mask;
-    static constexpr unsigned char lsb = std::countr_zero(mask);
-    static constexpr unsigned char msb = std::countl_zero(mask);
-};
-
-template <unsigned char msb, unsigned char lsb>
-using mask_from_range =
-    std::enable_if_t<(lsb <= msb) and (msb < sizeof(std::uint32_t) * 8),
-                     BitMask<((1u << msb - lsb + 1) - 1) << lsb>>;
-
 
 struct NoShift_t {};
 constexpr inline NoShift_t no_shift{};
 
 
-template <typename Reg, typename Mask>
+template <typename Reg, std::uint32_t mask>
 struct Field {
     explicit constexpr Field(std::uint32_t value, NoShift_t) : value_(value) {}
     explicit constexpr Field(std::uint32_t value)
-        : Field{value << Mask::lsb, no_shift}
+        : Field{value << lsb(mask), no_shift}
     {}
 
     std::uint32_t value_;
 
-    template <typename OtherMask>
-    constexpr auto operator|(const Field<Reg, OtherMask>& other) const noexcept
+    template <std::uint32_t other_mask>
+    constexpr auto operator|(const Field<Reg, other_mask>& other) const noexcept
     {
-        return Field<Reg, decltype(std::declval<Mask>()
-                                   | std::declval<OtherMask>())>{
-            value_ | other.value_, no_shift};
+        return Field<Reg, mask | other_mask>{value_ | other.value_, no_shift};
     }
 };
 
 template <std::uintptr_t (&address)()>
 struct Register {
 
-    template <typename Mask>
-    static auto write(Field<Register, Mask> field)
+    template <std::uint32_t mask>
+    static auto write(Field<Register, mask> field)
     {
         const auto write_address = address();
         const std::uint32_t write_value =
-            *reinterpret_cast<volatile std::uint32_t*>(write_address)
-                & ~Mask::value
+            *reinterpret_cast<volatile std::uint32_t*>(write_address) & ~mask
             | field.value_;
         *reinterpret_cast<volatile std::uint32_t*>(write_address) = write_value;
         return WriteAction<std::uint8_t>(write_value, write_address + 1);
@@ -85,8 +110,8 @@ auto make_addr() -> std::uintptr_t
 };
 
 
-template <typename Reg, typename... Masks>
-auto write(Field<Reg, Masks>... fields)
+template <typename Reg, std::uint32_t... masks>
+auto write(Field<Reg, masks>... fields)
 {
     return Reg::write((fields | ...));
 };

@@ -6,14 +6,17 @@
 
 std::uint32_t virtual_register;
 
+using Writeable = registex::Register<registex::make_addr<virtual_register>>;
+using Enable = registex::Field<Writeable, registex::mask_from_range(0, 0)>;
+using Execute = registex::Field<Writeable, registex::mask_from_range(1, 1)>;
+using Mode = registex::Field<Writeable, registex::mask_from_range(4, 2)>;
+using Config = registex::Field<Writeable, registex::mask_from_range(11, 8)>;
 
 TEST_GROUP(WriteToRegister)
 {
     void setup() { virtual_register = 0u; };
 };
 
-using Writeable = registex::Register<registex::make_addr<virtual_register>>;
-using Enable = registex::Field<Writeable, registex::mask_from_range<0, 0>>;
 
 TEST(WriteToRegister, WriteSingleBit)
 {
@@ -21,7 +24,6 @@ TEST(WriteToRegister, WriteSingleBit)
     LONGS_EQUAL(1u, virtual_register);
 }
 
-using Execute = registex::Field<Writeable, registex::mask_from_range<1, 1>>;
 
 TEST(WriteToRegister, WriteMultipleBits)
 {
@@ -36,7 +38,6 @@ TEST(WriteToRegister, WritesDoNotAffectOtherBits)
     LONGS_EQUAL(0xFFF0 | 3u, virtual_register);
 }
 
-using Mode = registex::Field<Writeable, registex::mask_from_range<4, 2>>;
 
 TEST(WriteToRegister, MultibitFieldClearsUnsetBits)
 {
@@ -45,7 +46,6 @@ TEST(WriteToRegister, MultibitFieldClearsUnsetBits)
     LONGS_EQUAL(0b11110111, virtual_register);
 }
 
-using Config = registex::Field<Writeable, registex::mask_from_range<11, 8>>;
 
 template <typename A, typename B>
 constexpr auto is_same_non_cv_type =
