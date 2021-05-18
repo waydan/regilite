@@ -1,9 +1,17 @@
 #ifndef TEST_REGISTER_HPP
 #define TEST_REGISTER_HPP
 
+#include "CppUTest/TestHarness.h"
+
 auto register_view(regilite::Register& reg) noexcept -> std::uint32_t&
 {
     return *reinterpret_cast<std::uint32_t*>(&reg);
+}
+
+auto REGISTER_EQUALS(std::uint32_t value, regilite::Register& reg) noexcept
+    -> void
+{
+    LONGS_EQUAL(value, register_view(reg));
 }
 
 
