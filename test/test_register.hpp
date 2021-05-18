@@ -33,8 +33,8 @@ using TestReg = regilite::Register<std::uint32_t>;
 static_assert(std::is_standard_layout<TestReg>::value,
               "Register<> type must always be standard layout.");
 
-using F0 = regilite::Field<0b001>;
-using F1 = regilite::Field<0b110>;
+using F0 = regilite::Field<std::uint32_t, 0b001>;
+using F1 = regilite::Field<std::uint32_t, 0b110>;
 
 
 #endif // TEST_REGISTER_HPP

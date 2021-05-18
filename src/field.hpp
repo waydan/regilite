@@ -7,10 +7,15 @@ struct NoShift_t {};
 } // namespace detail
 
 
-template <std::uint32_t mask>
+template <typename UInt, UInt mask>
 class Field
 {
-    std::uint32_t value_;
+    static_assert(std::is_unsigned<UInt>::value
+                      and not std::is_same<UInt, bool>::value,
+                  "Register<> type requires an unsigned integral as its "
+                  "underlying representation.");
+
+    UInt value_;
 
   public:
     constexpr explicit Field(std::uint32_t value) noexcept
@@ -25,28 +30,28 @@ class Field
     static constexpr auto msk() noexcept -> std::uint32_t { return mask; }
 
     template <std::uint32_t o_mask>
-    constexpr auto operator|(Field<o_mask> other_f) const noexcept
+    constexpr auto operator|(Field<UInt, o_mask> other_f) const noexcept
         -> std::enable_if_t<!detail::masks_overlap(mask, o_mask),
-                            Field<mask | o_mask>>
+                            Field<UInt, mask | o_mask>>
     {
-        return Field<mask | o_mask>{value() | other_f.value(),
-                                    detail::NoShift_t{}};
+        return Field<UInt, mask | o_mask>{value() | other_f.value(),
+                                          detail::NoShift_t{}};
     }
 };
 
 
 #ifndef __cpp_fold_expressions
 
-template <std::uint32_t mask>
-constexpr auto fold_fields(Field<mask> f)
+template <typename UInt, std::uint32_t mask>
+constexpr auto fold_fields(Field<UInt, mask> f)
 {
     return f;
 }
 
 #endif
 
-template <std::uint32_t mask, std::uint32_t... masks>
-constexpr auto fold_fields(Field<mask> f, Field<masks>... fs)
+template <typename UInt, std::uint32_t mask, std::uint32_t... masks>
+constexpr auto fold_fields(Field<UInt, mask> f, Field<UInt, masks>... fs)
 {
 #ifndef __cpp_fold_expressions
     return f | fold_fields(fs...);

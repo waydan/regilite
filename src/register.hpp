@@ -23,7 +23,7 @@ class Register
 
   public:
     template <UInt mask, UInt... masks>
-    auto write(Field<mask> f, Field<masks>... fs) noexcept -> void
+    auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
     {
         const auto fields = fold_fields(f, fs...);
         raw_ = (raw_ & ~fields.msk()) | fields.value();
