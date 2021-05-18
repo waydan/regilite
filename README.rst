@@ -1,7 +1,7 @@
 Summary
 -------
 
-``regestex`` provides consice, type-safe, abstractions for interacting with hardware registers.
+``regilite`` provides consice, type-safe, abstractions for interacting with hardware registers.
 
 Examples
 ========
@@ -14,8 +14,8 @@ Examples
 Reduce Errors
 +++++++++++++
 
-- Cannot mix fields from different registers
-- Cannot write different values to the same field
+- Only Predefined ``Field``s may be written to a ``Register``
+- Overlapping ``Field``s can be detected at compile-time
 
 Interface
 =========
