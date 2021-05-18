@@ -8,13 +8,21 @@
 
 namespace regilite {
 
+template <typename UInt>
+class Register;
 
+template <typename UInt>
 class Register
 {
-    std::uint32_t raw_;
+    static_assert(std::is_unsigned<UInt>::value
+                      and not std::is_same<UInt, bool>::value,
+                  "Register<> type requires an unsigned integral as its "
+                  "underlying representation.");
+
+    UInt raw_;
 
   public:
-    template <std::uint32_t mask, std::uint32_t... masks>
+    template <UInt mask, UInt... masks>
     auto write(Field<mask> f, Field<masks>... fs) noexcept -> void
     {
         const auto fields = fold_fields(f, fs...);

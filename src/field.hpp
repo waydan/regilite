@@ -25,7 +25,7 @@ class Field
     static constexpr auto msk() noexcept -> std::uint32_t { return mask; }
 
     template <std::uint32_t o_mask>
-    constexpr auto operator|(Field<o_mask> other_f) const noexcept
+    constexpr auto operator|(Field<o_mask> other_f) const noexcept -> std::enable_if_t<!detail::masks_overlap(mask, o_mask), Field<mask | o_mask>>
     {
         return Field<mask | o_mask>{value() | other_f.value(),
                                     detail::NoShift_t{}};

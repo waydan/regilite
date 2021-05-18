@@ -11,4 +11,11 @@ constexpr auto lsb(Int value) noexcept
     return lsb;
 }
 
+template <typename UInt>
+constexpr auto masks_overlap(UInt a, UInt b) noexcept
+    -> std::enable_if_t<std::is_unsigned<UInt>::value, bool>
+{
+    return (a ^ b) != (a | b);
+}
+
 } // namespace regilite::detail

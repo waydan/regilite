@@ -2,14 +2,17 @@
 #define TEST_REGISTER_HPP
 
 #include "CppUTest/TestHarness.h"
+#include "traits.hpp"
 
-auto register_view(regilite::Register& reg) noexcept -> std::uint32_t&
+template <typename UInt>
+auto register_view(regilite::Register<UInt>& reg) noexcept -> UInt&
 {
-    return *reinterpret_cast<std::uint32_t*>(&reg);
+    return *reinterpret_cast<UInt*>(&reg);
 }
 
-auto REGISTER_EQUALS(std::uint32_t value, regilite::Register& reg) noexcept
-    -> void
+template <typename UInt>
+auto REGISTER_EQUALS(regilite::traits::identity_t<UInt> value,
+                     regilite::Register<UInt>& reg) noexcept -> void
 {
     LONGS_EQUAL(value, register_view(reg));
 }
@@ -25,7 +28,7 @@ auto REGISTER_EQUALS(std::uint32_t value, regilite::Register& reg) noexcept
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 //  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 
-using TestReg = regilite::Register;
+using TestReg = regilite::Register<std::uint32_t>;
 
 static_assert(std::is_standard_layout<TestReg>::value,
               "Register<> type must always be standard layout.");
