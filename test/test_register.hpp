@@ -9,7 +9,7 @@
 template <typename UInt, UInt mask>
 SimpleString StringFrom(regilite::Field<UInt, mask> f)
 {
-    return SimpleString{"Field value: "} + HexStringFrom(f.value());
+    return SimpleString{"Field value: "} + StringFrom(f.value());
 }
 
 template <typename UInt>

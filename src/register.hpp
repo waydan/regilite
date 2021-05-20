@@ -28,6 +28,12 @@ class Register
         const auto fields = fold_fields(f, fs...);
         raw_ = (raw_ & ~fields.msk()) | fields.value();
     }
+
+    template <typename F>
+    auto read() const noexcept -> F
+    {
+        return F{raw_ & F::msk(), detail::NoShift_t{}};
+    }
 };
 
 } // namespace regilite
