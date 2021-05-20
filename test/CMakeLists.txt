@@ -1,5 +1,5 @@
 include_directories(${SRC_PATH})
 
-add_executable(read_write_unit read_write_unit.cpp test_main.cpp)
-target_link_libraries(read_write_unit PRIVATE CppUTest)
-add_test(NAME read_write_unit COMMAND read_write_unit)
+add_executable(test-write-fields write_field_unit.t.cpp test_main.cpp)
+target_link_libraries(test-write-fields PRIVATE CppUTest)
+add_test(NAME test-write-fields COMMAND test-write-fields)
