@@ -2,8 +2,6 @@
 #include "register.hpp"
 #include "test_register.hpp"
 
-#include <cstdint>
-#include <type_traits>
 
 TestReg test_register;
 
