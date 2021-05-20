@@ -1,3 +1,6 @@
+#ifndef REGILITE_UTILITY_HPP
+#define REGILITE_UTILITY_HPP
+
 namespace regilite::detail {
 
 template <typename Int>
@@ -19,3 +22,5 @@ constexpr auto masks_overlap(UInt a, UInt b) noexcept
 }
 
 } // namespace regilite::detail
+
+#endif // REGILITE_UTILITY_HPP

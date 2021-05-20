@@ -1,3 +1,6 @@
+#ifndef REGILITE_FIELD_HPP
+#define REGILITE_FIELD_HPP
+
 #include "utility.hpp"
 
 namespace regilite {
@@ -39,6 +42,19 @@ class Field
     }
 };
 
+template <typename UInt, UInt mask>
+constexpr auto operator==(const Field<UInt, mask>& lhs,
+                          const Field<UInt, mask>& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
+template <typename UInt, UInt mask>
+constexpr auto operator!=(const Field<UInt, mask>& lhs,
+                          const Field<UInt, mask>& rhs)
+{
+    return not (lhs == rhs);
+}
 
 #ifndef __cpp_fold_expressions
 
@@ -61,3 +77,5 @@ constexpr auto fold_fields(Field<UInt, mask> f, Field<UInt, masks>... fs)
 }
 
 } // namespace regilite
+
+#endif // REGILITE_FIELD_HPP
