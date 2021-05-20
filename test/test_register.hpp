@@ -2,7 +2,15 @@
 #define TEST_REGISTER_HPP
 
 #include "CppUTest/TestHarness.h"
+#include "field.hpp"
+#include "register.hpp"
 #include "traits.hpp"
+
+template <typename UInt, UInt mask>
+SimpleString StringFrom(regilite::Field<UInt, mask> f)
+{
+    return SimpleString{"Field value: "} + HexStringFrom(f.value());
+}
 
 template <typename UInt>
 auto register_view(regilite::Register<UInt>& reg) noexcept -> UInt&
