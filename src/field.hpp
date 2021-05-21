@@ -53,17 +53,15 @@ template <typename UInt, UInt mask>
 constexpr auto operator!=(const Field<UInt, mask>& lhs,
                           const Field<UInt, mask>& rhs)
 {
-    return not (lhs == rhs);
+    return not(lhs == rhs);
 }
 
 #ifndef __cpp_fold_expressions
-
 template <typename UInt, std::uint32_t mask>
 constexpr auto fold_fields(Field<UInt, mask> f)
 {
     return f;
 }
-
 #endif
 
 template <typename UInt, std::uint32_t mask, std::uint32_t... masks>
