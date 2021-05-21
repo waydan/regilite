@@ -1,5 +1,5 @@
-#ifndef REGISTER_HPP
-#define REGISTER_HPP
+#ifndef REGILITE_REGISTER_HPP
+#define REGILITE_REGISTER_HPP
 
 #include <cstdint>
 #include <type_traits>
@@ -30,13 +30,15 @@ class Register
     }
 
     template <typename F>
-    auto read() const noexcept -> F
+    auto read() const noexcept
+        -> std::enable_if_t<std::is_same<F, Field<UInt, F::msk()>>::value,
+                            Field<UInt, F::msk()>>
     {
-        return F{raw_ & F::msk(), detail::NoShift_t{}};
+        return Field<UInt, F::msk()>{raw_ & F::msk(), detail::NoShift_t{}};
     }
 };
 
 } // namespace regilite
 
 
-#endif // REGISTER_HPP
+#endif // REGILITE_REGISTER_HPP

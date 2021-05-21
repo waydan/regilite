@@ -4,15 +4,13 @@
 
 TestReg test_register;
 
-TEST_GROUP(ReadFieldFromRegister){
-    void setup(){register_view(test_register) = 0u;
-}
-}
-;
+TEST_GROUP(ReadFieldFromRegister)
+{
+    void setup() { register_view(test_register) = 0u; };
+};
 
 TEST(ReadFieldFromRegister, ReadSingleClearedBit)
 {
-    // CHECK_EQUAL(F0{0u}, test_register.read<F0>());
     CHECK_EQUAL(F0{0u}, test_register.read<F0>());
 }
 
