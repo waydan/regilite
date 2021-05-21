@@ -1,6 +1,8 @@
 #ifndef REGILITE_UTILITY_HPP
 #define REGILITE_UTILITY_HPP
 
+#include <type_traits>
+
 namespace regilite::detail {
 
 template <typename Int>

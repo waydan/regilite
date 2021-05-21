@@ -1,6 +1,9 @@
 #ifndef REGILITE_FIELD_HPP
 #define REGILITE_FIELD_HPP
 
+#include <cstdint>
+#include <type_traits>
+
 #include "utility.hpp"
 
 namespace regilite {
