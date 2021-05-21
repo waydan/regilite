@@ -15,9 +15,16 @@ TEST(ReadRegisterSnapshot, SnapshotMatchesState)
     LONGS_EQUAL(0u, snapshot.raw());
 }
 
-TEST(ReadRegisterSnapshot, SnapshotNotUpdatedByRegisterWrite)
+TEST(ReadRegisterSnapshot, SnapshotCopiedBeforWriteNotUpdated)
 {
     const auto snapshot = test_register.read();
     test_register.write(F1{3});
     CHECK(register_view(test_register) != snapshot.raw());
+}
+
+TEST(ReadRegisterSnapshot, SnapshotCopiedAfterWriteIsUpdated)
+{
+    test_register.write(F1{3});
+    const auto snapshot = test_register.read();
+    LONGS_EQUAL(register_view(test_register), snapshot.raw());
 }

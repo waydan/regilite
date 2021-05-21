@@ -18,11 +18,13 @@ class Register
 
     UInt state_;
 
-    class Snapshot
+    class State
     {
         UInt state_;
 
       public:
+        explicit constexpr State(UInt state) : state_{state} {}
+
         constexpr auto raw() const -> UInt { return state_; }
     };
 
@@ -44,7 +46,7 @@ class Register
     }
 
 
-    auto read() const noexcept -> Snapshot { return Snapshot{}; }
+    auto read() const noexcept -> State { return State{state_}; }
 
 
     template <UInt mask>
