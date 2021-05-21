@@ -11,3 +11,7 @@ add_test(NAME test-read-fields COMMAND test-read-fields)
 add_executable(test-match-fields match_field_unit.t.cpp test_main.cpp)
 target_link_libraries(test-match-fields PRIVATE CppUTest)
 add_test(NAME test-match-fields COMMAND test-match-fields)
+
+add_executable(test-read-snapshot read_snapshot_unit.t.cpp test_main.cpp)
+target_link_libraries(test-read-snapshot PRIVATE CppUTest)
+add_test(NAME test-read-snapshot COMMAND test-read-snapshot)

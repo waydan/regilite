@@ -18,6 +18,14 @@ class Register
 
     UInt state_;
 
+    class Snapshot
+    {
+        UInt state_;
+
+      public:
+        constexpr auto raw() const -> UInt { return state_; }
+    };
+
   public:
     template <UInt mask, UInt... masks>
     auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
@@ -34,6 +42,9 @@ class Register
     {
         return Field<UInt, F::msk()>{state_ & F::msk(), detail::NoShift_t{}};
     }
+
+
+    auto read() const noexcept -> Snapshot { return Snapshot{}; }
 
 
     template <UInt mask>
