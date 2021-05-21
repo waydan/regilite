@@ -9,9 +9,6 @@
 namespace regilite {
 
 template <typename UInt>
-class Register;
-
-template <typename UInt>
 class Register
 {
     static_assert(std::is_unsigned<UInt>::value
