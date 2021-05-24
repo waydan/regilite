@@ -85,30 +85,30 @@ class Register
     };
 
   public:
+    auto write(State s) noexcept -> void
+    {
+        *const_cast<volatile UInt*>(&state_) = s.raw();
+    }
+
+    
     template <UInt mask, UInt... masks>
     auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
     {
         write(read().modify(f, fs...));
     }
 
-    auto write(State s) noexcept -> void
+
+    auto read() const noexcept -> State
     {
-        *const_cast<volatile UInt*>(&state_) = s.raw();
+        return State{*const_cast<const volatile UInt* const>(&state_)};
     }
 
 
     template <typename F>
     auto read() const noexcept
-        -> std::enable_if_t<std::is_same<F, Field<UInt, F::msk()>>::value,
-                            Field<UInt, F::msk()>>
+        -> decltype(read().template read<F>())
     {
         return read().template read<F>();
-    }
-
-
-    auto read() const noexcept -> State
-    {
-        return State{*const_cast<const volatile UInt* const>(&state_)};
     }
 
 
