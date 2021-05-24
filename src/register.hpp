@@ -30,10 +30,11 @@ class Register
 
         template <UInt mask, UInt... masks>
         auto modify(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept
-            -> void
+            -> State&
         {
             const auto fields = fold_fields(f, fs...);
             state_ = (state_ & ~fields.msk()) | fields.value();
+            return *this;
         }
 
 
@@ -87,9 +88,7 @@ class Register
     template <UInt mask, UInt... masks>
     auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
     {
-        auto snapshot = read();
-        snapshot.modify(f, fs...);
-        write(snapshot);
+        write(read().modify(f, fs...));
     }
 
     auto write(State s) noexcept -> void
