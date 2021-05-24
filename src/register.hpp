@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "field.hpp"
+#include "utility.hpp"
 
 namespace regilite {
 
@@ -16,11 +17,15 @@ class Register
                   "Register<> type requires an unsigned integral as its "
                   "underlying representation.");
 
+    UInt state_;
+
     class State
     {
         UInt state_;
 
       public:
+        explicit constexpr State(UInt s) : state_{s} {};
+
         constexpr auto raw() const -> UInt { return state_; }
 
         template <UInt mask, UInt... masks>
@@ -76,31 +81,35 @@ class Register
             return (match(f) or ... or match(fs));
 #endif
         };
-
-    } state_;
+    };
 
   public:
     template <UInt mask, UInt... masks>
     auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
     {
-        state_.modify(f, fs...);
+        read().modify(f, fs...);
     }
 
 
     template <typename F>
-    auto read() const noexcept -> decltype(state_.template read<F>())
+    auto read() const noexcept
+        -> std::enable_if_t<std::is_same<F, Field<UInt, F::msk()>>::value,
+                            Field<UInt, F::msk()>>
     {
-        return state_.template read<F>();
+        return read().template read<F>();
     }
 
 
-    auto read() const noexcept -> State { return State{state_}; }
+    auto read() const noexcept -> State
+    {
+        return State{*const_cast<const volatile UInt* const>(&state_)};
+    }
 
 
     template <UInt mask>
     auto match(Field<UInt, mask> f) const noexcept -> bool
     {
-        return state_.match(f);
+        return read().match(f);
     }
 
 
@@ -108,14 +117,14 @@ class Register
     auto match_all(Field<UInt, mask> f, Field<UInt, masks>... fs) const noexcept
         -> bool
     {
-        return state_.match_all(f, fs...);
+        return read().match_all(f, fs...);
     }
 
     template <UInt mask, UInt... masks>
     auto match_any(Field<UInt, mask> f, Field<UInt, masks>... fs) const noexcept
         -> bool
     {
-        return state_.match_any(f, fs...);
+        return read().match_any(f, fs...);
     }
 };
 
