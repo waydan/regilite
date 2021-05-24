@@ -26,7 +26,7 @@ class Register
       public:
         explicit constexpr State(UInt s) : state_{s} {};
 
-        constexpr auto raw() const -> UInt { return state_; }
+        constexpr auto raw() const noexcept -> const UInt& { return state_; }
 
         template <UInt mask, UInt... masks>
         auto modify(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept
@@ -90,7 +90,7 @@ class Register
         *const_cast<volatile UInt*>(&state_) = s.raw();
     }
 
-    
+
     template <UInt mask, UInt... masks>
     auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
     {
@@ -105,8 +105,7 @@ class Register
 
 
     template <typename F>
-    auto read() const noexcept
-        -> decltype(read().template read<F>())
+    auto read() const noexcept -> decltype(read().template read<F>())
     {
         return read().template read<F>();
     }
