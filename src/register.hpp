@@ -87,7 +87,14 @@ class Register
     template <UInt mask, UInt... masks>
     auto write(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept -> void
     {
-        read().modify(f, fs...);
+        auto snapshot = read();
+        snapshot.modify(f, fs...);
+        write(snapshot);
+    }
+
+    auto write(State s) noexcept -> void
+    {
+        *const_cast<volatile UInt*>(&state_) = s.raw();
     }
 
 

@@ -13,14 +13,14 @@ SimpleString StringFrom(regilite::Field<UInt, mask> f)
 }
 
 template <typename UInt>
-auto register_view(regilite::Register<UInt>& reg) noexcept -> UInt&
+auto register_view(regilite::Register<UInt>& reg) -> UInt&
 {
     return *reinterpret_cast<UInt*>(&reg);
 }
 
 template <typename UInt>
 auto REGISTER_EQUALS(regilite::traits::identity_t<UInt> value,
-                     regilite::Register<UInt>& reg) noexcept -> void
+                     regilite::Register<UInt>& reg) -> void
 {
     LONGS_EQUAL(value, register_view(reg));
 }
