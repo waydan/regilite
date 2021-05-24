@@ -26,7 +26,7 @@ class Register
       public:
         explicit constexpr State(UInt s) : state_{s} {};
 
-        constexpr auto raw() const noexcept -> const UInt& { return state_; }
+        constexpr auto raw() const noexcept -> UInt { return state_; }
 
         template <UInt mask, UInt... masks>
         auto modify(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept
