@@ -87,7 +87,7 @@ class Register
   public:
     auto write(State s) noexcept -> void
     {
-        *const_cast<volatile UInt*>(&state_) = s.raw();
+        detail::volatile_ref(state_) = s.raw();
     }
 
 
@@ -100,7 +100,7 @@ class Register
 
     auto read() const noexcept -> State
     {
-        return State{*const_cast<const volatile UInt* const>(&state_)};
+        return State{detail::volatile_ref(state_)};
     }
 
 
