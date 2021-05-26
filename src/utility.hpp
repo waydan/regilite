@@ -24,13 +24,13 @@ constexpr auto masks_overlap(UInt a, UInt b) noexcept
 }
 
 template <typename T>
-constexpr auto volatile_ref(T& x) noexcept -> volatile T&
+constexpr auto make_volatile_ref(T& x) noexcept -> volatile T&
 {
     return *const_cast<volatile T*>(&x);
 }
 
 template <typename T>
-constexpr auto volatile_ref(const T& x) noexcept -> const volatile T&
+constexpr auto make_volatile_ref(const T& x) noexcept -> const volatile T&
 {
     return *const_cast<const volatile T*>(&x);
 }

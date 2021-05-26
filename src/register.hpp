@@ -87,7 +87,7 @@ class Register
   public:
     auto write(State s) noexcept -> void
     {
-        detail::volatile_ref(state_) = s.raw();
+        detail::make_volatile_ref(state_) = s.raw();
     }
 
 
@@ -100,7 +100,7 @@ class Register
 
     auto read() const noexcept -> State
     {
-        return State{detail::volatile_ref(state_)};
+        return State{detail::make_volatile_ref(state_)};
     }
 
 
