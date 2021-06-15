@@ -11,7 +11,8 @@ TEST_GROUP(ReadFieldFromRegister)
 
 TEST(ReadFieldFromRegister, ReadSingleClearedBit)
 {
-    CHECK_EQUAL(F0{0u}, test_register.read<F0>());
+    const F0 output_field = test_register.extract();
+    CHECK_EQUAL(F0{0u}, output_field);
 }
 
 TEST(ReadFieldFromRegister, ReadSingleSetBit)
