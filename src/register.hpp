@@ -54,20 +54,11 @@ class Register
             return {state_};
         }
 
-        template <typename F>
-        auto read() const noexcept
-            -> std::enable_if_t<std::is_same<F, Field<UInt, F::msk()>>::value,
-                                Field<UInt, F::msk()>>
-        {
-            return Field<UInt, F::msk()>{state_ & F::msk(),
-                                         detail::NoShift_t{}};
-        }
-
 
         template <UInt mask>
         auto match(Field<UInt, mask> f) const noexcept -> bool
         {
-            return read<decltype(f)>() == f;
+            return decltype(f){extract()} == f;
         }
 
 
@@ -119,12 +110,6 @@ class Register
 
 
     constexpr auto extract() const noexcept { return read().extract(); }
-
-    template <typename F>
-    auto read() const noexcept -> decltype(read().template read<F>())
-    {
-        return read().template read<F>();
-    }
 
 
     template <UInt mask>
