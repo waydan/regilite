@@ -19,8 +19,24 @@ class Register
 
     UInt state_;
 
+    struct FieldExtractor {
+        UInt state_;
+
+        template <UInt mask>
+        constexpr operator Field<UInt, mask>() const noexcept
+        {
+            return Field<UInt, mask>{state_ & mask, detail::NoShift_t{}};
+        }
+    };
+
 
   public:
+    constexpr auto extract() const noexcept -> FieldExtractor
+    {
+        return {state_};
+    }
+
+
     class Snapshot
     {
         UInt state_;
