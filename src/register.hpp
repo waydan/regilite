@@ -19,27 +19,20 @@ class Register
 
     UInt state_;
 
-    struct FieldExtractor {
-        UInt state_;
-
-        template <UInt mask>
-        constexpr operator Field<UInt, mask>() const noexcept
-        {
-            return Field<UInt, mask>{state_ & mask, detail::NoShift_t{}};
-        }
-    };
-
-
   public:
-    constexpr auto extract() const noexcept -> FieldExtractor
-    {
-        return {state_};
-    }
-
-
     class Snapshot
     {
         UInt state_;
+
+        struct FieldExtractor {
+            UInt state_;
+
+            template <UInt mask>
+            constexpr operator Field<UInt, mask>() const noexcept
+            {
+                return Field<UInt, mask>{state_ & mask, detail::NoShift_t{}};
+            }
+        };
 
       public:
         explicit constexpr Snapshot(UInt s) : state_{s} {};
@@ -55,6 +48,11 @@ class Register
             return *this;
         }
 
+
+        constexpr auto extract() const noexcept -> FieldExtractor
+        {
+            return {state_};
+        }
 
         template <typename F>
         auto read() const noexcept
@@ -119,6 +117,8 @@ class Register
         return Snapshot{detail::make_volatile_ref(state_)};
     }
 
+
+    constexpr auto extract() const noexcept { return read().extract(); }
 
     template <typename F>
     auto read() const noexcept -> decltype(read().template read<F>())
