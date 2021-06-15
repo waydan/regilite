@@ -19,18 +19,20 @@ class Register
 
     UInt state_;
 
-    class State
+
+  public:
+    class Snapshot
     {
         UInt state_;
 
       public:
-        explicit constexpr State(UInt s) : state_{s} {};
+        explicit constexpr Snapshot(UInt s) : state_{s} {};
 
         constexpr auto raw() const noexcept -> UInt { return state_; }
 
         template <UInt mask, UInt... masks>
         auto modify(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept
-            -> State&
+            -> Snapshot&
         {
             const auto fields = fold_fields(f, fs...);
             state_ = (state_ & ~fields.msk()) | fields.value();
@@ -83,9 +85,7 @@ class Register
 #endif
         };
     };
-
-  public:
-    auto write(State s) noexcept -> void
+    auto write(Snapshot s) noexcept -> void
     {
         detail::make_volatile_ref(state_) = s.raw();
     }
@@ -98,9 +98,9 @@ class Register
     }
 
 
-    auto read() const noexcept -> State
+    auto read() const noexcept -> Snapshot
     {
-        return State{detail::make_volatile_ref(state_)};
+        return Snapshot{detail::make_volatile_ref(state_)};
     }
 
 
