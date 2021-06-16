@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "traits.hpp"
 #include "utility.hpp"
 
 namespace regilite {
@@ -47,17 +48,20 @@ class Field
 
 template <typename UInt, UInt mask>
 constexpr auto operator==(const Field<UInt, mask>& lhs,
-                          const Field<UInt, mask>& rhs)
+                          const traits::identity_t<Field<UInt, mask>>& rhs)
 {
     return lhs.value() == rhs.value();
 }
 
+
 template <typename UInt, UInt mask>
 constexpr auto operator!=(const Field<UInt, mask>& lhs,
-                          const Field<UInt, mask>& rhs)
+                          const traits::identity_t<Field<UInt, mask>>& rhs)
+    -> bool
 {
     return not(lhs == rhs);
 }
+
 
 #ifndef __cpp_fold_expressions
 template <typename UInt, std::uint32_t mask>

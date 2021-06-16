@@ -58,7 +58,7 @@ class Register
         template <UInt mask>
         auto match(Field<UInt, mask> f) const noexcept -> bool
         {
-            return decltype(f){extract()} == f;
+            return f == decltype(f){extract()};
         }
 
 
