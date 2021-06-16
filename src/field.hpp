@@ -13,14 +13,13 @@ namespace detail {
 struct NoShift_t {};
 
 template <typename UInt, UInt mask>
-class BitField
-{
+struct BitField {
     static_assert(std::is_unsigned<UInt>::value
                       and not std::is_same<UInt, bool>::value,
                   "Register<> type requires an unsigned integral as its "
                   "underlying representation.");
 
-    UInt value_;
+    UInt value;
 
     template <std::uint32_t rhs_mask>
     friend constexpr auto operator|(BitField lhs,
@@ -29,10 +28,19 @@ class BitField
                             BitField<UInt, mask | rhs_mask>>
     {
         return BitField<UInt, mask | rhs_mask>{
-            lhs.value() | rhs.value(),
+            lhs.value | rhs.value,
         };
     }
 };
+
+
+template <typename UInt, UInt mask>
+constexpr auto insert_bits(UInt value, BitField<UInt, mask> field) noexcept
+    -> UInt
+{
+    return (value & ~mask) | field.value;
+}
+
 
 } // namespace detail
 
@@ -87,10 +95,10 @@ constexpr auto operator!=(const Field<UInt, mask>& lhs,
 
 
 #ifndef __cpp_fold_expressions
-template <typename UInt, std::uint32_t mask>
+template <typename UInt, UInt mask>
 constexpr auto fold_fields(Field<UInt, mask> f)
 {
-    return f;
+    return detail::BitField<UInt, mask>{static_cast<UInt>(f.value())};
 }
 #endif
 
@@ -98,7 +106,7 @@ template <typename UInt, std::uint32_t mask, std::uint32_t... masks>
 constexpr auto fold_fields(Field<UInt, mask> f, Field<UInt, masks>... fs)
 {
 #ifndef __cpp_fold_expressions
-    return f | fold_fields(fs...);
+    return fold_fields(f) | fold_fields(fs...);
 #else
     return (f | ... | fs);
 #endif

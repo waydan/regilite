@@ -34,6 +34,13 @@ class Register
             }
         };
 
+        template <UInt mask>
+        auto match(detail::BitField<UInt, mask> f) const noexcept -> bool
+        {
+            return f.value == state_ & mask;
+        }
+
+
       public:
         explicit constexpr Snapshot(UInt s) : state_{s} {};
 
@@ -44,7 +51,7 @@ class Register
             -> Snapshot&
         {
             const auto fields = fold_fields(f, fs...);
-            state_ = (state_ & ~fields.msk()) | fields.value();
+            state_ = detail::insert_bits(state_, fields);
             return *this;
         }
 
