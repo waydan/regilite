@@ -65,15 +65,10 @@ class Field
     {}
 
     constexpr auto value() const noexcept { return value_; };
-    static constexpr auto msk() noexcept -> std::uint32_t { return mask; }
 
-    template <std::uint32_t o_mask>
-    constexpr auto operator|(Field<UInt, o_mask> other_f) const noexcept
-        -> std::enable_if_t<!detail::masks_overlap(mask, o_mask),
-                            Field<UInt, mask | o_mask>>
+    constexpr auto as_bitfield() const noexcept -> detail::BitField<UInt, mask>
     {
-        return Field<UInt, mask | o_mask>{value() | other_f.value(),
-                                          detail::NoShift_t{}};
+        return detail::BitField<UInt, mask>{static_cast<UInt>(value_)};
     }
 };
 
@@ -98,7 +93,7 @@ constexpr auto operator!=(const Field<UInt, mask>& lhs,
 template <typename UInt, UInt mask>
 constexpr auto fold_fields(Field<UInt, mask> f)
 {
-    return detail::BitField<UInt, mask>{static_cast<UInt>(f.value())};
+    return f.as_bitfield();
 }
 #endif
 
@@ -108,7 +103,7 @@ constexpr auto fold_fields(Field<UInt, mask> f, Field<UInt, masks>... fs)
 #ifndef __cpp_fold_expressions
     return fold_fields(f) | fold_fields(fs...);
 #else
-    return (f | ... | fs);
+    return (f.as_bitfield() | ... | fs.as_bitfield());
 #endif
 }
 
