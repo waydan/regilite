@@ -45,9 +45,9 @@ static_assert(
     std::is_standard_layout<decltype(std::declval<TestReg>().read())>::value,
     "Unnameable type Register<>::Snapshot must be standard layout.");
 
-using F0 = regilite::Field<std::uint32_t, 0b0000001>;
-using F1 = regilite::Field<std::uint32_t, 0b0000110>;
-using F2 = regilite::Field<std::uint32_t, 0b1110000>;
+using F0 = regilite::Field<std::uint32_t, regilite::Mask<0>::value>;
+using F1 = regilite::Field<std::uint32_t, regilite::Mask<2, 1>::value>;
+using F2 = regilite::Field<std::uint32_t, regilite::Mask<6, 4>::value>;
 
 
 #endif // TEST_REGISTER_HPP

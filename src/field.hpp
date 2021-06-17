@@ -10,7 +10,6 @@
 namespace regilite {
 
 namespace detail {
-struct NoShift_t {};
 
 template <typename UInt, UInt mask>
 struct BitField {
@@ -44,6 +43,14 @@ constexpr auto insert_bits(UInt value, BitField<UInt, mask> field) noexcept
 
 } // namespace detail
 
+template <int msb, int lsb = msb>
+struct Mask {
+    static_assert(msb >= lsb, "Most significant bit may not be less than the "
+                              "least significant");
+    static_assert(lsb >= 0 and msb >= 0, "Bit positions may not be negative");
+
+    static constexpr unsigned long value = (~1ul << msb) ^ (~0ul << lsb);
+};
 
 template <typename UInt, UInt mask>
 class Field
