@@ -6,8 +6,8 @@
 #include "register.hpp"
 #include "traits.hpp"
 
-template <typename UInt, UInt mask>
-SimpleString StringFrom(regilite::Field<UInt, mask> f)
+template <typename UInt, UInt mask, typename ValType>
+SimpleString StringFrom(regilite::Field<UInt, mask, ValType> f)
 {
     return SimpleString{"Field value: "} + StringFrom(f.value());
 }
@@ -45,9 +45,12 @@ static_assert(
     std::is_standard_layout<decltype(std::declval<TestReg>().read())>::value,
     "Unnameable type Register<>::Snapshot must be standard layout.");
 
-using F0 = regilite::Field<std::uint32_t, regilite::Mask<0>::value>;
-using F1 = regilite::Field<std::uint32_t, regilite::Mask<2, 1>::value>;
-using F2 = regilite::Field<std::uint32_t, regilite::Mask<6, 4>::value>;
+using F0 =
+    regilite::Field<std::uint32_t, regilite::Mask<0>::value, std::uint16_t>;
+using F1 =
+    regilite::Field<std::uint32_t, regilite::Mask<2, 1>::value, std::uint16_t>;
+using F2 =
+    regilite::Field<std::uint32_t, regilite::Mask<6, 4>::value, std::uint16_t>;
 
 
 #endif // TEST_REGISTER_HPP

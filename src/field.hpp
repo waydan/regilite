@@ -52,15 +52,19 @@ struct Mask {
     static constexpr unsigned long value = (~1ul << msb) ^ (~0ul << lsb);
 };
 
-template <typename UInt, UInt mask>
+
+template <typename UInt, UInt mask, typename ValType>
 class Field
 {
     static_assert(std::is_unsigned<UInt>::value
                       and not std::is_same<UInt, bool>::value,
                   "Register<> type requires an unsigned integral as its "
                   "underlying representation.");
+    static_assert(
+        sizeof(UInt) >= sizeof(ValType),
+        "Value type may not be larger than storage type for a register");
 
-    UInt value_;
+    ValType value_;
 
   public:
     constexpr explicit Field(std::uint32_t value) noexcept : value_(value) {}
@@ -89,15 +93,17 @@ class Field
 namespace detail {
 
 #ifndef __cpp_fold_expressions
-template <typename UInt, UInt mask>
-constexpr auto fold_fields(Field<UInt, mask> f)
+template <typename UInt, UInt mask, typename ValType>
+constexpr auto fold_fields(Field<UInt, mask, ValType> f)
 {
     return f.as_bitfield();
 }
 #endif
 
-template <typename UInt, std::uint32_t mask, std::uint32_t... masks>
-constexpr auto fold_fields(Field<UInt, mask> f, Field<UInt, masks>... fs)
+template <typename UInt, UInt mask, typename ValType, UInt... masks,
+          typename... ValTypes>
+constexpr auto fold_fields(Field<UInt, mask, ValType> f,
+                           Field<UInt, masks, ValTypes>... fs)
 {
 #ifndef __cpp_fold_expressions
     return fold_fields(f) | fold_fields(fs...);
