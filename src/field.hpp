@@ -56,38 +56,28 @@ class Field
     UInt value_;
 
   public:
-    constexpr explicit Field(std::uint32_t value) noexcept
-        : value_(value)
-    {}
+    constexpr explicit Field(std::uint32_t value) noexcept : value_(value) {}
 
-    constexpr explicit Field(std::uint32_t value, detail::NoShift_t) noexcept
-        : value_(value)
-    {}
 
     constexpr auto value() const noexcept { return value_; };
 
     constexpr auto as_bitfield() const noexcept -> detail::BitField<UInt, mask>
     {
-        return detail::BitField<UInt, mask>{static_cast<UInt>(value_) << detail::lsb(mask)};
+        return detail::BitField<UInt, mask>{static_cast<UInt>(value_)
+                                            << detail::lsb(mask)};
+    }
+
+    constexpr auto operator==(const Field& rhs) const noexcept -> bool
+    {
+        return value_ == rhs.value_;
+    }
+
+
+    constexpr auto operator!=(const Field& rhs) const noexcept -> bool
+    {
+        return not(*this == rhs);
     }
 };
-
-template <typename UInt, UInt mask>
-constexpr auto operator==(const Field<UInt, mask>& lhs,
-                          const traits::identity_t<Field<UInt, mask>>& rhs)
-{
-    return lhs.value() == rhs.value();
-}
-
-
-template <typename UInt, UInt mask>
-constexpr auto operator!=(const Field<UInt, mask>& lhs,
-                          const traits::identity_t<Field<UInt, mask>>& rhs)
-    -> bool
-{
-    return not(lhs == rhs);
-}
-
 
 #ifndef __cpp_fold_expressions
 template <typename UInt, UInt mask>
