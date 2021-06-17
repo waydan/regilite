@@ -4,7 +4,7 @@
         {
             "label": "configure",
             "type": "shell",
-            "command": "cmake ${workspaceFolder} -G Ninja -B ${workspaceFolder}/../build",
+            "command": "cmake ${workspaceFolder} ${input:cmake-config} -G Ninja -B ${workspaceFolder}/../build",
             "group": "build",
             "presentation": {
                 "reveal": "always"
@@ -56,6 +56,14 @@
                 "reveal": "silent"
             },
             "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "cmake-config",
+            "description": "CMake configuration options",
+            "type": "promptString",
+            "default": null
         }
     ]
 }

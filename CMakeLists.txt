@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(registex CXX)
+project(regilite CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+add_library(regilite INTERFACE)
+target_include_directories(regilite INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(regilite INTERFACE cxx_std_14)
 
-option(BUILD_TESTS "Build tests" ON)
-if(BUILD_TESTS)
+option(REGILITE_BUILD_TESTS "Build tests" ON)
+if(REGILITE_BUILD_TESTS)
 enable_testing()
 find_package(CppUTest REQUIRED)
 add_subdirectory(test)
 endif()
-
-set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src CACHE STRING "")
