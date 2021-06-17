@@ -3,7 +3,8 @@
 
 #include <type_traits>
 
-namespace regilite::detail {
+namespace regilite {
+namespace detail {
 
 template <typename Int>
 constexpr auto lsb(Int value) noexcept
@@ -35,6 +36,7 @@ constexpr auto make_volatile_ref(const T& x) noexcept -> const volatile T&
     return *const_cast<const volatile T*>(&x);
 }
 
-} // namespace regilite::detail
+} // namespace detail
+} // namespace regilite
 
 #endif // REGILITE_UTILITY_HPP

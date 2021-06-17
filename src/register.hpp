@@ -38,7 +38,7 @@ class Register
         template <UInt mask>
         auto match(detail::BitField<UInt, mask> f) const noexcept -> bool
         {
-            return f.value == state_ & mask;
+            return f.value == (state_ & mask);
         }
 
 
@@ -95,14 +95,15 @@ class Register
                        Field<UInt, masks, ValTypes>... fs) const noexcept
             -> bool
         {
-
 #ifndef __cpp_fold_expressions
             return match_any(f) or match_any(fs...);
 #else
             return (match(f) or ... or match(fs));
 #endif
-        };
+        }
     };
+
+
     auto write(Snapshot s) noexcept -> void
     {
         detail::make_volatile_ref(state_) = s.raw();

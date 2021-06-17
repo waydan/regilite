@@ -1,7 +1,8 @@
 #ifndef REGILITE_TRAITS_HPP
 #define REGILITE_TRAITS_HPP
 
-namespace regilite::traits {
+namespace regilite {
+namespace traits {
 template <typename T>
 struct identity {
     using type = T;
@@ -10,6 +11,7 @@ struct identity {
 template <typename T>
 using identity_t = typename identity<T>::type;
 
-} // namespace regilite::traits
+} // namespace traits
+} // namespace regilite
 
 #endif // REGILITE_TRAITS_HPP
