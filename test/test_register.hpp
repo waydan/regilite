@@ -32,7 +32,7 @@ auto REGISTER_EQUALS(regilite::traits::identity_t<UInt> value,
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 //  31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 15
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-// |  |  |  |  |  |  |  |  |  |   F2   |  |  F1 |F0|
+// |  |  |  |  |     F3    |  |   F2   |  |  F1 |F0|
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 //  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 
@@ -45,12 +45,21 @@ static_assert(
     std::is_standard_layout<decltype(std::declval<TestReg>().read())>::value,
     "Unnameable type Register<>::Snapshot must be standard layout.");
 
+enum class F3Val: std::uint32_t
+{
+    A = 1,
+    B = 2,
+    C = 4,
+    D = 8
+};
+
 using F0 =
     regilite::Field<std::uint32_t, regilite::Mask<0>::value, std::uint16_t>;
 using F1 =
     regilite::Field<std::uint32_t, regilite::Mask<2, 1>::value, std::uint16_t>;
 using F2 =
     regilite::Field<std::uint32_t, regilite::Mask<6, 4>::value, std::uint16_t>;
+using F3 = regilite::Field<std::uint32_t, regilite::Mask<11, 8>::value, F3Val>;
 
 
 #endif // TEST_REGISTER_HPP

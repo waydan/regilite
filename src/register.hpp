@@ -30,8 +30,8 @@ class Register
             template <UInt mask, typename ValType>
             constexpr operator Field<UInt, mask, ValType>() const noexcept
             {
-                return Field<UInt, mask, ValType>{(state_ & mask)
-                                                  >> detail::lsb(mask)};
+                return Field<UInt, mask, ValType>{
+                    static_cast<ValType>((state_ & mask) >> detail::lsb(mask))};
             }
         };
 
@@ -139,6 +139,7 @@ class Register
     {
         return read().match_all(f, fs...);
     }
+
 
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto match_any(Field<UInt, mask, ValType> f,

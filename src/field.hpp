@@ -63,11 +63,14 @@ class Field
     static_assert(
         sizeof(UInt) >= sizeof(ValType),
         "Value type may not be larger than storage type for a register");
+    static_assert(
+        std::is_unsigned<ValType>::value or std::is_enum<ValType>::value,
+        "Field only supports unsigned integrals or enumeration types");
 
     ValType value_;
 
   public:
-    constexpr explicit Field(std::uint32_t value) noexcept : value_(value) {}
+    constexpr explicit Field(ValType value) noexcept : value_(value) {}
 
 
     constexpr auto value() const noexcept { return value_; };
