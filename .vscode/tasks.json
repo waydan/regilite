@@ -63,7 +63,7 @@
             "id": "cmake-config",
             "description": "CMake configuration options",
             "type": "promptString",
-            "default": null
+            "default": ""
         }
     ]
 }
