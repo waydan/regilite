@@ -50,7 +50,7 @@ class Register
         auto modify(Field<UInt, mask> f, Field<UInt, masks>... fs) noexcept
             -> Snapshot&
         {
-            const auto fields = fold_fields(f, fs...);
+            const auto fields = detail::fold_fields(f, fs...);
             state_ = detail::insert_bits(state_, fields);
             return *this;
         }
@@ -73,7 +73,7 @@ class Register
         auto match_all(Field<UInt, mask> f,
                        Field<UInt, masks>... fs) const noexcept -> bool
         {
-            const auto fields = fold_fields(f, fs...);
+            const auto fields = detail::fold_fields(f, fs...);
             return match(fields);
         }
 

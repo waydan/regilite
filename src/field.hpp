@@ -79,6 +79,8 @@ class Field
     }
 };
 
+namespace detail {
+
 #ifndef __cpp_fold_expressions
 template <typename UInt, UInt mask>
 constexpr auto fold_fields(Field<UInt, mask> f)
@@ -97,6 +99,7 @@ constexpr auto fold_fields(Field<UInt, mask> f, Field<UInt, masks>... fs)
 #endif
 }
 
+} // namespace detail
 } // namespace regilite
 
 #endif // REGILITE_FIELD_HPP
