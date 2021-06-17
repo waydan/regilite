@@ -30,7 +30,7 @@ class Register
             template <UInt mask>
             constexpr operator Field<UInt, mask>() const noexcept
             {
-                return Field<UInt, mask>{state_ & mask, detail::NoShift_t{}};
+                return Field<UInt, mask>{(state_ & mask) >> detail::lsb(mask)};
             }
         };
 

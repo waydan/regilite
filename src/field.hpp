@@ -57,7 +57,7 @@ class Field
 
   public:
     constexpr explicit Field(std::uint32_t value) noexcept
-        : Field(value << detail::lsb(mask), detail::NoShift_t{})
+        : value_(value)
     {}
 
     constexpr explicit Field(std::uint32_t value, detail::NoShift_t) noexcept
@@ -68,7 +68,7 @@ class Field
 
     constexpr auto as_bitfield() const noexcept -> detail::BitField<UInt, mask>
     {
-        return detail::BitField<UInt, mask>{static_cast<UInt>(value_)};
+        return detail::BitField<UInt, mask>{static_cast<UInt>(value_) << detail::lsb(mask)};
     }
 };
 
