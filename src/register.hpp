@@ -9,7 +9,7 @@
 
 namespace regilite {
 
-template <typename UInt>
+template <typename UInt, typename... Fields>
 class Register
 {
     static_assert(std::is_unsigned<UInt>::value
@@ -27,7 +27,9 @@ class Register
         struct FieldExtractor {
             UInt state_;
 
-            template <UInt mask, typename ValType>
+            template <UInt mask, typename ValType,
+                      typename = std::enable_if_t<traits::is_one_of<
+                          Field<UInt, mask, ValType>, Fields...>::value>>
             constexpr operator Field<UInt, mask, ValType>() const noexcept
             {
                 return Field<UInt, mask, ValType>{
@@ -50,7 +52,10 @@ class Register
         template <UInt mask, typename ValType, UInt... masks,
                   typename... ValTypes>
         auto modify(Field<UInt, mask, ValType> f,
-                    Field<UInt, masks, ValTypes>... fs) noexcept -> Snapshot&
+                    Field<UInt, masks, ValTypes>... fs) noexcept
+            -> std::enable_if_t<
+                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value,
+                Snapshot&>
         {
             const auto fields = detail::fold_fields(f, fs...);
             state_ = detail::insert_bits(state_, fields);
@@ -65,7 +70,10 @@ class Register
 
 
         template <UInt mask, typename ValType>
-        auto match(Field<UInt, mask, ValType> f) const noexcept -> bool
+        auto match(Field<UInt, mask, ValType> f) const noexcept
+            -> std::enable_if_t<
+                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value,
+                bool>
         {
             return f == decltype(f){extract()};
         }
@@ -75,7 +83,13 @@ class Register
                   typename... ValTypes>
         auto match_all(Field<UInt, mask, ValType> f,
                        Field<UInt, masks, ValTypes>... fs) const noexcept
-            -> bool
+            -> std::enable_if_t<
+                traits::conjunction<
+                    traits::is_one_of<Field<UInt, mask, ValType>,
+                                      Fields...>::value,
+                    traits::is_one_of<Field<UInt, masks, ValTypes>,
+                                      Fields...>::value...>::value,
+                bool>
         {
             const auto fields = detail::fold_fields(f, fs...);
             return match(fields);
@@ -83,7 +97,10 @@ class Register
 
 #ifndef __cpp_fold_expressions
         template <UInt mask, typename ValType>
-        auto match_any(Field<UInt, mask, ValType> f) const noexcept -> bool
+        auto match_any(Field<UInt, mask, ValType> f) const noexcept
+            -> std::enable_if_t<
+                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value,
+                bool>
         {
             return match(f);
         }
@@ -93,7 +110,13 @@ class Register
                   typename... ValTypes>
         auto match_any(Field<UInt, mask, ValType> f,
                        Field<UInt, masks, ValTypes>... fs) const noexcept
-            -> bool
+            -> std::enable_if_t<
+                traits::conjunction<
+                    traits::is_one_of<Field<UInt, mask, ValType>,
+                                      Fields...>::value,
+                    traits::is_one_of<Field<UInt, masks, ValTypes>,
+                                      Fields...>::value...>::value,
+                bool>
         {
 #ifndef __cpp_fold_expressions
             return match_any(f) or match_any(fs...);
@@ -112,7 +135,12 @@ class Register
 
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto write(Field<UInt, mask, ValType> f,
-               Field<UInt, masks, ValTypes>... fs) noexcept -> void
+               Field<UInt, masks, ValTypes>... fs) noexcept
+        -> std::enable_if_t<traits::conjunction<
+            traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value,
+            traits::is_one_of<Field<UInt, masks, ValTypes>,
+                              Fields...>::value...>::value>
+
     {
         write(read().modify(f, fs...));
     }
@@ -128,7 +156,8 @@ class Register
 
 
     template <UInt mask, typename ValType>
-    auto match(Field<UInt, mask, ValType> f) const noexcept -> bool
+    auto match(Field<UInt, mask, ValType> f) const noexcept -> std::enable_if_t<
+        traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value, bool>
     {
         return read().match(f);
     }
@@ -136,7 +165,13 @@ class Register
 
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto match_all(Field<UInt, mask, ValType> f,
-                   Field<UInt, masks, ValTypes>... fs) const noexcept -> bool
+                   Field<UInt, masks, ValTypes>... fs) const noexcept
+        -> std::enable_if_t<
+            traits::conjunction<
+                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value,
+                traits::is_one_of<Field<UInt, masks, ValTypes>,
+                                  Fields...>::value...>::value,
+            bool>
     {
         return read().match_all(f, fs...);
     }
@@ -144,7 +179,13 @@ class Register
 
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto match_any(Field<UInt, mask, ValType> f,
-                   Field<UInt, masks, ValTypes>... fs) const noexcept -> bool
+                   Field<UInt, masks, ValTypes>... fs) const noexcept
+        -> std::enable_if_t<
+            traits::conjunction<
+                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>::value,
+                traits::is_one_of<Field<UInt, masks, ValTypes>,
+                                  Fields...>::value...>::value,
+            bool>
     {
         return read().match_any(f, fs...);
     }
