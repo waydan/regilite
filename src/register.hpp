@@ -18,6 +18,10 @@ class Register
 
     UInt state_;
 
+    template <typename... Fs>
+    using is_member_field =
+        traits::conjunction<traits::is_one_of<Fs, Fields...>{}...>;
+
   public:
     class Snapshot
     {
@@ -27,8 +31,8 @@ class Register
             UInt state_;
 
             template <UInt mask, typename ValType,
-                      typename = std::enable_if_t<traits::is_one_of<
-                          Field<UInt, mask, ValType>, Fields...>{}>>
+                      typename = std::enable_if_t<
+                          is_member_field<Field<UInt, mask, ValType>>{}>>
             constexpr operator Field<UInt, mask, ValType>() const noexcept
             {
                 return Field<UInt, mask, ValType>{
@@ -52,9 +56,8 @@ class Register
                   typename... ValTypes>
         auto modify(Field<UInt, mask, ValType> f,
                     Field<UInt, masks, ValTypes>... fs) noexcept
-            -> std::enable_if_t<
-                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-                Snapshot&>
+            -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
+                                Snapshot&>
         {
             const auto fields = detail::fold_fields(f, fs...);
             state_ = detail::insert_bits(state_, fields);
@@ -69,9 +72,9 @@ class Register
 
 
         template <UInt mask, typename ValType>
-        auto
-        match(Field<UInt, mask, ValType> f) const noexcept -> std::enable_if_t<
-            traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{}, bool>
+        auto match(Field<UInt, mask, ValType> f) const noexcept
+            -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
+                                bool>
         {
             return f == decltype(f){extract()};
         }
@@ -82,10 +85,8 @@ class Register
         auto match_all(Field<UInt, mask, ValType> f,
                        Field<UInt, masks, ValTypes>... fs) const noexcept
             -> std::enable_if_t<
-                traits::conjunction<
-                    traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-                    traits::is_one_of<Field<UInt, masks, ValTypes>,
-                                      Fields...>{}...>{},
+                is_member_field<Field<UInt, mask, ValType>,
+                                Field<UInt, masks, ValTypes>...>{},
                 bool>
         {
             const auto fields = detail::fold_fields(f, fs...);
@@ -95,9 +96,8 @@ class Register
 #ifndef __cpp_fold_expressions
         template <UInt mask, typename ValType>
         auto match_any(Field<UInt, mask, ValType> f) const noexcept
-            -> std::enable_if_t<
-                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-                bool>
+            -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
+                                bool>
         {
             return match(f);
         }
@@ -108,10 +108,8 @@ class Register
         auto match_any(Field<UInt, mask, ValType> f,
                        Field<UInt, masks, ValTypes>... fs) const noexcept
             -> std::enable_if_t<
-                traits::conjunction<
-                    traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-                    traits::is_one_of<Field<UInt, masks, ValTypes>,
-                                      Fields...>{}...>{},
+                is_member_field<Field<UInt, mask, ValType>,
+                                Field<UInt, masks, ValTypes>...>{},
                 bool>
         {
 #ifndef __cpp_fold_expressions
@@ -132,9 +130,8 @@ class Register
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto write(Field<UInt, mask, ValType> f,
                Field<UInt, masks, ValTypes>... fs) noexcept
-        -> std::enable_if_t<traits::conjunction<
-            traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-            traits::is_one_of<Field<UInt, masks, ValTypes>, Fields...>{}...>{}>
+        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
+                                            Field<UInt, masks, ValTypes>...>{}>
 
     {
         write(read().modify(f, fs...));
@@ -151,8 +148,8 @@ class Register
 
 
     template <UInt mask, typename ValType>
-    auto match(Field<UInt, mask, ValType> f) const noexcept -> std::enable_if_t<
-        traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{}, bool>
+    auto match(Field<UInt, mask, ValType> f) const noexcept
+        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{}, bool>
     {
         return read().match(f);
     }
@@ -161,12 +158,9 @@ class Register
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto match_all(Field<UInt, mask, ValType> f,
                    Field<UInt, masks, ValTypes>... fs) const noexcept
-        -> std::enable_if_t<
-            traits::conjunction<
-                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-                traits::is_one_of<Field<UInt, masks, ValTypes>,
-                                  Fields...>{}...>{},
-            bool>
+        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
+                                            Field<UInt, masks, ValTypes>...>{},
+                            bool>
     {
         return read().match_all(f, fs...);
     }
@@ -175,12 +169,9 @@ class Register
     template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
     auto match_any(Field<UInt, mask, ValType> f,
                    Field<UInt, masks, ValTypes>... fs) const noexcept
-        -> std::enable_if_t<
-            traits::conjunction<
-                traits::is_one_of<Field<UInt, mask, ValType>, Fields...>{},
-                traits::is_one_of<Field<UInt, masks, ValTypes>,
-                                  Fields...>{}...>{},
-            bool>
+        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
+                                            Field<UInt, masks, ValTypes>...>{},
+                            bool>
     {
         return read().match_any(f, fs...);
     }

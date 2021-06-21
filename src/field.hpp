@@ -39,7 +39,6 @@ constexpr auto insert_bits(UInt value, BitField<UInt, mask> field) noexcept
     return (value & ~mask) | field.value;
 }
 
-
 } // namespace detail
 
 template <int msb, int lsb = msb>
