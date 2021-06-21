@@ -58,8 +58,7 @@ using TestReg = regilite::Register<std::uint32_t, F0, F1, F2, F3>;
 static_assert(std::is_standard_layout<TestReg>::value,
               "Register<> type must be standard layout.");
 
-static_assert(
-    std::is_standard_layout<decltype(std::declval<TestReg>().read())>::value,
-    "Unnameable type Register<>::Snapshot must be standard layout.");
+static_assert(std::is_standard_layout<TestReg::Snapshot>::value,
+              "Unnameable type Register<>::Snapshot must be standard layout.");
 
 #endif // TEST_REGISTER_HPP
