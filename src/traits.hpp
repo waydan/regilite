@@ -11,22 +11,19 @@ struct identity {
 template <typename T>
 using identity_t = typename identity<T>::type;
 
+
 template <typename T, typename... Ts>
 struct is_one_of;
 
 template <typename T>
-struct is_one_of<T> {
-    static constexpr bool value = false;
-};
+struct is_one_of<T> : std::false_type {};
 
 template <typename T, typename... Ts>
-struct is_one_of<T, T, Ts...> {
-    static constexpr bool value = true;
-    using type = T;
-};
+struct is_one_of<T, T, Ts...> : std::true_type {};
 
 template <typename T, typename NotT, typename... Ts>
 struct is_one_of<T, NotT, Ts...> : is_one_of<T, Ts...> {};
+
 
 template <bool pred, bool... preds>
 struct conjunction;

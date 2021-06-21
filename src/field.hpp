@@ -13,8 +13,7 @@ namespace detail {
 
 template <typename UInt, UInt mask>
 struct BitField {
-    static_assert(std::is_unsigned<UInt>::value
-                      and not std::is_same<UInt, bool>::value,
+    static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
                   "Register<> type requires an unsigned integral as its "
                   "underlying representation.");
 
@@ -56,15 +55,14 @@ struct Mask {
 template <typename UInt, UInt mask, typename ValType>
 class Field
 {
-    static_assert(std::is_unsigned<UInt>::value
-                      and not std::is_same<UInt, bool>::value,
+    static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
                   "Register<> type requires an unsigned integral as its "
                   "underlying representation.");
     static_assert(
         sizeof(UInt) >= sizeof(ValType),
         "Value type may not be larger than storage type for a register");
     static_assert(
-        std::is_unsigned<ValType>::value or std::is_enum<ValType>::value,
+        std::is_unsigned<ValType>{} or std::is_enum<ValType>{},
         "Field only supports unsigned integrals or enumeration types");
 
     ValType value_;
