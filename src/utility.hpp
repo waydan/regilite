@@ -46,7 +46,7 @@ struct masks_overlap_impl<UInt, false, accum, mask, masks...>
                          masks...> {};
 
 template <typename UInt, UInt mask, UInt... masks>
-struct masks_overlap : masks_overlap_impl<UInt, false, mask, masks...> {};
+using masks_overlap = masks_overlap_impl<UInt, false, mask, masks...>;
 
 
 static_assert(!masks_overlap<std::uint32_t, 0x1234>{},
