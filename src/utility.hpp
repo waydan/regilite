@@ -17,6 +17,10 @@ constexpr auto lsb(Int value) noexcept
     return lsb;
 }
 
+static_assert(lsb(0x00000001) == 0, "Only lowest bit set");
+static_assert(lsb(0xFFFFFFFF) == 0, "All bits set");
+static_assert(lsb(0xFFFFFFFE) == 1, "Only lowest bit cleared");
+
 
 template <typename T>
 constexpr auto make_volatile_ref(T& x) noexcept -> volatile T&
