@@ -17,12 +17,6 @@ constexpr auto lsb(Int value) noexcept
     return lsb;
 }
 
-template <typename UInt>
-constexpr auto masks_overlap(UInt a, UInt b) noexcept
-    -> std::enable_if_t<std::is_unsigned<UInt>::value, bool>
-{
-    return (a ^ b) != (a | b);
-}
 
 template <typename T>
 constexpr auto make_volatile_ref(T& x) noexcept -> volatile T&
@@ -35,6 +29,35 @@ constexpr auto make_volatile_ref(const T& x) noexcept -> const volatile T&
 {
     return *const_cast<const volatile T*>(&x);
 }
+
+
+template <typename UInt, bool test, UInt accum, UInt... masks>
+struct masks_overlap_impl;
+
+template <typename UInt, UInt accum>
+struct masks_overlap_impl<UInt, false, accum> : std::false_type {};
+
+template <typename UInt, UInt accum, UInt... masks>
+struct masks_overlap_impl<UInt, true, accum, masks...> : std::true_type {};
+
+template <typename UInt, UInt accum, UInt mask, UInt... masks>
+struct masks_overlap_impl<UInt, false, accum, mask, masks...>
+    : masks_overlap_impl<UInt, (accum | mask) != (accum ^ mask), accum | mask,
+                         masks...> {};
+
+template <typename UInt, UInt mask, UInt... masks>
+struct masks_overlap : masks_overlap_impl<UInt, false, mask, masks...> {};
+
+
+static_assert(!masks_overlap<std::uint32_t, 0x1234>{},
+              "Single mask does not overlap");
+static_assert(!masks_overlap<std::uint32_t, 0x0F, 0xF0>{},
+              "These masks do not overlap");
+static_assert(masks_overlap<std::uint32_t, 0x0F, 0xF8>{},
+              "These masks do overlap");
+static_assert(masks_overlap<std::uint32_t, 0x0F, 0xF0, 0x01>{},
+              "Final mask overlaps");
+
 
 } // namespace detail
 } // namespace regilite
