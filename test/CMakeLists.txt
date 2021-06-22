@@ -5,11 +5,7 @@ function(new_test test_name)
 endfunction()
 
 new_test(test-write-fields write_field_unit.t.cpp test_main.cpp)
-
 new_test(test-read-fields read_field_unit.t.cpp test_main.cpp)
-
 new_test(test-match-fields match_field_unit.t.cpp test_main.cpp)
-
 new_test(test-read-snapshot read_snapshot_unit.t.cpp test_main.cpp)
-
 new_test(test-enum-field enum_field_unit.t.cpp test_main.cpp)
