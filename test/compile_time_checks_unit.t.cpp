@@ -10,13 +10,13 @@ TEST_GROUP(CompileTimeChecks){};
 
 using NonMemberF = regilite::Field<std::uint32_t, 0x1, std::uint32_t>;
 
-template <typename Register, typename Field, typename = void>
+
+template <typename R, typename F, typename = void>
 struct WriteNonMemberField {};
 
-template <typename Register, typename Field>
-struct WriteNonMemberField<Register, Field,
-                           decltype(std::declval<Register>().write(
-                               std::declval<Field>()))> {
+template <typename R, typename F>
+struct WriteNonMemberField<
+    R, F, decltype(std::declval<R>().write(std::declval<F>()))> {
     WriteNonMemberField()
     {
         FAIL("Writing a non-member field must fail compilation");
@@ -27,4 +27,27 @@ struct WriteNonMemberField<Register, Field,
 TEST(CompileTimeChecks, CannotWriteNonmemberField)
 {
     WriteNonMemberField<TestReg, NonMemberF>{};
+}
+
+
+using Fa = regilite::Field<std::uint32_t, 0x0F, std::uint32_t>;
+using Fb = regilite::Field<std::uint32_t, 0xF8, std::uint32_t>;
+using RegAB = regilite::Register<std::uint32_t, Fa, Fb>;
+
+template <typename R, typename F1, typename F2, typename = void>
+struct WriteOverlappingFields {};
+
+template <typename R, typename F1, typename F2>
+struct WriteOverlappingFields<R, F1, F2,
+                              decltype(std::declval<R>().write(
+                                  std::declval<F1>(), std::declval<F2>()))> {
+    WriteOverlappingFields()
+    {
+        FAIL("Writing overlapping member fields must fail compilation");
+    }
+};
+
+TEST(CompileTimeChecks, CannotWriteOverlappingFields)
+{
+    WriteOverlappingFields<RegAB, Fa, Fb>{};
 }
