@@ -19,10 +19,10 @@ struct BitField {
 
     UInt value;
 
-    template <std::uint32_t rhs_mask>
+    template <UInt rhs_mask>
     friend constexpr auto operator|(BitField lhs,
                                     BitField<UInt, rhs_mask> rhs) noexcept
-        -> std::enable_if_t<!masks_overlap(mask, rhs_mask),
+        -> std::enable_if_t<!masks_overlap<UInt, mask, rhs_mask>{},
                             BitField<UInt, mask | rhs_mask>>
     {
         return BitField<UInt, mask | rhs_mask>{
