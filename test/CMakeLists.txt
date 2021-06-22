@@ -1,20 +1,15 @@
-add_executable(test-write-fields write_field_unit.t.cpp test_main.cpp)
-target_link_libraries(test-write-fields PRIVATE regilite
-CppUTest)
-add_test(NAME test-write-fields COMMAND test-write-fields)
+function(new_test test_name)
+    add_executable(${test_name} ${ARGN})
+    target_link_libraries(${test_name} PRIVATE regilite CppUTest)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endfunction()
 
-add_executable(test-read-fields read_field_unit.t.cpp test_main.cpp)
-target_link_libraries(test-read-fields PRIVATE regilite CppUTest)
-add_test(NAME test-read-fields COMMAND test-read-fields)
+new_test(test-write-fields write_field_unit.t.cpp test_main.cpp)
 
-add_executable(test-match-fields match_field_unit.t.cpp test_main.cpp)
-target_link_libraries(test-match-fields PRIVATE regilite CppUTest)
-add_test(NAME test-match-fields COMMAND test-match-fields)
+new_test(test-read-fields read_field_unit.t.cpp test_main.cpp)
 
-add_executable(test-read-snapshot read_snapshot_unit.t.cpp test_main.cpp)
-target_link_libraries(test-read-snapshot PRIVATE regilite CppUTest)
-add_test(NAME test-read-snapshot COMMAND test-read-snapshot)
+new_test(test-match-fields match_field_unit.t.cpp test_main.cpp)
 
-add_executable(test-enum-field enum_field_unit.t.cpp test_main.cpp)
-target_link_libraries(test-enum-field PRIVATE regilite CppUTest)
-add_test(NAME test-enum-field COMMAND test-enum-field)
+new_test(test-read-snapshot read_snapshot_unit.t.cpp test_main.cpp)
+
+new_test(test-enum-field enum_field_unit.t.cpp test_main.cpp)
