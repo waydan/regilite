@@ -92,24 +92,18 @@ class Field
 
 namespace detail {
 
-#ifndef __cpp_fold_expressions
 template <typename UInt, UInt mask, typename ValType>
 constexpr auto fold_fields(Field<UInt, mask, ValType> f)
 {
     return f.as_bitfield();
 }
-#endif
 
 template <typename UInt, UInt mask, typename ValType, UInt... masks,
           typename... ValTypes>
 constexpr auto fold_fields(Field<UInt, mask, ValType> f,
                            Field<UInt, masks, ValTypes>... fs)
 {
-#ifndef __cpp_fold_expressions
     return fold_fields(f) | fold_fields(fs...);
-#else
-    return (f.as_bitfield() | ... | fs.as_bitfield());
-#endif
 }
 
 } // namespace detail

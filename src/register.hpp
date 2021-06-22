@@ -93,7 +93,7 @@ class Register
             return match(fields);
         }
 
-#ifndef __cpp_fold_expressions
+
         template <UInt mask, typename ValType>
         auto match_any(Field<UInt, mask, ValType> f) const noexcept
             -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
@@ -101,7 +101,6 @@ class Register
         {
             return match(f);
         }
-#endif
 
         template <UInt mask, typename ValType, UInt... masks,
                   typename... ValTypes>
@@ -112,11 +111,7 @@ class Register
                                 Field<UInt, masks, ValTypes>...>{},
                 bool>
         {
-#ifndef __cpp_fold_expressions
             return match_any(f) or match_any(fs...);
-#else
-            return (match(f) or ... or match(fs));
-#endif
         }
     };
 
