@@ -131,8 +131,8 @@ class Register
     auto write(Field<UInt, mask, ValType> f,
                Field<UInt, masks, ValTypes>... fs) noexcept
         -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
-                                            Field<UInt, masks, ValTypes>...>{}>
-
+                                            Field<UInt, masks, ValTypes>...>{}
+                            and !detail::masks_overlap<UInt, mask, masks...>{}>
     {
         write(read().modify(f, fs...));
     }
