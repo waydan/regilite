@@ -86,14 +86,14 @@ class Field
     }
 
     template <typename Other>
-    friend constexpr auto operator==(Field lhs, Other rhs) noexcept
+    friend constexpr auto operator==(const Field& lhs, const Other& rhs) noexcept
         -> std::enable_if_t<std::is_convertible<Other, Field>{}, bool>
     {
         return lhs.value() == static_cast<Field>(rhs).value();
     }
 
     template <typename Other>
-    friend constexpr auto operator!=(Field lhs, Other rhs) noexcept
+    friend constexpr auto operator!=(const Field& lhs, const Other& rhs) noexcept
         -> std::enable_if_t<std::is_convertible<Other, Field>{}, bool>
     {
         return not(lhs == static_cast<Field>(rhs));

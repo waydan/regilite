@@ -27,8 +27,18 @@ class Register
     {
         UInt state_;
 
-        struct FieldExtractor {
+        class FieldExtractor
+        {
             UInt state_;
+
+            // Prevent user code from creating named FieldExtractor object
+            FieldExtractor(FieldExtractor&&) = default;
+            // Register and Snapshot are friends which enables passing
+            // FieldExtractor&&
+            friend class Register;
+
+          public:
+            constexpr FieldExtractor(UInt s) noexcept: state_{s} {}
 
             template <typename Field,
                       typename = std::enable_if_t<is_member_field<Field>{}>>

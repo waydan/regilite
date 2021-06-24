@@ -50,3 +50,12 @@ TEST(ReadFieldFromRegister, DirectNegativeComparisonPossible)
     CHECK(F1{1} != test_register.extract_field());
     CHECK(test_register.extract_field() != F0{0});
 }
+
+TEST(ReadFieldFromRegister, CannotSaveFieldExtractor)
+{
+    // This expression will not compile. Register<>::Snapshot<>::FieldExtractor
+    // is unnameable and can only be move constructed by friend classes
+
+    // auto extractor = test_register.extract_field();
+    // (void)extractor;
+}
