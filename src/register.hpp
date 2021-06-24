@@ -41,9 +41,9 @@ class Register
         };
 
         template <UInt mask>
-        auto match(detail::BitField<UInt, mask> f) const noexcept -> bool
+        auto match(detail::BitField<UInt, mask> field) const noexcept -> bool
         {
-            return f.value == (state_ & mask);
+            return field.value == (state_ & mask);
         }
 
 
@@ -52,15 +52,12 @@ class Register
 
         constexpr auto raw() const noexcept -> UInt { return state_; }
 
-        template <UInt mask, typename ValType, UInt... masks,
-                  typename... ValTypes>
-        auto modify(Field<UInt, mask, ValType> f,
-                    Field<UInt, masks, ValTypes>... fs) noexcept
-            -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
-                                Snapshot&>
+        template <typename F, typename... Fs>
+        auto modify(F field, Fs... fields) noexcept
+            -> std::enable_if_t<is_member_field<F>{}, Snapshot&>
         {
-            const auto fields = detail::fold_fields(f, fs...);
-            state_ = detail::insert_bits(state_, fields);
+            const auto joined_fields = detail::fold_fields(field, fields...);
+            state_ = detail::insert_bits(state_, joined_fields);
             return *this;
         }
 
@@ -71,47 +68,35 @@ class Register
         }
 
 
-        template <UInt mask, typename ValType>
-        auto match(Field<UInt, mask, ValType> f) const noexcept
-            -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
-                                bool>
+        template <typename F>
+        auto match(F field) const noexcept
+            -> std::enable_if_t<is_member_field<F>{}, bool>
         {
-            return f == decltype(f){extract()};
+            return field == decltype(field){extract()};
         }
 
 
-        template <UInt mask, typename ValType, UInt... masks,
-                  typename... ValTypes>
-        auto match_all(Field<UInt, mask, ValType> f,
-                       Field<UInt, masks, ValTypes>... fs) const noexcept
-            -> std::enable_if_t<
-                is_member_field<Field<UInt, mask, ValType>,
-                                Field<UInt, masks, ValTypes>...>{},
-                bool>
+        template <typename F, typename... Fs>
+        auto match_all(F field, Fs... fields) const noexcept
+            -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
         {
-            const auto fields = detail::fold_fields(f, fs...);
-            return match(fields);
+            const auto joined_fields = detail::fold_fields(field, fields...);
+            return match(joined_fields);
         }
 
 
-        template <UInt mask, typename ValType>
-        auto match_any(Field<UInt, mask, ValType> f) const noexcept
-            -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{},
-                                bool>
+        template <typename F>
+        auto match_any(F field) const noexcept
+            -> std::enable_if_t<is_member_field<F>{}, bool>
         {
-            return match(f);
+            return match(field);
         }
 
-        template <UInt mask, typename ValType, UInt... masks,
-                  typename... ValTypes>
-        auto match_any(Field<UInt, mask, ValType> f,
-                       Field<UInt, masks, ValTypes>... fs) const noexcept
-            -> std::enable_if_t<
-                is_member_field<Field<UInt, mask, ValType>,
-                                Field<UInt, masks, ValTypes>...>{},
-                bool>
+        template <typename F, typename... Fs>
+        auto match_any(F field, Fs... fields) const noexcept
+            -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
         {
-            return match_any(f) or match_any(fs...);
+            return match_any(field) or match_any(fields...);
         }
     };
 
@@ -122,14 +107,12 @@ class Register
     }
 
 
-    template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
-    auto write(Field<UInt, mask, ValType> f,
-               Field<UInt, masks, ValTypes>... fs) noexcept
-        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
-                                            Field<UInt, masks, ValTypes>...>{}
-                            and !detail::masks_overlap<UInt, mask, masks...>{}>
+    template <typename F, typename... Fs>
+    auto write(F field, Fs... fields) noexcept -> std::enable_if_t<
+        is_member_field<F, Fs...>{}
+        and !detail::masks_overlap<UInt, F::mask(), Fs::mask()...>{}>
     {
-        write(read().modify(f, fs...));
+        write(read().modify(field, fields...));
     }
 
 
@@ -142,33 +125,27 @@ class Register
     constexpr auto extract() const noexcept { return read().extract(); }
 
 
-    template <UInt mask, typename ValType>
-    auto match(Field<UInt, mask, ValType> f) const noexcept
-        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>>{}, bool>
+    template <typename F>
+    auto match(F field) const noexcept
+        -> std::enable_if_t<is_member_field<F>{}, bool>
     {
-        return read().match(f);
+        return read().match(field);
     }
 
 
-    template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
-    auto match_all(Field<UInt, mask, ValType> f,
-                   Field<UInt, masks, ValTypes>... fs) const noexcept
-        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
-                                            Field<UInt, masks, ValTypes>...>{},
-                            bool>
+    template <typename F, typename... Fs>
+    auto match_all(F field, Fs... fields) const noexcept
+        -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
     {
-        return read().match_all(f, fs...);
+        return read().match_all(field, fields...);
     }
 
 
-    template <UInt mask, typename ValType, UInt... masks, typename... ValTypes>
-    auto match_any(Field<UInt, mask, ValType> f,
-                   Field<UInt, masks, ValTypes>... fs) const noexcept
-        -> std::enable_if_t<is_member_field<Field<UInt, mask, ValType>,
-                                            Field<UInt, masks, ValTypes>...>{},
-                            bool>
+    template <typename F, typename... Fs>
+    auto match_any(F field, Fs... fields) const noexcept
+        -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
     {
-        return read().match_any(f, fs...);
+        return read().match_any(field, fields...);
     }
 };
 

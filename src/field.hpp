@@ -51,7 +51,7 @@ struct Mask {
 };
 
 
-template <typename UInt, UInt mask, typename ValType>
+template <typename UInt, UInt mask_, typename ValType>
 class Field
 {
     static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
@@ -67,15 +67,18 @@ class Field
     ValType value_;
 
   public:
+    static constexpr auto mask() noexcept -> UInt { return mask_; }
+
     constexpr explicit Field(ValType value) noexcept : value_(value) {}
 
 
     constexpr auto value() const noexcept { return value_; };
 
-    constexpr auto as_bitfield() const noexcept -> detail::BitField<UInt, mask>
+    constexpr auto as_bitfield() const noexcept
+        -> detail::BitField<UInt, mask()>
     {
-        return detail::BitField<UInt, mask>{static_cast<UInt>(value_)
-                                            << detail::lsb(mask)};
+        return detail::BitField<UInt, mask()>{static_cast<UInt>(value_)
+                                              << detail::lsb(mask())};
     }
 
     constexpr auto operator==(const Field& rhs) const noexcept -> bool
