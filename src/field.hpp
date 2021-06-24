@@ -51,7 +51,7 @@ struct Mask {
 };
 
 
-template <typename UInt, UInt mask_, typename ValType>
+template <typename UInt, UInt bit_mask, typename ValType>
 class Field
 {
     static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
@@ -64,15 +64,19 @@ class Field
         std::is_unsigned<ValType>{} or std::is_enum<ValType>{},
         "Field only supports unsigned integrals or enumeration types");
 
-    ValType value_;
+  public:
+    using value_type = ValType;
+
+  private:
+    value_type value_;
 
   public:
-    static constexpr auto mask() noexcept -> UInt { return mask_; }
+    static constexpr auto mask() noexcept -> UInt { return bit_mask; }
 
-    constexpr explicit Field(ValType value) noexcept : value_(value) {}
+    constexpr explicit Field(value_type value) noexcept : value_(value) {}
 
 
-    constexpr auto value() const noexcept { return value_; };
+    constexpr auto value() const noexcept -> value_type { return value_; };
 
     constexpr auto as_bitfield() const noexcept
         -> detail::BitField<UInt, mask()>
@@ -94,6 +98,10 @@ class Field
 };
 
 namespace detail {
+
+template <typename F, typename... Fs>
+using fields_overlap =
+    masks_overlap<decltype(F::mask()), F::mask(), Fs::mask()...>;
 
 template <typename UInt, UInt mask, typename ValType>
 constexpr auto fold_fields(Field<UInt, mask, ValType> f)
