@@ -54,7 +54,9 @@ class Register
 
         template <typename F, typename... Fs>
         auto modify(F field, Fs... fields) noexcept
-            -> std::enable_if_t<is_member_field<F>{}, Snapshot&>
+            -> std::enable_if_t<is_member_field<F>{}
+                                    and !detail::fields_overlap<F, Fs...>{},
+                                Snapshot&>
         {
             const auto joined_fields = detail::fold_fields(field, fields...);
             state_ = detail::insert_bits(state_, joined_fields);
@@ -78,7 +80,9 @@ class Register
 
         template <typename F, typename... Fs>
         auto match_all(F field, Fs... fields) const noexcept
-            -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
+            -> std::enable_if_t<is_member_field<F, Fs...>{}
+                                    and !detail::fields_overlap<F, Fs...>{},
+                                bool>
         {
             const auto joined_fields = detail::fold_fields(field, fields...);
             return match(joined_fields);
