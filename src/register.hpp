@@ -30,13 +30,12 @@ class Register
         struct FieldExtractor {
             UInt state_;
 
-            template <UInt mask, typename ValType,
-                      typename = std::enable_if_t<
-                          is_member_field<Field<UInt, mask, ValType>>{}>>
-            constexpr operator Field<UInt, mask, ValType>() const noexcept
+            template <typename Field,
+                      typename = std::enable_if_t<is_member_field<Field>{}>>
+            constexpr operator Field() const noexcept
             {
-                return Field<UInt, mask, ValType>{
-                    static_cast<ValType>((state_ & mask) >> detail::lsb(mask))};
+                return Field{static_cast<typename Field::value_type>(
+                    (state_ & Field::mask()) >> detail::lsb(Field::mask()))};
             }
         };
 
