@@ -21,7 +21,7 @@ TEST(EnumTypeField, NakedValueIsEnum)
 TEST(EnumTypeField, ExtractingEnum)
 {
     test_register.write(F3{F3Val::B});
-    CHECK(F3{F3Val::B} == test_register.extract());
+    CHECK(F3{F3Val::B} == test_register.extract_field());
 }
 
 TEST(EnumTypeField, EnumFieldJoinsWithNonEnum)

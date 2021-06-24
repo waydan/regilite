@@ -63,7 +63,7 @@ class Register
         }
 
 
-        constexpr auto extract() const noexcept
+        constexpr auto extract_field() const noexcept
         {
             return FieldExtractor{state_};
         }
@@ -73,7 +73,7 @@ class Register
         auto match(Field f) const noexcept
             -> std::enable_if_t<is_member_field<Field>{}, bool>
         {
-            return f == decltype(f){extract()};
+            return f == decltype(f){extract_field()};
         }
 
 
@@ -126,7 +126,10 @@ class Register
     }
 
 
-    constexpr auto extract() const noexcept { return read().extract(); }
+    constexpr auto extract_field() const noexcept
+    {
+        return read().extract_field();
+    }
 
 
     template <typename Field>
