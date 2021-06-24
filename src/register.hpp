@@ -9,7 +9,7 @@
 
 namespace regilite {
 
-template <typename UInt, typename... Fields>
+template <typename UInt, typename... MemberFields>
 class Register
 {
     static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
@@ -20,7 +20,7 @@ class Register
 
     template <typename... Fs>
     using is_member_field =
-        traits::conjunction<traits::is_one_of<Fs, Fields...>{}...>;
+        traits::conjunction<traits::is_one_of<Fs, MemberFields...>{}...>;
 
   public:
     class Snapshot
@@ -108,9 +108,9 @@ class Register
 
 
     template <typename F, typename... Fs>
-    auto write(F field, Fs... fields) noexcept -> std::enable_if_t<
-        is_member_field<F, Fs...>{}
-        and !detail::masks_overlap<UInt, F::mask(), Fs::mask()...>{}>
+    auto write(F field, Fs... fields) noexcept
+        -> std::enable_if_t<is_member_field<F, Fs...>{}
+                            and !detail::fields_overlap<F, Fs...>{}>
     {
         write(read().modify(field, fields...));
     }
@@ -135,7 +135,9 @@ class Register
 
     template <typename F, typename... Fs>
     auto match_all(F field, Fs... fields) const noexcept
-        -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
+        -> std::enable_if_t<is_member_field<F, Fs...>{}
+                                and !detail::fields_overlap<F, Fs...>{},
+                            bool>
     {
         return read().match_all(field, fields...);
     }
@@ -150,6 +152,5 @@ class Register
 };
 
 } // namespace regilite
-
 
 #endif // REGILITE_REGISTER_HPP
