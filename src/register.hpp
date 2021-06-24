@@ -18,9 +18,9 @@ class Register
 
     UInt state_;
 
-    template <typename... Fs>
+    template <typename... Fields>
     using is_member_field =
-        traits::conjunction<traits::is_one_of<Fs, MemberFields...>{}...>;
+        traits::conjunction<traits::is_one_of<Fields, MemberFields...>{}...>;
 
   public:
     class Snapshot
@@ -52,11 +52,11 @@ class Register
 
         constexpr auto raw() const noexcept -> UInt { return state_; }
 
-        template <typename F, typename... Fs>
-        auto modify(F field, Fs... fields) noexcept
-            -> std::enable_if_t<is_member_field<F>{}
-                                    and !detail::fields_overlap<F, Fs...>{},
-                                Snapshot&>
+        template <typename Field, typename... Fields>
+        auto modify(Field field, Fields... fields) noexcept -> std::enable_if_t<
+            is_member_field<Field>{}
+                and !detail::fields_overlap<Field, Fields...>{},
+            Snapshot&>
         {
             const auto joined_fields = detail::fold_fields(field, fields...);
             state_ = detail::insert_bits(state_, joined_fields);
@@ -70,35 +70,36 @@ class Register
         }
 
 
-        template <typename F>
-        auto match(F field) const noexcept
-            -> std::enable_if_t<is_member_field<F>{}, bool>
+        template <typename Field>
+        auto match(Field field) const noexcept
+            -> std::enable_if_t<is_member_field<Field>{}, bool>
         {
             return field == decltype(field){extract()};
         }
 
 
-        template <typename F, typename... Fs>
-        auto match_all(F field, Fs... fields) const noexcept
-            -> std::enable_if_t<is_member_field<F, Fs...>{}
-                                    and !detail::fields_overlap<F, Fs...>{},
-                                bool>
+        template <typename Field, typename... Fields>
+        auto match_all(Field field, Fields... fields) const noexcept
+            -> std::enable_if_t<
+                is_member_field<Field, Fields...>{}
+                    and !detail::fields_overlap<Field, Fields...>{},
+                bool>
         {
             const auto joined_fields = detail::fold_fields(field, fields...);
             return match(joined_fields);
         }
 
 
-        template <typename F>
-        auto match_any(F field) const noexcept
-            -> std::enable_if_t<is_member_field<F>{}, bool>
+        template <typename Field>
+        auto match_any(Field field) const noexcept
+            -> std::enable_if_t<is_member_field<Field>{}, bool>
         {
             return match(field);
         }
 
-        template <typename F, typename... Fs>
-        auto match_any(F field, Fs... fields) const noexcept
-            -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
+        template <typename Field, typename... Fields>
+        auto match_any(Field field, Fields... fields) const noexcept
+            -> std::enable_if_t<is_member_field<Field, Fields...>{}, bool>
         {
             return match_any(field) or match_any(fields...);
         }
@@ -111,10 +112,10 @@ class Register
     }
 
 
-    template <typename F, typename... Fs>
-    auto write(F field, Fs... fields) noexcept
-        -> std::enable_if_t<is_member_field<F, Fs...>{}
-                            and !detail::fields_overlap<F, Fs...>{}>
+    template <typename Field, typename... Fields>
+    auto write(Field field, Fields... fields) noexcept
+        -> std::enable_if_t<is_member_field<Field, Fields...>{}
+                            and !detail::fields_overlap<Field, Fields...>{}>
     {
         write(read().modify(field, fields...));
     }
@@ -129,27 +130,27 @@ class Register
     constexpr auto extract() const noexcept { return read().extract(); }
 
 
-    template <typename F>
-    auto match(F field) const noexcept
-        -> std::enable_if_t<is_member_field<F>{}, bool>
+    template <typename Field>
+    auto match(Field field) const noexcept
+        -> std::enable_if_t<is_member_field<Field>{}, bool>
     {
         return read().match(field);
     }
 
 
-    template <typename F, typename... Fs>
-    auto match_all(F field, Fs... fields) const noexcept
-        -> std::enable_if_t<is_member_field<F, Fs...>{}
-                                and !detail::fields_overlap<F, Fs...>{},
+    template <typename Field, typename... Fields>
+    auto match_all(Field field, Fields... fields) const noexcept
+        -> std::enable_if_t<is_member_field<Field, Fields...>{}
+                                and !detail::fields_overlap<Field, Fields...>{},
                             bool>
     {
         return read().match_all(field, fields...);
     }
 
 
-    template <typename F, typename... Fs>
-    auto match_any(F field, Fs... fields) const noexcept
-        -> std::enable_if_t<is_member_field<F, Fs...>{}, bool>
+    template <typename Field, typename... Fields>
+    auto match_any(Field field, Fields... fields) const noexcept
+        -> std::enable_if_t<is_member_field<Field, Fields...>{}, bool>
     {
         return read().match_any(field, fields...);
     }
