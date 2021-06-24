@@ -83,8 +83,7 @@ class Field
 
     constexpr auto value() const noexcept -> value_type { return value_; };
 
-    constexpr auto as_bitfield() const noexcept
-        -> detail::BitField<UInt, mask()>
+    constexpr operator detail::BitField<UInt, mask()>() const noexcept
     {
         return detail::BitField<UInt, mask()>{static_cast<UInt>(value_)
                                               << detail::lsb(mask())};
@@ -115,15 +114,15 @@ using fields_overlap =
     masks_overlap<decltype(F::mask()), F::mask(), Fs::mask()...>;
 
 template <typename UInt, UInt mask, typename ValType>
-constexpr auto fold_fields(Field<UInt, mask, ValType> f)
+constexpr auto fold_fields(Field<UInt, mask, ValType> f) noexcept-> BitField<UInt, mask>
 {
-    return f.as_bitfield();
+    return f;
 }
 
 template <typename UInt, UInt mask, typename ValType, UInt... masks,
           typename... ValTypes>
 constexpr auto fold_fields(Field<UInt, mask, ValType> f,
-                           Field<UInt, masks, ValTypes>... fs)
+                           Field<UInt, masks, ValTypes>... fs) noexcept
 {
     return fold_fields(f) | fold_fields(fs...);
 }
