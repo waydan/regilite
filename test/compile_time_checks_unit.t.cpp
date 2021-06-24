@@ -5,6 +5,8 @@
 #include "register.hpp"
 #include "test_register.hpp"
 
+template <typename>
+using sink = void;
 
 TEST_GROUP(CompileTimeChecks){};
 
@@ -39,8 +41,8 @@ struct WriteOverlappingFields {};
 
 template <typename R, typename F1, typename F2>
 struct WriteOverlappingFields<R, F1, F2,
-                              decltype(std::declval<R>().write(
-                                  std::declval<F1>(), std::declval<F2>()))> {
+                              sink<decltype(std::declval<R>().write(
+                                  std::declval<F1>(), std::declval<F2>()))>> {
     WriteOverlappingFields()
     {
         FAIL("Writing overlapping member fields must fail compilation");
@@ -50,4 +52,23 @@ struct WriteOverlappingFields<R, F1, F2,
 TEST(CompileTimeChecks, CannotWriteOverlappingFields)
 {
     WriteOverlappingFields<RegAB, Fa, Fb>{};
+}
+
+template <typename R, typename F1, typename F2, typename = void>
+struct MatchAnyOverlappingFields {};
+
+template <typename R, typename F1, typename F2>
+struct MatchAnyOverlappingFields<
+    R, F1, F2,
+    sink<decltype(
+        std::declval<R>().match_all(std::declval<F1>(), std::declval<F2>()))>> {
+    MatchAnyOverlappingFields()
+    {
+        FAIL("Matching overlapping member fields must fail compilation");
+    }
+};
+
+TEST(CompileTimeChecks, CannotMatchOverlappingFields)
+{
+    MatchAnyOverlappingFields<RegAB, Fa, Fb>{};
 }
