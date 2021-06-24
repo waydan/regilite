@@ -85,15 +85,18 @@ class Field
                                               << detail::lsb(mask())};
     }
 
-    constexpr auto operator==(const Field& rhs) const noexcept -> bool
+    template <typename Other>
+    friend constexpr auto operator==(Field lhs, Other rhs) noexcept
+        -> std::enable_if_t<std::is_convertible<Other, Field>{}, bool>
     {
-        return value_ == rhs.value_;
+        return lhs.value() == static_cast<Field>(rhs).value();
     }
 
-
-    constexpr auto operator!=(const Field& rhs) const noexcept -> bool
+    template <typename Other>
+    friend constexpr auto operator!=(Field lhs, Other rhs) noexcept
+        -> std::enable_if_t<std::is_convertible<Other, Field>{}, bool>
     {
-        return not(*this == rhs);
+        return not(lhs == static_cast<Field>(rhs));
     }
 };
 

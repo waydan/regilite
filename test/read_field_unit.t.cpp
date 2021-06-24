@@ -36,3 +36,17 @@ TEST(ReadFieldFromRegister, ReadsOnlyReturnBitsForOneField)
     const F1 output_field = test_register.extract();
     CHECK_EQUAL(F1{2}, output_field);
 }
+
+TEST(ReadFieldFromRegister, DirectComparisonPossible)
+{
+    test_register.write(F1{2}, F0{1});
+    CHECK(F1{2} == test_register.extract());
+    CHECK(test_register.extract() == F0{1});
+}
+
+TEST(ReadFieldFromRegister, DirectNegativeComparisonPossible)
+{
+    test_register.write(F1{2}, F0{1});
+    CHECK(F1{1} != test_register.extract());
+    CHECK(test_register.extract() != F0{0});
+}
