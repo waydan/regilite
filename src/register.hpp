@@ -41,9 +41,9 @@ class Register
         };
 
         template <UInt mask>
-        auto match(detail::BitField<UInt, mask> field) const noexcept -> bool
+        auto match(detail::BitField<UInt, mask> f) const noexcept -> bool
         {
-            return field.value == (state_ & mask);
+            return f.value == (state_ & mask);
         }
 
 
@@ -53,13 +53,13 @@ class Register
         constexpr auto raw() const noexcept -> UInt { return state_; }
 
         template <typename Field, typename... Fields>
-        auto modify(Field field, Fields... fields) noexcept -> std::enable_if_t<
+        auto modify(Field f, Fields... fs) noexcept -> std::enable_if_t<
             is_member_field<Field>{}
                 and !detail::fields_overlap<Field, Fields...>{},
             Snapshot&>
         {
-            const auto joined_fields = detail::fold_fields(field, fields...);
-            state_ = detail::insert_bits(state_, joined_fields);
+            const auto fields = detail::fold_fields(f, fs...);
+            state_ = detail::insert_bits(state_, fields);
             return *this;
         }
 
@@ -71,37 +71,37 @@ class Register
 
 
         template <typename Field>
-        auto match(Field field) const noexcept
+        auto match(Field f) const noexcept
             -> std::enable_if_t<is_member_field<Field>{}, bool>
         {
-            return field == decltype(field){extract()};
+            return f == decltype(f){extract()};
         }
 
 
         template <typename Field, typename... Fields>
-        auto match_all(Field field, Fields... fields) const noexcept
+        auto match_all(Field f, Fields... fs) const noexcept
             -> std::enable_if_t<
                 is_member_field<Field, Fields...>{}
                     and !detail::fields_overlap<Field, Fields...>{},
                 bool>
         {
-            const auto joined_fields = detail::fold_fields(field, fields...);
-            return match(joined_fields);
+            const auto fields = detail::fold_fields(f, fs...);
+            return match(fields);
         }
 
 
         template <typename Field>
-        auto match_any(Field field) const noexcept
+        auto match_any(Field f) const noexcept
             -> std::enable_if_t<is_member_field<Field>{}, bool>
         {
-            return match(field);
+            return match(f);
         }
 
         template <typename Field, typename... Fields>
-        auto match_any(Field field, Fields... fields) const noexcept
+        auto match_any(Field f, Fields... fs) const noexcept
             -> std::enable_if_t<is_member_field<Field, Fields...>{}, bool>
         {
-            return match_any(field) or match_any(fields...);
+            return match_any(f) or match_any(fs...);
         }
     };
 
@@ -113,11 +113,11 @@ class Register
 
 
     template <typename Field, typename... Fields>
-    auto write(Field field, Fields... fields) noexcept
+    auto write(Field f, Fields... fs) noexcept
         -> std::enable_if_t<is_member_field<Field, Fields...>{}
                             and !detail::fields_overlap<Field, Fields...>{}>
     {
-        write(read().modify(field, fields...));
+        write(read().modify(f, fs...));
     }
 
 
@@ -131,28 +131,28 @@ class Register
 
 
     template <typename Field>
-    auto match(Field field) const noexcept
+    auto match(Field f) const noexcept
         -> std::enable_if_t<is_member_field<Field>{}, bool>
     {
-        return read().match(field);
+        return read().match(f);
     }
 
 
     template <typename Field, typename... Fields>
-    auto match_all(Field field, Fields... fields) const noexcept
+    auto match_all(Field f, Fields... fs) const noexcept
         -> std::enable_if_t<is_member_field<Field, Fields...>{}
                                 and !detail::fields_overlap<Field, Fields...>{},
                             bool>
     {
-        return read().match_all(field, fields...);
+        return read().match_all(f, fs...);
     }
 
 
     template <typename Field, typename... Fields>
-    auto match_any(Field field, Fields... fields) const noexcept
+    auto match_any(Field f, Fields... fs) const noexcept
         -> std::enable_if_t<is_member_field<Field, Fields...>{}, bool>
     {
-        return read().match_any(field, fields...);
+        return read().match_any(f, fs...);
     }
 };
 
