@@ -1,6 +1,7 @@
 #ifndef REGILITE_FIELD_HPP
 #define REGILITE_FIELD_HPP
 
+#include <cassert>
 #include <cstdint>
 #include <type_traits>
 
@@ -73,8 +74,12 @@ class Field
   public:
     static constexpr auto mask() noexcept -> UInt { return bit_mask; }
 
-    constexpr explicit Field(value_type value) noexcept : value_(value) {}
-
+    constexpr explicit Field(value_type value) noexcept : value_(value)
+    {
+        assert(
+            0u == (~(mask() >> detail::lsb(mask())) & static_cast<UInt>(value))
+            and "Value overflows the field boundary");
+    }
 
     constexpr auto value() const noexcept -> value_type { return value_; };
 
@@ -85,15 +90,18 @@ class Field
                                               << detail::lsb(mask())};
     }
 
+
     template <typename Other>
-    friend constexpr auto operator==(const Field& lhs, const Other& rhs) noexcept
+    friend constexpr auto operator==(const Field& lhs,
+                                     const Other& rhs) noexcept
         -> std::enable_if_t<std::is_convertible<Other, Field>{}, bool>
     {
         return lhs.value() == static_cast<Field>(rhs).value();
     }
 
     template <typename Other>
-    friend constexpr auto operator!=(const Field& lhs, const Other& rhs) noexcept
+    friend constexpr auto operator!=(const Field& lhs,
+                                     const Other& rhs) noexcept
         -> std::enable_if_t<std::is_convertible<Other, Field>{}, bool>
     {
         return not(lhs == static_cast<Field>(rhs));
