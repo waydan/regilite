@@ -12,17 +12,17 @@ template <typename T>
 using identity_t = typename identity<T>::type;
 
 
-template <typename T, typename... Ts>
-struct is_one_of;
+template <typename Elem, typename... Pack>
+struct is_pack_element;
 
-template <typename T>
-struct is_one_of<T> : std::false_type {};
+template <typename Elem>
+struct is_pack_element<Elem> : std::false_type {};
 
-template <typename T, typename... Ts>
-struct is_one_of<T, T, Ts...> : std::true_type {};
+template <typename Elem, typename... Pack>
+struct is_pack_element<Elem, Elem, Pack...> : std::true_type {};
 
-template <typename T, typename NotT, typename... Ts>
-struct is_one_of<T, NotT, Ts...> : is_one_of<T, Ts...> {};
+template <typename Elem, typename NotElem, typename... Pack>
+struct is_pack_element<Elem, NotElem, Pack...> : is_pack_element<Elem, Pack...> {};
 
 
 template <bool pred, bool... preds>

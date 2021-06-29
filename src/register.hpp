@@ -19,8 +19,9 @@ class Register
     UInt state_;
 
     template <typename... Fields>
-    using is_member_field =
-        traits::conjunction<traits::is_one_of<Fields, MemberFields...>{}...>;
+    using is_member_field = traits::conjunction<
+        traits::is_pack_element<Fields, MemberFields...>{}...>;
+
 
   public:
     class Snapshot
@@ -38,7 +39,7 @@ class Register
             friend class Register;
 
           public:
-            constexpr FieldExtractor(UInt s) noexcept: state_{s} {}
+            constexpr FieldExtractor(UInt s) noexcept : state_{s} {}
 
             template <typename Field,
                       typename = std::enable_if_t<is_member_field<Field>{}>>
