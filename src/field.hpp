@@ -12,7 +12,7 @@ namespace regilite {
 
 namespace detail {
 
-template <typename UInt, UInt mask>
+template <typename UInt, UInt bit_mask>
 struct BitField {
     static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
                   "Register<> type requires an unsigned integral as its "
@@ -20,13 +20,15 @@ struct BitField {
 
     UInt value;
 
+    static constexpr auto mask() -> UInt {return bit_mask;}
+
     template <UInt rhs_mask>
     friend constexpr auto operator|(BitField lhs,
                                     BitField<UInt, rhs_mask> rhs) noexcept
-        -> std::enable_if_t<!masks_overlap<UInt, mask, rhs_mask>{},
-                            BitField<UInt, mask | rhs_mask>>
+        -> std::enable_if_t<!masks_overlap<UInt, bit_mask, rhs_mask>{},
+                            BitField<UInt, bit_mask | rhs_mask>>
     {
-        return BitField<UInt, mask | rhs_mask>{
+        return BitField<UInt, bit_mask | rhs_mask>{
             lhs.value | rhs.value,
         };
     }
