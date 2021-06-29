@@ -6,6 +6,7 @@
 namespace regilite {
 namespace detail {
 
+// Pre: value > 0
 template <typename Int>
 constexpr auto lsb(Int value) noexcept
     -> std::enable_if_t<std::is_integral<Int>::value, int>
