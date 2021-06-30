@@ -44,21 +44,20 @@ enum class F3Val : std::uint32_t
     D = 8
 };
 
-using F0 =
-    regilite::Field<std::uint32_t, regilite::Mask<0>::value, std::uint16_t>;
+using F0 = regilite::Field<std::uint32_t, regilite::Mask<0>{}, std::uint16_t>;
 using F1 =
-    regilite::Field<std::uint32_t, regilite::Mask<2, 1>::value, std::uint16_t>;
+    regilite::Field<std::uint32_t, regilite::Mask<2, 1>{}, std::uint16_t>;
 using F2 =
-    regilite::Field<std::uint32_t, regilite::Mask<6, 4>::value, std::uint16_t>;
-using F3 = regilite::Field<std::uint32_t, regilite::Mask<11, 8>::value, F3Val>;
+    regilite::Field<std::uint32_t, regilite::Mask<6, 4>{}, std::uint16_t>;
+using F3 = regilite::Field<std::uint32_t, regilite::Mask<11, 8>{}, F3Val>;
 
 
 using TestReg = regilite::Register<std::uint32_t, F0, F1, F2, F3>;
 
-static_assert(std::is_standard_layout<TestReg>::value,
+static_assert(std::is_standard_layout<TestReg>{},
               "Register<> type must be standard layout.");
 
-static_assert(std::is_standard_layout<TestReg::Snapshot>::value,
+static_assert(std::is_standard_layout<TestReg::Snapshot>{},
               "Unnameable type Register<>::Snapshot must be standard layout.");
 
 #endif // TEST_REGISTER_HPP

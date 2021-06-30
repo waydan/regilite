@@ -11,7 +11,7 @@ namespace detail {
 // Pre: value > 0
 template <typename Int>
 constexpr auto lsb(Int value) noexcept
-    -> std::enable_if_t<std::is_integral<Int>::value, int>
+    -> std::enable_if_t<std::is_integral<Int>{}, int>
 {
     auto x = static_cast<std::make_unsigned_t<Int>>(value);
     int lsb = sizeof(x) * 8;
@@ -29,7 +29,7 @@ static_assert(lsb(0b00001010) == 1, "Bit gap has not effect");
 // Pre: value > 0
 template <typename Int>
 constexpr auto msb(Int value) noexcept
-    -> std::enable_if_t<std::is_integral<Int>::value, int>
+    -> std::enable_if_t<std::is_integral<Int>{}, int>
 {
     auto x = static_cast<std::make_unsigned_t<Int>>(value);
     int msb = -1;
