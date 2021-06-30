@@ -8,5 +8,11 @@ RUN apt-get update && apt-get -y install \
     cmake \
     ninja-build \
     clang-format \
-    git \
-    cpputest
+    git
+
+#Install test framework
+RUN git clone https://github.com/cpputest/cpputest.git && \
+    mkdir -p cpputest/build && cd cpputest/build && \
+    cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DC++11=ON -DTESTS=OFF -DVERBOSE_CONFIG=OFF && \
+    cmake --build . && cmake --install . && \
+    cd ../.. && rm -r cpputest
