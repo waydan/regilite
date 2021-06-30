@@ -5,14 +5,9 @@
 	"build": {
 		"dockerfile": "Dockerfile",
 	},
-	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash"
-	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"xaver.clang-format",
-		"twxs.cmake",
-		"lextudio.restructuredtext"
+		"twxs.cmake"
 	],
 }

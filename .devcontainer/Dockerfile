@@ -1,8 +1,8 @@
 FROM ubuntu:latest
 
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install \
-    # Pakages
+ARG DEBIAN_FRONTEND noninteractive
+RUN apt-get update && apt-get -y install \
+    # Toolchain pakages
     g++-10 \
     build-essential \
     cmake \
