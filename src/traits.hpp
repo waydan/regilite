@@ -22,7 +22,8 @@ template <typename Elem, typename... Pack>
 struct is_pack_element<Elem, Elem, Pack...> : std::true_type {};
 
 template <typename Elem, typename NotElem, typename... Pack>
-struct is_pack_element<Elem, NotElem, Pack...> : is_pack_element<Elem, Pack...> {};
+struct is_pack_element<Elem, NotElem, Pack...>
+    : is_pack_element<Elem, Pack...> {};
 
 
 template <bool pred, bool... preds>

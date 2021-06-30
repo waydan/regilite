@@ -18,6 +18,9 @@ class Register
 
     UInt state_;
 
+    static constexpr auto reserved_ =
+        ~static_cast<UInt>(fold_masks(MemberFields::mask()...));
+
     template <typename... Fields>
     using is_member_field = traits::conjunction<
         traits::is_pack_element<Fields, MemberFields...>{}...>;
