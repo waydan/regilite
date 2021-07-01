@@ -34,7 +34,7 @@ TEST(CompileTimeChecks, CannotWriteNonmemberField)
 
 using Fa = regilite::Field<std::uint32_t, 0x0F, std::uint32_t>;
 using Fb = regilite::Field<std::uint32_t, 0xF8, std::uint32_t>;
-using RegAB = regilite::Register<std::uint32_t, Fa, Fb>;
+using RegAB = regilite::BasicRegister<std::uint32_t, Fa, Fb>;
 
 template <typename R, typename F1, typename F2, typename = void>
 struct WriteOverlappingFields {};

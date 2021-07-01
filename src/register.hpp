@@ -9,17 +9,15 @@
 
 namespace regilite {
 
-template <typename UInt, typename... MemberFields>
-class Register
+template <typename Impl, typename... MemberFields>
+class Register : private Impl
 {
-    static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
-                  "Register<> type requires an unsigned integral as its "
-                  "underlying representation.");
-
-    UInt state_;
+    using Impl::volatile_read;
+    using Impl::volatile_write;
+    using typename Impl::storage_type;
 
     static constexpr auto reserved_ =
-        ~static_cast<UInt>(fold_masks(MemberFields::mask()...));
+        ~static_cast<storage_type>(fold_masks(MemberFields::mask()...));
 
     template <typename... Fields>
     using is_member_field = traits::conjunction<
@@ -29,11 +27,11 @@ class Register
   public:
     class Snapshot
     {
-        UInt state_;
+        storage_type state_;
 
         class FieldExtractor
         {
-            UInt state_;
+            storage_type state_;
 
             // Prevent user code from creating named FieldExtractor object
             FieldExtractor(FieldExtractor&&) = default;
@@ -42,7 +40,7 @@ class Register
             friend class Register;
 
           public:
-            constexpr FieldExtractor(UInt s) noexcept : state_{s} {}
+            constexpr FieldExtractor(storage_type s) noexcept : state_{s} {}
 
             template <typename Field,
                       typename = std::enable_if_t<is_member_field<Field>{}>>
@@ -53,17 +51,18 @@ class Register
             }
         };
 
-        template <UInt mask>
-        auto match(detail::BitField<UInt, mask> f) const noexcept -> bool
+        template <storage_type mask>
+        auto match(detail::BitField<storage_type, mask> f) const noexcept
+            -> bool
         {
             return f.value == (state_ & mask);
         }
 
 
       public:
-        explicit constexpr Snapshot(UInt s) : state_{s} {};
+        explicit constexpr Snapshot(storage_type s) : state_{s} {};
 
-        constexpr auto raw() const noexcept -> UInt { return state_; }
+        constexpr auto raw() const noexcept -> storage_type { return state_; }
 
         template <typename Field, typename... Fields>
         auto modify(Field f, Fields... fs) noexcept -> std::enable_if_t<
@@ -119,10 +118,7 @@ class Register
     };
 
 
-    auto write(Snapshot s) noexcept -> void
-    {
-        detail::make_volatile_ref(state_) = s.raw();
-    }
+    auto write(Snapshot s) noexcept -> void { volatile_write(s.raw()); }
 
 
     template <typename Field, typename... Fields>
@@ -134,10 +130,7 @@ class Register
     }
 
 
-    auto read() const noexcept -> Snapshot
-    {
-        return Snapshot{detail::make_volatile_ref(state_)};
-    }
+    auto read() const noexcept -> Snapshot { return Snapshot{volatile_read()}; }
 
 
     constexpr auto extract_field() const noexcept

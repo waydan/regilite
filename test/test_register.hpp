@@ -2,6 +2,7 @@
 #define TEST_REGISTER_HPP
 
 #include "CppUTest/TestHarness.h"
+#include "basic_register.hpp"
 #include "field.hpp"
 #include "register.hpp"
 #include "traits.hpp"
@@ -12,15 +13,16 @@ SimpleString StringFrom(regilite::Field<UInt, mask, ValType> f)
     return SimpleString{"Field value: "} + StringFrom(f.value());
 }
 
-template <typename UInt, typename... Fields>
-auto register_view(regilite::Register<UInt, Fields...>& reg) -> UInt&
+template <typename Impl, typename... Fields>
+auto register_view(regilite::Register<Impl, Fields...>& reg) ->
+    typename Impl::storage_type&
 {
-    return *reinterpret_cast<UInt*>(&reg);
+    return *reinterpret_cast<typename Impl::storage_type*>(&reg);
 }
 
-template <typename UInt, typename... Fields>
-auto REGISTER_EQUALS(regilite::traits::identity_t<UInt> value,
-                     regilite::Register<UInt, Fields...>& reg) -> void
+template <typename Impl, typename... Fields>
+auto REGISTER_EQUALS(typename Impl::storage_type value,
+                     regilite::Register<Impl, Fields...>& reg) -> void
 {
     LONGS_EQUAL(value, register_view(reg));
 }
@@ -52,10 +54,10 @@ using F2 =
 using F3 = regilite::Field<std::uint32_t, regilite::Mask<11, 8>{}, F3Val>;
 
 
-using TestReg = regilite::Register<std::uint32_t, F0, F1, F2, F3>;
+using TestReg = regilite::BasicRegister<std::uint32_t, F0, F1, F2, F3>;
 
 static_assert(std::is_standard_layout<TestReg>{},
-              "Register<> type must be standard layout.");
+              "BasicRegister<> type must be standard layout.");
 
 static_assert(std::is_standard_layout<TestReg::Snapshot>{},
               "Unnameable type Register<>::Snapshot must be standard layout.");
