@@ -10,7 +10,7 @@
 namespace regilite {
 
 template <typename Impl, typename... MemberFields>
-class Register : private Impl
+class RegisterProxy : private Impl
 {
     using Impl::volatile_read;
     using Impl::volatile_write;
@@ -35,9 +35,9 @@ class Register : private Impl
 
             // Prevent user code from creating named FieldExtractor object
             FieldExtractor(FieldExtractor&&) = default;
-            // Register and Snapshot are friends which enables passing
+            // RegisterProxy and Snapshot are friends which enables passing
             // FieldExtractor&&
-            friend class Register;
+            friend class RegisterProxy;
 
           public:
             constexpr FieldExtractor(storage_type s) noexcept : state_{s} {}

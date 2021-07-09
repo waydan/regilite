@@ -13,7 +13,7 @@ SimpleString StringFrom(regilite::Field<UInt, mask, ValType> f)
 }
 
 template <typename Impl, typename... Fields>
-auto register_view(regilite::Register<Impl, Fields...>& reg) ->
+auto register_view(regilite::RegisterProxy<Impl, Fields...>& reg) ->
     typename Impl::storage_type&
 {
     return *reinterpret_cast<typename Impl::storage_type*>(&reg);
@@ -21,7 +21,7 @@ auto register_view(regilite::Register<Impl, Fields...>& reg) ->
 
 template <typename Impl, typename... Fields>
 auto REGISTER_EQUALS(typename Impl::storage_type value,
-                     regilite::Register<Impl, Fields...>& reg) -> void
+                     regilite::RegisterProxy<Impl, Fields...>& reg) -> void
 {
     LONGS_EQUAL(value, register_view(reg));
 }
@@ -58,7 +58,8 @@ using TestReg = regilite::BasicRegister<std::uint32_t, F0, F1, F2, F3>;
 static_assert(std::is_standard_layout<TestReg>{},
               "BasicRegister<> type must be standard layout.");
 
-static_assert(std::is_standard_layout<TestReg::Snapshot>{},
-              "Unnameable type Register<>::Snapshot must be standard layout.");
+static_assert(
+    std::is_standard_layout<TestReg::Snapshot>{},
+    "Unnameable type RegisterProxy<>::Snapshot must be standard layout.");
 
 #endif // TEST_REGISTER_HPP

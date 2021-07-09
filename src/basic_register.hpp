@@ -34,7 +34,7 @@ class BasicRegisterImpl
 
 template <typename UInt, typename... MemberFields>
 using BasicRegister =
-    Register<detail::BasicRegisterImpl<UInt>, MemberFields...>;
+    RegisterProxy<detail::BasicRegisterImpl<UInt>, MemberFields...>;
 
 } // namespace regilite
 
