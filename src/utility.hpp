@@ -1,8 +1,8 @@
 #ifndef REGILITE_UTILITY_HPP
 #define REGILITE_UTILITY_HPP
 
-#include <type_traits>
 #include <cassert>
+#include <type_traits>
 
 #include "traits.hpp"
 
@@ -44,19 +44,6 @@ static_assert(msb(0x00000001) == 0, "Only lowest bit set");
 static_assert(msb(0xFFFFFFFF) == 31, "All bits set");
 static_assert(msb(0xFFFFFFFE) == 31, "Only lowest bit cleared");
 static_assert(msb(0b00001010) == 3, "Bit gap has not effect");
-
-
-template <typename T>
-constexpr auto make_volatile_ref(T& x) noexcept -> volatile T&
-{
-    return *const_cast<volatile T*>(&x);
-}
-
-template <typename T>
-constexpr auto make_volatile_ref(const T& x) noexcept -> const volatile T&
-{
-    return *const_cast<const volatile T*>(&x);
-}
 
 
 template <typename UInt, bool test, UInt accum, UInt... masks>
