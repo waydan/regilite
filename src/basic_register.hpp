@@ -5,6 +5,7 @@
 
 namespace regilite {
 
+namespace detail {
 template <typename UInt>
 class BasicRegisterImpl
 {
@@ -29,9 +30,11 @@ class BasicRegisterImpl
         return *const_cast<const volatile storage_type*>(&state_);
     }
 };
+} // namespace detail
 
 template <typename UInt, typename... MemberFields>
-using BasicRegister = Register<BasicRegisterImpl<UInt>, MemberFields...>;
+using BasicRegister =
+    Register<detail::BasicRegisterImpl<UInt>, MemberFields...>;
 
 } // namespace regilite
 
