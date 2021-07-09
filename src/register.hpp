@@ -12,8 +12,6 @@ namespace regilite {
 template <typename Impl, typename... MemberFields>
 class RegisterProxy : private Impl
 {
-    using Impl::volatile_read;
-    using Impl::volatile_write;
     using typename Impl::storage_type;
 
     static constexpr auto reserved_ =
@@ -118,7 +116,7 @@ class RegisterProxy : private Impl
     };
 
 
-    auto write(Snapshot s) noexcept -> void { volatile_write(s.raw()); }
+    auto write(Snapshot s) noexcept -> void { Impl::volatile_write(s.raw()); }
 
 
     template <typename Field, typename... Fields>
@@ -130,7 +128,10 @@ class RegisterProxy : private Impl
     }
 
 
-    auto read() const noexcept -> Snapshot { return Snapshot{volatile_read()}; }
+    auto read() const noexcept -> Snapshot
+    {
+        return Snapshot{Impl::volatile_read()};
+    }
 
 
     constexpr auto extract_field() const noexcept
