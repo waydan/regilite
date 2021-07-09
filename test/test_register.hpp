@@ -4,7 +4,6 @@
 #include "CppUTest/TestHarness.h"
 #include "basic_register.hpp"
 #include "field.hpp"
-#include "register.hpp"
 #include "traits.hpp"
 
 template <typename UInt, UInt mask, typename ValType>

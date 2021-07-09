@@ -1,5 +1,4 @@
 #include "CppUTest/TestHarness.h"
-#include "register.hpp"
 #include "test_register.hpp"
 
 TestReg test_register;

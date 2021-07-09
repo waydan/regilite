@@ -2,7 +2,6 @@
 #include <type_traits>
 
 #include "CppUTest/TestHarness.h"
-#include "register.hpp"
 #include "test_register.hpp"
 
 template <typename>
