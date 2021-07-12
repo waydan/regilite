@@ -9,7 +9,7 @@ using sink = void;
 
 TEST_GROUP(CompileTimeChecks){};
 
-using NonMemberF = regilite::Field<std::uint32_t, 0x1, std::uint32_t>;
+using NonMemberF = regilite::Field<std::uint32_t, 0x1>;
 
 
 template <typename R, typename F, typename = void>
@@ -31,8 +31,8 @@ TEST(CompileTimeChecks, CannotWriteNonmemberField)
 }
 
 
-using Fa = regilite::Field<std::uint32_t, 0x0F, std::uint32_t>;
-using Fb = regilite::Field<std::uint32_t, 0xF8, std::uint32_t>;
+using Fa = regilite::Field<std::uint32_t, 0x0F>;
+using Fb = regilite::Field<std::uint32_t, 0xF8>;
 using RegAB = regilite::BasicRegister<std::uint32_t, Fa, Fb>;
 
 template <typename R, typename F1, typename F2, typename = void>

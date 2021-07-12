@@ -68,7 +68,7 @@ class RegisterProxy : private Impl
                 and !detail::fields_overlap<Field, Fields...>{},
             Snapshot&>
         {
-            const auto fields = detail::fold_fields(f, fs...);
+            const auto fields = detail::fold_fields<storage_type>(f, fs...);
             state_ = detail::insert_bits(state_, fields);
             return *this;
         }
@@ -95,7 +95,7 @@ class RegisterProxy : private Impl
                     and !detail::fields_overlap<Field, Fields...>{},
                 bool>
         {
-            const auto fields = detail::fold_fields(f, fs...);
+            const auto fields = detail::fold_fields<storage_type>(f, fs...);
             return match(fields);
         }
 

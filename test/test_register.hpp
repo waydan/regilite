@@ -6,10 +6,11 @@
 #include "field.hpp"
 #include "traits.hpp"
 
-template <typename UInt, UInt mask, typename ValType>
-SimpleString StringFrom(regilite::Field<UInt, mask, ValType> f)
+template <typename ValType, regilite::mask_t mask>
+SimpleString StringFrom(regilite::Field<ValType, mask> f)
 {
-    return SimpleString{"Field value: "} + StringFrom(f.value());
+    return SimpleString{"Field value: "}
+           + StringFrom(regilite::traits::as_uint(f.value()));
 }
 
 template <typename Impl, typename... Fields>
@@ -45,12 +46,10 @@ enum class F3Val : std::uint32_t
     D = 8
 };
 
-using F0 = regilite::Field<std::uint32_t, regilite::Mask<0>{}, std::uint16_t>;
-using F1 =
-    regilite::Field<std::uint32_t, regilite::Mask<2, 1>{}, std::uint16_t>;
-using F2 =
-    regilite::Field<std::uint32_t, regilite::Mask<6, 4>{}, std::uint16_t>;
-using F3 = regilite::Field<std::uint32_t, regilite::Mask<11, 8>{}, F3Val>;
+using F0 = regilite::Field<std::uint16_t, regilite::Mask<0>{}>;
+using F1 = regilite::Field<std::uint16_t, regilite::Mask<2, 1>{}>;
+using F2 = regilite::Field<std::uint16_t, regilite::Mask<6, 4>{}>;
+using F3 = regilite::Field<F3Val, regilite::Mask<11, 8>{}>;
 
 
 using TestReg = regilite::BasicRegister<std::uint32_t, F0, F1, F2, F3>;

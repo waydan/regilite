@@ -1,6 +1,8 @@
 #ifndef REGILITE_TRAITS_HPP
 #define REGILITE_TRAITS_HPP
 
+#include <type_traits>
+
 namespace regilite {
 namespace traits {
 template <typename T>
@@ -10,6 +12,13 @@ struct identity {
 
 template <typename T>
 using identity_t = typename identity<T>::type;
+
+
+template <typename T>
+constexpr auto as_uint(const T& x) -> std::make_unsigned_t<T>
+{
+    return static_cast<std::make_unsigned_t<T>>(x);
+}
 
 
 template <typename Elem, typename... Pack>
