@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "bit_mask.hpp"
 #include "traits.hpp"
 #include "utility.hpp"
 
@@ -12,7 +13,7 @@ namespace regilite {
 
 namespace detail {
 
-template <typename UInt, UInt bit_mask>
+template <typename UInt, mask_t bit_mask>
 struct BitField {
     static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
                   "Register<> type requires an unsigned integral as its "
@@ -20,12 +21,12 @@ struct BitField {
 
     UInt value;
 
-    static constexpr auto mask() -> UInt { return bit_mask; }
+    static constexpr auto mask() -> mask_t { return bit_mask; }
 
-    template <UInt rhs_mask>
+    template <mask_t rhs_mask>
     friend constexpr auto operator|(BitField lhs,
                                     BitField<UInt, rhs_mask> rhs) noexcept
-        -> std::enable_if_t<!masks_overlap<UInt, bit_mask, rhs_mask>{},
+        -> std::enable_if_t<!masks_overlap<bit_mask, rhs_mask>{},
                             BitField<UInt, bit_mask | rhs_mask>>
     {
         return BitField<UInt, bit_mask | rhs_mask>{
@@ -35,7 +36,7 @@ struct BitField {
 };
 
 
-template <typename UInt, UInt mask>
+template <typename UInt, mask_t mask>
 constexpr auto insert_bits(UInt value, BitField<UInt, mask> field) noexcept
     -> UInt
 {
@@ -45,8 +46,7 @@ constexpr auto insert_bits(UInt value, BitField<UInt, mask> field) noexcept
 } // namespace detail
 
 template <int msb, int lsb = msb>
-struct Mask
-    : std::integral_constant<unsigned long, (~1ul << msb) ^ (~0ul << lsb)> {
+struct Mask : std::integral_constant<mask_t, (~1ul << msb) ^ (~0ul << lsb)> {
     static_assert(msb >= lsb, "Most significant bit may not be less than the "
                               "least significant");
     static_assert(lsb >= 0 and msb >= 0, "Bit positions may not be negative");
@@ -111,8 +111,8 @@ class Field
 namespace detail {
 
 template <typename F, typename... Fs>
-using fields_overlap =
-    masks_overlap<decltype(F::mask()), F::mask(), Fs::mask()...>;
+using fields_overlap = masks_overlap<F::mask(), Fs::mask()...>;
+
 
 template <typename UInt, UInt mask, typename ValType>
 constexpr auto fold_fields(Field<UInt, mask, ValType> f) noexcept

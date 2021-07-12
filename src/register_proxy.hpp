@@ -49,7 +49,7 @@ class RegisterProxy : private Impl
             }
         };
 
-        template <storage_type mask>
+        template <mask_t mask>
         auto match(detail::BitField<storage_type, mask> f) const noexcept
             -> bool
         {
