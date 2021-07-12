@@ -5,6 +5,7 @@ namespace regilite {
 
 using mask_t = std::uint64_t;
 
+
 namespace detail {
 
 template <bool test, mask_t accum, mask_t... masks>
@@ -25,6 +26,7 @@ template <mask_t mask, mask_t... masks>
 using masks_overlap = masks_overlap_impl<false, mask, masks...>;
 
 
+// Test masks_overlap
 static_assert(!masks_overlap<0x1234>{}, "Single mask does not overlap");
 static_assert(!masks_overlap<0x0F, 0xF0>{}, "These masks do not overlap");
 static_assert(masks_overlap<0x0F, 0xF8>{}, "These masks do overlap");
@@ -44,6 +46,8 @@ constexpr auto fold_masks(Int m, Ints... ms) noexcept -> decltype(fold_masks(m))
     return fold_masks(m) | fold_masks(ms...);
 }
 
+
+// Test fold_masks
 static_assert(fold_masks(0x0u) == 0x0u,
               "Single fold_masks argument is identity");
 static_assert(fold_masks(0x0u, 0x1) == 0x1, "Can fold two fields");
