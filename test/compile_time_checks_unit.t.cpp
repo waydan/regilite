@@ -2,7 +2,7 @@
 #include <type_traits>
 
 #include "CppUTest/TestHarness.h"
-#include "test_register.hpp"
+#include "test_registers.hpp"
 
 template <typename>
 using sink = void;
