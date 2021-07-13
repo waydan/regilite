@@ -30,15 +30,11 @@ auto REGISTER_EQUALS(typename Impl::storage_type value,
 
 // TestReg layout
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-// |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-//  31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16
-// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 // |  |  |  |  |     F3    |  |   F2   |  |  F1 |F0|
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 //  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 
-enum class F3Val : std::uint32_t
+enum class F3Val
 {
     A = 1,
     B = 2,
@@ -52,7 +48,7 @@ using F2 = regilite::Field<std::uint16_t, regilite::Mask<6, 4>{}>;
 using F3 = regilite::Field<F3Val, regilite::Mask<11, 8>{}>;
 
 
-using TestReg = regilite::BasicRegister<std::uint32_t, F0, F1, F2, F3>;
+using TestReg = regilite::BasicRegister<std::uint16_t, F0, F1, F2, F3>;
 
 static_assert(std::is_standard_layout<TestReg>{},
               "BasicRegister<> type must be standard layout.");

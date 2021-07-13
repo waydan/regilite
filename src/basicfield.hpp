@@ -28,16 +28,15 @@ struct BasicField {
                             BasicField<UInt, mask() | rhs_mask>>
     {
         return BasicField<UInt, mask() | rhs_mask>{
-            lhs.value() | rhs.value(),
-        };
+            static_cast<UInt>(lhs.value() | rhs.value())};
     }
 };
 
 template <typename UInt, typename Field>
 constexpr auto to_basicfield(Field f) noexcept
 {
-    return detail::BasicField<UInt, f.mask()>{static_cast<UInt>(f.value())
-                                              << f.offset()};
+    return detail::BasicField<UInt, f.mask()>{
+        static_cast<UInt>(static_cast<UInt>(f.value()) << f.offset())};
 }
 
 template <typename F, typename... Fs>
