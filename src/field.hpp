@@ -26,10 +26,10 @@ struct BitField {
     template <mask_t rhs_mask>
     friend constexpr auto operator|(BitField lhs,
                                     BitField<UInt, rhs_mask> rhs) noexcept
-        -> std::enable_if_t<!masks_overlap<bit_mask, rhs_mask>{},
-                            BitField<UInt, bit_mask | rhs_mask>>
+        -> std::enable_if_t<!masks_overlap<mask(), rhs_mask>{},
+                            BitField<UInt, mask() | rhs_mask>>
     {
-        return BitField<UInt, bit_mask | rhs_mask>{
+        return BitField<UInt, mask() | rhs_mask>{
             lhs.value | rhs.value,
         };
     }
@@ -67,16 +67,16 @@ class Field
     value_type value_;
 
   public:
-    static constexpr auto mask() noexcept -> mask_t { return bit_mask; }
-
     constexpr explicit Field(value_type value) noexcept : value_(value)
     {
         assert(0u
                    == (~static_cast<decltype(traits::to_uint(value))>(
-                           mask() >> detail::lsb(mask()))
+                           mask() >> offset())
                        & traits::to_uint(value))
                and "Value overflows the field boundary");
     }
+    static constexpr auto mask() noexcept -> mask_t { return bit_mask; }
+    static constexpr auto offset() noexcept { return detail::lsb(mask()); }
 
     constexpr auto value() const noexcept -> value_type { return value_; };
 
@@ -104,7 +104,7 @@ template <typename UInt, typename ValType, mask_t mask>
 constexpr auto to_bitfield(Field<ValType, mask> f) noexcept
 {
     return detail::BitField<UInt, mask>{static_cast<UInt>(f.value())
-                                        << detail::lsb(mask)};
+                                        << f.offset()};
 }
 
 template <typename F, typename... Fs>
