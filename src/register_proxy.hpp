@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "field.hpp"
+#include "basicfield.hpp"
 #include "utility.hpp"
 
 namespace regilite {
@@ -50,10 +50,10 @@ class RegisterProxy : private Impl
         };
 
         template <mask_t mask>
-        auto match(detail::BitField<storage_type, mask> f) const noexcept
+        auto match(detail::BasicField<storage_type, mask> f) const noexcept
             -> bool
         {
-            return f.value == (state_ & mask);
+            return f.value() == (state_ & mask);
         }
 
 

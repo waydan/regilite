@@ -6,6 +6,14 @@ namespace regilite {
 using mask_t = std::uint64_t;
 
 
+template <int msb, int lsb = msb>
+struct Mask : std::integral_constant<mask_t, (~1ul << msb) ^ (~0ul << lsb)> {
+    static_assert(msb >= lsb, "Most significant bit may not be less than the "
+                              "least significant");
+    static_assert(lsb >= 0 and msb >= 0, "Bit positions may not be negative");
+};
+
+
 namespace detail {
 
 template <bool test, mask_t accum, mask_t... masks>
