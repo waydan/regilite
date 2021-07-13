@@ -4,6 +4,7 @@
 #include "CppUTest/TestHarness.h"
 #include "basic_register.hpp"
 #include "field.hpp"
+#include "partition_register.hpp"
 #include "traits.hpp"
 
 template <typename ValType, regilite::mask_t mask>
@@ -56,5 +57,15 @@ static_assert(std::is_standard_layout<TestReg>{},
 static_assert(
     std::is_standard_layout<TestReg::Snapshot>{},
     "Unnameable type RegisterProxy<>::Snapshot must be standard layout.");
+
+
+// PartableReg layout
+// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+// |  |  |  |  |     F3    |  |   F2   |  |  F1 |F0|
+// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+//  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+
+using PartableReg =
+    regilite::PartitionRegister<std::uint16_t, std::uint8_t, F0, F1, F2, F3>;
 
 #endif // TEST_REGISTER_HPP
