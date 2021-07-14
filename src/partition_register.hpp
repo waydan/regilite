@@ -2,6 +2,7 @@
 #define REGILITE_PARTITION_REGISTER_HPP
 
 #include "basicfield.hpp"
+#include "partition_type.hpp"
 #include "register_proxy.hpp"
 #include "traits.hpp"
 #include "utility.hpp"
@@ -26,21 +27,6 @@ class Write
     constexpr auto address() -> std::uintptr_t { return addr_; }
 };
 
-template <int max_partition>
-struct Block;
-
-template <>
-struct Block<1> {
-    using type = std::uint8_t;
-};
-template <>
-struct Block<2> {
-    using type = std::uint16_t;
-};
-
-template <int msb, int lsb = 0>
-using Block_t = typename Block<(1 << (detail::msb((msb ^ lsb) / 8) + 1))>::type;
-
 
 namespace detail {
 
@@ -62,16 +48,19 @@ class PartitionRegisterImpl
     template <typename Field>
     auto write_field(Field f)
     {
-        using WriteBlock =
-            Block_t<detail::msb(f.mask()), detail::lsb(f.mask())>;
-        constexpr int offset = detail::lsb(f.mask()) / (sizeof(WriteBlock) * 8);
-        constexpr int offset_bits = offset * sizeof(WriteBlock) * 8;
+        using WriteBlock = detail::Partition<f.mask()>;
+        using WriteBlock_t = typename WriteBlock::type;
+        static_assert(sizeof(WriteBlock_t) <= sizeof(storage_type),
+                      "Partition may not be larger than the register itself.");
+
         auto* state_segment_ptr =
-            reinterpret_cast<WriteBlock*>(&state_) + offset;
-        const WriteBlock modified_state =
+            reinterpret_cast<WriteBlock_t*>(&state_) + WriteBlock::offset();
+        const WriteBlock_t modified_state =
             (volatile_read(state_segment_ptr)
-             & ~static_cast<WriteBlock>(f.mask() >> offset_bits))
-            | static_cast<WriteBlock>(f.value() >> offset_bits);
+             & ~static_cast<WriteBlock_t>(
+                 f.mask() >> (WriteBlock::offset() * WriteBlock::size())))
+            | static_cast<WriteBlock_t>(f.value() >> WriteBlock::offset()
+                                                         * WriteBlock::size());
         return volatile_write(state_segment_ptr, modified_state);
     }
 
