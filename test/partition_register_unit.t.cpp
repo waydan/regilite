@@ -27,4 +27,5 @@ TEST(PartitionRegisterAccess, WriteSpans16Bits)
     static_assert(
         std::is_same<decltype(write_type), regilite::Write<std::uint16_t>>{},
         "Access the smallest aligned span which covers all fields.");
+    REGISTER_EQUALS(0x101, test_register);
 }
