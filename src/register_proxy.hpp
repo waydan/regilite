@@ -120,11 +120,14 @@ class RegisterProxy : private Impl
 
 
     template <typename Field, typename... Fields>
-    auto write(Field f, Fields... fs) noexcept
-        -> std::enable_if_t<is_member_field<Field, Fields...>{}
-                            and !detail::fields_overlap<Field, Fields...>{}>
+    auto write(Field f, Fields... fs) noexcept -> std::enable_if_t<
+        is_member_field<Field, Fields...>{}
+            and !detail::fields_overlap<Field, Fields...>{},
+        decltype(Impl::write_field(detail::fold_fields<storage_type>(
+            std::declval<Field>(), std::declval<Fields>()...)))>
     {
-        write(read().modify(f, fs...));
+        const auto fields = detail::fold_fields<storage_type>(f, fs...);
+        return Impl::write_field(fields);
     }
 
 

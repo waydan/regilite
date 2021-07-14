@@ -9,7 +9,7 @@ namespace detail {
 template <typename UInt>
 class BasicRegisterImpl
 {
-    static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
+    static_assert(traits::is_storage_type<UInt>{},
                   "BasicRegister<> type requires an unsigned integral as its "
                   "underlying representation.");
 
@@ -20,6 +20,14 @@ class BasicRegisterImpl
     storage_type state_;
 
   protected:
+    template <typename Field>
+    auto write_field(Field f)
+    {
+        const storage_type modified_state =
+            detail::insert_bits(volatile_read(), f);
+        volatile_write(modified_state);
+    }
+
     auto volatile_write(storage_type s) noexcept -> void
     {
         *const_cast<volatile storage_type*>(&state_) = s;
