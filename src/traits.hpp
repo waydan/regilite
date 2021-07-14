@@ -14,6 +14,23 @@ template <typename T>
 using identity_t = typename identity<T>::type;
 
 
+template <typename T, typename = void>
+struct is_storage_type : std::integral_constant<bool, false> {};
+template <typename T>
+struct is_storage_type<
+    T, std::enable_if_t<std::is_unsigned<T>{} and not std::is_same<T, bool>{}>>
+    : std::integral_constant<bool, true> {};
+
+static_assert(not is_storage_type<float>{},
+              "Floating-point types may not be used for register storage.");
+static_assert(is_storage_type<unsigned char>{},
+              "Unsigned integral types may be used for register storage.");
+static_assert(not is_storage_type<bool>{},
+              "Boolean types may not be used for register storage.");
+static_assert(not is_storage_type<signed int>{},
+              "Storage types must be unsigned.");
+
+
 template <typename T>
 constexpr auto as_uint(const T& x) -> std::make_unsigned_t<T>
 {
