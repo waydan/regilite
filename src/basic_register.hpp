@@ -1,7 +1,9 @@
 #ifndef REGILITE_BASIC_REGISTER_HPP
 #define REGILITE_BASIC_REGISTER_HPP
 
+#include "basicfield.hpp"
 #include "register_proxy.hpp"
+#include "traits.hpp"
 
 namespace regilite {
 
