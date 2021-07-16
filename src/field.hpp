@@ -11,7 +11,7 @@
 namespace regilite {
 
 
-template <typename ValType, mask_t bit_mask>
+template <typename ValType, mask_t bit_mask, typename = void /*shadow type*/>
 class Field
 {
     static_assert(

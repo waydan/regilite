@@ -9,7 +9,8 @@ using sink = void;
 
 TEST_GROUP(CompileTimeChecks){};
 
-using NonMemberF = regilite::Field<std::uint32_t, 0x1>;
+// This field is the same as F0 except for `NonMember` shadow type
+using NonMemberF = regilite::Field<std::uint16_t, 0x1, struct NonMember>;
 
 
 template <typename R, typename F, typename = void>
@@ -30,7 +31,7 @@ TEST(CompileTimeChecks, CannotWriteNonmemberField)
     WriteNonMemberField<TestReg, NonMemberF>{};
 }
 
-
+// Types overlap at bit position 3
 using Fa = regilite::Field<std::uint32_t, 0x0F>;
 using Fb = regilite::Field<std::uint32_t, 0xF8>;
 using RegAB = regilite::BasicRegister<std::uint32_t, Fa, Fb>;
