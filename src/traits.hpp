@@ -5,14 +5,6 @@
 
 namespace regilite {
 namespace traits {
-template <typename T>
-struct identity {
-    using type = T;
-};
-
-template <typename T>
-using identity_t = typename identity<T>::type;
-
 
 template <typename T, typename = void>
 struct is_storage_type : std::integral_constant<bool, false> {};
