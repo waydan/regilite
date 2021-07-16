@@ -5,13 +5,15 @@
 #include <type_traits>
 
 #include "bitmask.hpp"
+#include "field_access.hpp"
 #include "traits.hpp"
 #include "utility.hpp"
 
 namespace regilite {
 
 
-template <typename ValType, mask_t bit_mask, typename = void /*shadow type*/>
+template <typename ValType, mask_t bit_mask, typename FieldAccess = RW,
+          typename = void /*shadow type*/>
 class Field
 {
     static_assert(
@@ -20,6 +22,7 @@ class Field
 
   public:
     using value_type = ValType;
+    using access_type = FieldAccess;
 
   private:
     value_type value_;
