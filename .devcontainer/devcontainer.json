@@ -6,6 +6,7 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"xaver.clang-format",
-		"twxs.cmake"
+		"twxs.cmake",
+		"lextudio.restructuredtext"
 	],
 }
