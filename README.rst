@@ -1,53 +1,43 @@
 Introduction
 ------------
 
-**Regilite** provides concise, robust abstractions for interacting with memory-mapped hardware registers. It's goals are:
+**Regilite** provides concise, robust abstractions for interacting with memory-mapped hardware registers. It's goals are to:
 
-- To reduce programming errors by restricting register interaction to preset fields; automating bit shifting and masking; and avoiding unintentional modification of special fields like "write-1-to-clear"
-- Affecting volatile access without obstructing the user
-- Generate assebly at-least as efficient as hand-written C code.
+- Lighten user burden with a simple interface
+- Flag common errors at compile-time
+- Generate assebly at-least as efficient as hand-written C code
 
-Traditional C-style access and manipulation of hardware registers is manual, tedeous, and error prone.
-
-.. code-block:: C
-
-    typedef struct {
-        uint8_t volatile CONFIG;
-        /* etc. */
-    } UART;
-
-    #define UART0 ((UART* const)(0x1000))
-
-    void configurize(void)
-    {
-        UART0->CONFIG = (UART0->CONFIG & ~(7u << 5)) | (2u << 5);
-    }
-
-The magic numbers are often abstracted with macros to make code more readable.
-
-.. code-block:: C
-
-    #define PARITY_SHIFT    (5)
-    #define PARITY_MASK     ((uint8_t)(7u << PARITY_SHIFT))
-    #define PARITY(x)       ((uint8_t)((x) << PARITY_SHIFT))
-
-    void configurize(void)
-    {
-        UART0->CONFIG = (UART0->CONFIG & ~PARITY_MASK) | PARITY(2u);
-    }
 
 Examples
 --------
 
-A simple 8-bit register
+.. code-block:: Cpp
 
-+-+-----------+---+-------+---+---+
-|R|           |   |  ERRF |   |   |
-+-+   PARITY  |Res+-------+Res| EN|
-|W|           |   |       |   |   |
+    UART0->C1.write(PE{ParityEnable::Disable}, M{Mode::Bits8});
+
+What does the above line of code do? It clearly disables parity *and* configures the UART for 8-bit transmissions. The register names are taken from the `Kinetis KV1x`_ peripheral definition and they set the UART to `8-N-1`_ mode.
+
+.. _`Kinetis KV1x`: https://www.nxp.com/files-static/32bit/doc/ref_manual/KV11P64M75RM.pdf
+
+.. _`8-N-1`: https://en.wikipedia.org/wiki/8-N-1
+
++-+-----------+-----------+---+---+
+|R|           |           |ERR|   |
++-+   GIBBLE  |    Res.   +---+EN |
+|W|           |           |w1c|   |
 +-+---+---+---+---+---+---+---+---+
-| | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+| | 7 | 6 | 5 | 4 | 3 | 3 | 1 | 0 |
 +-+---+---+---+---+---+---+---+---+
+
+.. code-block:: Cpp
+
+    FROB.write(EN::Enable);
+
+    Or perhaps we want to update GIBBLE at the same time. Then we'd just write
+
+.. code-block:: Cpp
+
+    FROB.write(EN::Enable, GIBBLE{2});
 
 
 Notes
@@ -55,9 +45,33 @@ Notes
 
 Rationale
 ---------
+Traditional C-style access and manipulation of hardware registers is manual, tedeous, and error prone. There are well documented patterns to reduce errors and make code more obvious, e.g. `Barr Group`_.
 
-References
-----------
+.. _`Barr Group`: https://barrgroup.com/embedded-systems/books/programming-embedded-systems/peripherals-device-drivers
+
+Often silicon vendors will provide a headder file which groups registers into a struct and ``#define``\ s pointers and constants to ease access.
+
+.. code-block:: C
+
+    typedef struct {
+        uint8_t volatile CONFIG;
+        uint8_t volatile MISSILE_COMMAND;
+    } FROB;
+
+    #define FROB0 ((FROB* const)(0x1000))
+    #define GIBBLE_SHIFT    (5)
+    #define GIBBLE_MASK     ((uint8_t)(7u << GIBBLE_SHIFT))
+    #define GIBBLE(x)       ((uint8_t)((x) << GIBBLE_SHIFT))
+
+
+A function in the hardware abstraction layer may then contain code which looks like:
+
+.. code-block:: C
+
+        FROB0->CONFIG = (FROB0->CONFIG & ~GIBBLE_MASK) | GIBBLE(2u);
+
+Prior Art
+---------
 This library is not breaking new ground; others have also used the expressive power of C++ to simplify register access and reduce errors.
 
 - Kvasir_
