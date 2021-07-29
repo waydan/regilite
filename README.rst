@@ -1,12 +1,21 @@
+.. default-role:: code
+
 Introduction
 ------------
 
 **Regilite** provides concise, robust abstractions for interacting with memory-mapped hardware registers. It's goals are to:
 
-- Lighten user burden with a simple interface
-- Flag common errors at compile-time
+- Lighten user burden and improve readability with a simple, expressive interface
+- Flag most programming errors at compile-time
 - Generate assebly at-least as efficient as hand-written C code
 
+The most common operation for a memory-mapped hardware register is probably read-modify-write. This is expressed idiomatically in C as :code:`REGISTER = (REGISTER & ~MASK) | VALUE;` assuming `MASK` and `VALUE` are both appropriately shifted and `REGISTER` has been declared `volatile`.
+
+With Regilite, this kind of operation is more expressive.
+
+.. code-block:: Cpp
+
+    UART0->C1.write(MODE::Bits8);
 
 Examples
 --------
