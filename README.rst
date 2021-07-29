@@ -17,41 +17,95 @@ Introduction
 - Flag most programming errors at compile-time
 - Generate assebly at-least as efficient as hand-written C code
 
-Example
+Examples
 --------
 The most common operation for a memory-mapped hardware register is probably read-modify-write. This is expressed idiomatically in C as :c-code:`register = (register & ~mask) | value;` (assuming `mask` and `value` are both appropriately shifted and `register` has been declared :c-code:`volatile`).
 
 Read-modify-write, however, is actually an implementation detail. Usually a user just wants to update one or more fields in a register. In Regilite, this is expressed as :cpp-code:`register.write(field)`. Here, `field` is an object of some `Field`-like type defined in the library, and it carries metadata to perform all bit-shifting and masking behind the scenes.
 
 
-.. code-block:: Cpp
 
-    UART0->C1.write(PE{ParityEnable::Disable}, M{Mode::Bits8});
 
-What does the above line of code do? It clearly disables parity *and* configures the UART for 8-bit transmissions. The register names are taken from the `Kinetis KV1x`_ peripheral definition and they set the UART to `8-N-1`_ mode.
+.. csv-table:: Port Control Register
+    :header: "Bits", "Field", "Access"
+    :align: center
+
+    31-8, *Reserved*, *n/a*
+    7, LowPowerCfg, r/w
+    6-5, ClkDivSel, r/w
+    4, SampleTimeCfg, r/w
+    3-2, Mode, r/w
+    1-0, InputClkSel, r/w
+
+*This register definition is based on the `Kinetis KV1x`_ PORT_PCRx register.*
 
 .. _`Kinetis KV1x`: https://www.nxp.com/files-static/32bit/doc/ref_manual/KV11P64M75RM.pdf
 
-.. _`8-N-1`: https://en.wikipedia.org/wiki/8-N-1
 
-+-+-----------+-----------+---+---+
-|R|           |           |ERR|   |
-+-+   GIBBLE  |    Res.   +---+EN |
-|W|           |           |w1c|   |
-+-+---+---+---+---+---+---+---+---+
-| | 7 | 6 | 5 | 4 | 3 | 3 | 1 | 0 |
-+-+---+---+---+---+---+---+---+---+
 
+Writing to a Register
+~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: Cpp
 
-    FROB.write(EN::Enable);
+    // Able to write one or more field values simultaneously
+    reg.write(SlewRate::Fast);
+    reg.write(Mux{5}, DriveStrength::Low);
 
-    Or perhaps we want to update GIBBLE at the same time. Then we'd just write
+    // Error! Cannot write different values to the same field
+    reg.write(SlewRate::Fast, SlewRate::Slow);
 
+Capturing Register State
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: Cpp
 
-    FROB.write(EN::Enable, GIBBLE{2});
+    // Saves the state of a register as non-volatile value
+    auto snapshot = reg.read();
 
+Sometimes a piece of code will need to refer to the same register state multiple times while assuming it has not changed. `Register::read()` copies the state of the volatile register to a non-volatile object for later processing.
+
+Changing Saved Register State
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: Cpp
+
+    // Modifying a saved register state uses different syntax
+    snapshot.modify(SlewRate::Fast);
+    snapshot.modify(Mux{5}, DriveStrength::Low);
+
+    // Modification may be chained
+    snapshot.modify(Mux{5}).modify(DriveStrength::Low);
+
+
+Extracting a Field
+~~~~~~~~~~~~~~~~~~
+.. code-block:: Cpp
+
+    // Extract field value directly from register
+    PullEnable pull_state = reg.extract();
+
+    // Extract field value from saved register state
+    PullSelect selector = snapshot.extract();
+
+
+Testing Fields
+~~~~~~~~~~~~~~
+.. code-block:: Cpp
+
+    // Check if single field matches register state
+    reg.match(DummyField::Enable);
+    snapshot.match(DummyField::Enable);
+
+    // Check if multiple fields match register state
+    reg.match_all(DummyField::Enable, SillyField{42});
+    snapshot.match_all(DummyField::Enable, SillyField{42});
+
+    // Check if any of the fields match register state
+    reg.match_any(DummyField::Enable, SillyField{42});
+    reg.match_any(DummyField::Enable, DummyField::Disable); // Always evaluates as true
+    snapshot.match_any(DummyField::Enable, SillyField{42});
+
+Passing a single field object to `match_any` or `match_all` is valid and semantically equivalent to calling `match` with that field.
+
+A single call to `Register::match` will result in exactly one read to the memory-mapped hardware.
 
 Notes
 -----
@@ -62,14 +116,14 @@ Traditional C-style access and manipulation of hardware registers is manual, ted
 
 .. _`Barr Group`: https://barrgroup.com/embedded-systems/books/programming-embedded-systems/peripherals-device-drivers
 
-Often silicon vendors will provide a headder file which groups registers into a struct and ``#define``\ s pointers and constants to ease access.
+Often silicon vendors will provide a header file which groups registers into a struct and `#define`\ s pointers and constants to ease access.
 
 .. code-block:: C
 
     typedef struct {
         uint8_t volatile CONFIG;
         uint8_t volatile MISSILE_COMMAND;
-    } FROB;
+        } FROB;
 
     #define FROB0 ((FROB* const)(0x1000))
     #define GIBBLE_SHIFT    (5)
@@ -77,7 +131,7 @@ Often silicon vendors will provide a headder file which groups registers into a 
     #define GIBBLE(x)       ((uint8_t)((x) << GIBBLE_SHIFT))
 
 
-A function in the hardware abstraction layer may then contain code which looks like:
+    A function in the hardware abstraction layer may then contain code which looks like:
 
 .. code-block:: C
 
@@ -106,7 +160,5 @@ Reduce Errors
 - Only Predefined ``Field``\ s may be written to a ``Register``
 - Overlapping ``Field``\ s can be detected at compile-time
 
-Interface
-=========
 
 Copyright |copy| 2021 by Daniel Way
