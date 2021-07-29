@@ -155,7 +155,7 @@ These libraries are interesting and readers should take a look to consider which
 - Read multiple fields from a register
 
 Reduce Errors
-+++++++++++++
+~~~~~~~~~~~~~
 
 - Only Predefined ``Field``\ s may be written to a ``Register``
 - Overlapping ``Field``\ s can be detected at compile-time
