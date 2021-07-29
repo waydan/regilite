@@ -14,24 +14,16 @@ enum class SafeWriteDefault
 
 }
 
-struct WriteOnly {
-    static constexpr auto safe_value = detail::SafeWriteDefault::Zero;
-};
+struct WriteOnly {};
 using WO = WriteOnly;
 
-struct ReadOnly {
-    static constexpr auto safe_value = detail::SafeWriteDefault::Readback;
-};
+struct ReadOnly {};
 using RO = ReadOnly;
 
-struct WriteOneToClear {
-    static constexpr auto safe_value = detail::SafeWriteDefault::One;
-};
+struct WriteOneToClear {};
 using W1C = WriteOneToClear;
 
-struct ReadWrite {
-    static constexpr auto safe_value = detail::SafeWriteDefault::Readback;
-};
+struct ReadWrite {};
 using RW = ReadWrite;
 
 } // namespace regilite
