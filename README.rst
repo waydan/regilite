@@ -1,5 +1,8 @@
 .. default-role:: code
 
+.. role:: c-code(code)
+    :language: C
+
 Introduction
 ------------
 
@@ -9,7 +12,7 @@ Introduction
 - Flag most programming errors at compile-time
 - Generate assebly at-least as efficient as hand-written C code
 
-The most common operation for a memory-mapped hardware register is probably read-modify-write. This is expressed idiomatically in C as :code:`REGISTER = (REGISTER & ~MASK) | VALUE;` assuming `MASK` and `VALUE` are both appropriately shifted and `REGISTER` has been declared `volatile`.
+The most common operation for a memory-mapped hardware register is probably read-modify-write. This is expressed idiomatically in C as :c-code:`REGISTER = (REGISTER & ~MASK) | VALUE;` (assuming `MASK` and `VALUE` are both appropriately shifted and `REGISTER` has been declared :c-code:`volatile`).
 
 With Regilite, this kind of operation is more expressive.
 
