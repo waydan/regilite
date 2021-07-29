@@ -3,6 +3,11 @@
 .. role:: c-code(code)
     :language: C
 
+.. role:: cpp-code(code)
+    :language: Cpp
+
+.. include:: <isonum.txt>
+
 Introduction
 ------------
 
@@ -12,16 +17,12 @@ Introduction
 - Flag most programming errors at compile-time
 - Generate assebly at-least as efficient as hand-written C code
 
-The most common operation for a memory-mapped hardware register is probably read-modify-write. This is expressed idiomatically in C as :c-code:`REGISTER = (REGISTER & ~MASK) | VALUE;` (assuming `MASK` and `VALUE` are both appropriately shifted and `REGISTER` has been declared :c-code:`volatile`).
-
-With Regilite, this kind of operation is more expressive.
-
-.. code-block:: Cpp
-
-    UART0->C1.write(MODE::Bits8);
-
-Examples
+Example
 --------
+The most common operation for a memory-mapped hardware register is probably read-modify-write. This is expressed idiomatically in C as :c-code:`register = (register & ~mask) | value;` (assuming `mask` and `value` are both appropriately shifted and `register` has been declared :c-code:`volatile`).
+
+Read-modify-write, however, is actually an implementation detail. Usually a user just wants to update one or more fields in a register. In Regilite, this is expressed as :cpp-code:`register.write(field)`. Here, `field` is an object of some `Field`-like type defined in the library, and it carries metadata to perform all bit-shifting and masking behind the scenes.
+
 
 .. code-block:: Cpp
 
@@ -107,3 +108,5 @@ Reduce Errors
 
 Interface
 =========
+
+Copyright |copy| 2021 by Daniel Way
