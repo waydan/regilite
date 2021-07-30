@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "basicfield.hpp"
+#include "field_access.hpp"
 #include "utility.hpp"
 
 namespace regilite {
@@ -21,6 +22,8 @@ class RegisterProxy : private Impl
     using is_member_field = traits::conjunction<
         traits::is_pack_element<Fields, MemberFields...>{}...>;
 
+    static constexpr mask_t static_zero =
+        detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
 
   public:
     class Snapshot
@@ -119,15 +122,17 @@ class RegisterProxy : private Impl
     auto write(Snapshot s) noexcept -> void { Impl::volatile_write(s.raw()); }
 
 
-    template <typename Field, typename... Fields>
-    auto write(Field f, Fields... fs) noexcept -> std::enable_if_t<
-        is_member_field<Field, Fields...>{}
-            and !detail::fields_overlap<Field, Fields...>{},
-        decltype(Impl::write_field(detail::fold_fields<storage_type>(
-            std::declval<Field>(), std::declval<Fields>()...)))>
+    template <typename Field, typename... Fields,
+              typename = std::enable_if_t<
+                  is_member_field<Field, Fields...>{}
+                  and !detail::fields_overlap<Field, Fields...>{}>>
+    auto write(Field f, Fields... fs) noexcept
     {
         const auto fields = detail::fold_fields<storage_type>(f, fs...);
-        return Impl::write_field(fields);
+        return Impl::write_field(
+            fields
+            | detail::BasicField<storage_type, static_zero & ~fields.mask()>{
+                0});
     }
 
 
