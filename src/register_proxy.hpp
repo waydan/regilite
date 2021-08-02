@@ -147,10 +147,7 @@ class RegisterProxy
     auto write(Field f, Fields... fs) noexcept
     {
         const auto fields = detail::fold_fields<storage_type>(f, fs...);
-        return impl().write_field(
-            fields
-            | detail::BasicField<storage_type, FieldSet::safe_write_zero
-                                                   & ~fields.mask()>{0});
+        return impl().write_field(fields);
     }
 
 

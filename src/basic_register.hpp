@@ -12,7 +12,9 @@ class BasicRegister
     : public RegisterProxy<BasicRegister<UInt, reset, MemberFields...>,
                            MemberFields...>
 {
-    friend RegisterProxy<BasicRegister, MemberFields...>;
+    using Base = RegisterProxy<BasicRegister, MemberFields...>;
+    friend Base;
+    using typename Base::FieldSet;
 
   public:
     using storage_type =
@@ -23,10 +25,19 @@ class BasicRegister
 
   protected:
     template <typename Field>
-    auto write_field(Field f)
+    auto write_field(Field field)
     {
-        const storage_type modified_state =
-            detail::insert_bits(volatile_read(), f);
+        // if (all other bits have safe static write value)
+        //     detail::overwrite(field);
+        // else if (all used bits read as zero)
+        //     detail::or_with_register(field);
+        // else
+
+        const storage_type modified_state = detail::insert_bits(
+            volatile_read(),
+            (field
+             | detail::BasicField<storage_type, FieldSet::safe_write_zero
+                                                    & ~field.mask()>{0}));
         volatile_write(modified_state);
     }
 
