@@ -9,8 +9,13 @@
 #include "utility.hpp"
 
 namespace regilite {
+namespace detail {
 
-template <typename Impl, typename StorageType, typename... MemberFields>
+template <typename R>
+struct register_traits;
+}
+
+template <typename Impl, typename... MemberFields>
 class RegisterProxy
 {
   protected:
@@ -22,8 +27,8 @@ class RegisterProxy
         detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
 
   public:
-    using storage_type = StorageType;
-    static_assert(traits::is_storage_type<StorageType>{},
+    using storage_type = typename detail::register_traits<Impl>::storage_type;
+    static_assert(traits::is_storage_type<storage_type>{},
                   "BasicRegister<> type requires an unsigned integral as its "
                   "underlying representation.");
 
@@ -69,8 +74,8 @@ class RegisterProxy
 
         template <typename Field, typename... Fields>
         auto modify(Field f, Fields... fs) noexcept -> std::enable_if_t<
-            is_member_field<Field>
-                and !detail::fields_overlap<Field, Fields...>{},
+            is_member_field<
+                Field> and !detail::fields_overlap<Field, Fields...>{},
             Snapshot&>
         {
             const auto fields = detail::fold_fields<storage_type>(f, fs...);
@@ -96,8 +101,9 @@ class RegisterProxy
         template <typename Field, typename... Fields>
         auto match_all(Field f, Fields... fs) const noexcept
             -> std::enable_if_t<
-                is_member_field<Field, Fields...>
-                    and !detail::fields_overlap<Field, Fields...>{},
+                is_member_field<
+                    Field,
+                    Fields...> and !detail::fields_overlap<Field, Fields...>{},
                 bool>
         {
             const auto fields = detail::fold_fields<storage_type>(f, fs...);
@@ -127,10 +133,12 @@ class RegisterProxy
     }
 
 
-    template <typename Field, typename... Fields,
-              typename = std::enable_if_t<
-                  is_member_field<Field, Fields...>
-                  and !detail::fields_overlap<Field, Fields...>{}>>
+    template <
+        typename Field, typename... Fields,
+        typename = std::enable_if_t<
+            is_member_field<
+                Field,
+                Fields...> and !detail::fields_overlap<Field, Fields...>{}>>
     auto write(Field f, Fields... fs) noexcept
     {
         const auto fields = detail::fold_fields<storage_type>(f, fs...);
@@ -162,10 +170,10 @@ class RegisterProxy
 
 
     template <typename Field, typename... Fields>
-    auto match_all(Field f, Fields... fs) const noexcept
-        -> std::enable_if_t<is_member_field<Field, Fields...>
-                                and !detail::fields_overlap<Field, Fields...>{},
-                            bool>
+    auto match_all(Field f, Fields... fs) const noexcept -> std::enable_if_t<
+        is_member_field<
+            Field, Fields...> and !detail::fields_overlap<Field, Fields...>{},
+        bool>
     {
         return read().match_all(f, fs...);
     }

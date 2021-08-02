@@ -30,14 +30,14 @@ class Write
 
 template <typename UInt, typename... MemberFields>
 class PartitionRegister
-    : public RegisterProxy<PartitionRegister<UInt, MemberFields...>, UInt,
+    : public RegisterProxy<PartitionRegister<UInt, MemberFields...>,
                            MemberFields...>
 {
-    using Base = RegisterProxy<PartitionRegister, UInt, MemberFields...>;
-    friend Base;
+    friend RegisterProxy<PartitionRegister, MemberFields...>;
 
   public:
-    using typename Base::storage_type;
+    using storage_type =
+        typename detail::register_traits<PartitionRegister>::storage_type;
 
   private:
     storage_type state_;
@@ -87,6 +87,13 @@ class PartitionRegister
         return *const_cast<volatile T*>(address);
     }
 };
+
+namespace detail {
+template <typename UInt, typename... MemberFields>
+struct register_traits<PartitionRegister<UInt, MemberFields...>> {
+    using storage_type = UInt;
+};
+} // namespace detail
 
 } // namespace regilite
 

@@ -9,13 +9,13 @@ namespace regilite {
 
 template <typename UInt, typename... MemberFields>
 class BasicRegister : public RegisterProxy<BasicRegister<UInt, MemberFields...>,
-                                           UInt, MemberFields...>
+                                           MemberFields...>
 {
-    using Base = RegisterProxy<BasicRegister, UInt, MemberFields...>;
-    friend Base;
+    friend RegisterProxy<BasicRegister, MemberFields...>;
 
   public:
-    using typename Base::storage_type;
+    using storage_type =
+        typename detail::register_traits<BasicRegister>::storage_type;
 
   private:
     storage_type state_;
@@ -39,6 +39,13 @@ class BasicRegister : public RegisterProxy<BasicRegister<UInt, MemberFields...>,
         return *const_cast<const volatile storage_type*>(&state_);
     }
 };
+
+namespace detail {
+template <typename UInt, typename... MemberFields>
+struct register_traits<BasicRegister<UInt, MemberFields...>> {
+    using storage_type = UInt;
+};
+} // namespace detail
 
 } // namespace regilite
 
