@@ -18,6 +18,12 @@ struct register_traits;
 template <typename Impl, typename... MemberFields>
 class RegisterProxy
 {
+    auto& impl() noexcept { return *static_cast<Impl*>(this); }
+    const auto& impl() const noexcept
+    {
+        return *static_cast<const Impl*>(this);
+    }
+
   protected:
     template <typename... Fields>
     static constexpr bool is_member_field = traits::conjunction(
@@ -129,10 +135,7 @@ class RegisterProxy
     }; // class Snapshot
 
 
-    auto write(Snapshot s) noexcept -> void
-    {
-        static_cast<Impl*>(this)->volatile_write(s.raw());
-    }
+    auto write(Snapshot s) noexcept -> void { impl().volatile_write(s.raw()); }
 
 
     template <
@@ -144,7 +147,7 @@ class RegisterProxy
     auto write(Field f, Fields... fs) noexcept
     {
         const auto fields = detail::fold_fields<storage_type>(f, fs...);
-        return static_cast<Impl*>(this)->write_field(
+        return impl().write_field(
             fields
             | detail::BasicField<storage_type, FieldSet::safe_write_zero
                                                    & ~fields.mask()>{0});
@@ -153,7 +156,7 @@ class RegisterProxy
 
     auto read() const noexcept -> Snapshot
     {
-        return Snapshot{static_cast<const Impl*>(this)->volatile_read()};
+        return Snapshot{impl().volatile_read()};
     }
 
 
