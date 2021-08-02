@@ -7,16 +7,15 @@
 
 namespace regilite {
 
-namespace detail {
-template <typename UInt>
-class BasicRegisterImpl
+template <typename UInt, typename... MemberFields>
+class BasicRegister : public RegisterProxy<BasicRegister<UInt, MemberFields...>,
+                                           UInt, MemberFields...>
 {
-    static_assert(traits::is_storage_type<UInt>{},
-                  "BasicRegister<> type requires an unsigned integral as its "
-                  "underlying representation.");
+    using Base = RegisterProxy<BasicRegister, UInt, MemberFields...>;
+    friend Base;
 
   public:
-    using storage_type = UInt;
+    using typename Base::storage_type;
 
   private:
     storage_type state_;
@@ -40,11 +39,6 @@ class BasicRegisterImpl
         return *const_cast<const volatile storage_type*>(&state_);
     }
 };
-} // namespace detail
-
-template <typename UInt, typename... MemberFields>
-using BasicRegister =
-    RegisterProxy<detail::BasicRegisterImpl<UInt>, MemberFields...>;
 
 } // namespace regilite
 

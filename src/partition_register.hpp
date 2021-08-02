@@ -28,18 +28,16 @@ class Write
 };
 
 
-namespace detail {
-
-template <typename UInt, typename AccessType, typename... MemberFields>
-class PartitionRegisterImpl
+template <typename UInt, typename... MemberFields>
+class PartitionRegister
+    : public RegisterProxy<PartitionRegister<UInt, MemberFields...>, UInt,
+                           MemberFields...>
 {
-    static_assert(
-        traits::is_storage_type<UInt>{},
-        "PartitionRegister<> type requires an unsigned integral as its "
-        "underlying representation.");
+    using Base = RegisterProxy<PartitionRegister, UInt, MemberFields...>;
+    friend Base;
 
   public:
-    using storage_type = UInt;
+    using typename Base::storage_type;
 
   private:
     storage_type state_;
@@ -89,13 +87,6 @@ class PartitionRegisterImpl
         return *const_cast<volatile T*>(address);
     }
 };
-
-} // namespace detail
-
-template <typename UInt, typename AccessType, typename... MemberFields>
-using PartitionRegister = RegisterProxy<
-    detail::PartitionRegisterImpl<UInt, AccessType, MemberFields...>,
-    MemberFields...>;
 
 } // namespace regilite
 

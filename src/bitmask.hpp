@@ -1,6 +1,8 @@
 #ifndef REGILITE_BIT_MASK_HPP
 #define REGILITE_BIT_MASK_HPP
 
+#include <cstdint>
+
 namespace regilite {
 
 using mask_t = std::uint64_t;

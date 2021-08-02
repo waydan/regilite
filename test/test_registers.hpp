@@ -14,18 +14,18 @@ SimpleString StringFrom(regilite::Field<ValType, mask> f)
            + StringFrom(regilite::traits::as_uint(f.value()));
 }
 
-template <typename Impl, typename... Fields>
-auto register_view(regilite::RegisterProxy<Impl, Fields...>& reg) ->
-    typename Impl::storage_type&
+template <typename Register>
+auto& register_view(Register& reg)
 {
-    return *reinterpret_cast<typename Impl::storage_type*>(&reg);
+    return *reinterpret_cast<typename Register::storage_type*>(&reg);
 }
 
-template <typename Impl, typename... Fields>
-auto REGISTER_EQUALS(typename Impl::storage_type value,
-                     regilite::RegisterProxy<Impl, Fields...>& reg) -> void
+
+template <typename Register, typename UInt>
+void REGISTER_EQUALS(UInt value, Register& reg)
 {
-    LONGS_EQUAL(value, register_view(reg));
+    LONGS_EQUAL(static_cast<typename Register::storage_type>(value),
+                register_view(reg));
 }
 
 
@@ -65,7 +65,6 @@ static_assert(
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 //  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 
-using PartableReg =
-    regilite::PartitionRegister<std::uint16_t, std::uint8_t, F0, F1, F2, F3>;
+using PartableReg = regilite::PartitionRegister<std::uint16_t, F0, F1, F2, F3>;
 
 #endif // TEST_REGISTER_HPP

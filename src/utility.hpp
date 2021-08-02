@@ -1,7 +1,6 @@
 #ifndef REGILITE_UTILITY_HPP
 #define REGILITE_UTILITY_HPP
 
-#include <cassert>
 #include <type_traits>
 
 #include "traits.hpp"

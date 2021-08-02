@@ -10,14 +10,10 @@
 
 namespace regilite {
 
-template <typename Impl, typename... MemberFields>
-class RegisterProxy : private Impl
+template <typename Impl, typename StorageType, typename... MemberFields>
+class RegisterProxy
 {
-    using typename Impl::storage_type;
-
-    static constexpr auto reserved_ =
-        ~static_cast<storage_type>(fold_masks(MemberFields::mask()...));
-
+  protected:
     template <typename... Fields>
     using is_member_field = traits::conjunction<
         traits::is_pack_element<Fields, MemberFields...>{}...>;
@@ -26,6 +22,12 @@ class RegisterProxy : private Impl
         detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
 
   public:
+    using storage_type = StorageType;
+    static_assert(traits::is_storage_type<StorageType>{},
+                  "BasicRegister<> type requires an unsigned integral as its "
+                  "underlying representation.");
+
+
     class Snapshot
     {
         storage_type state_;
@@ -116,10 +118,13 @@ class RegisterProxy : private Impl
         {
             return match_any(f) or match_any(fs...);
         }
-    };
+    }; // class Snapshot
 
 
-    auto write(Snapshot s) noexcept -> void { Impl::volatile_write(s.raw()); }
+    auto write(Snapshot s) noexcept -> void
+    {
+        static_cast<Impl*>(this)->volatile_write(s.raw());
+    }
 
 
     template <typename Field, typename... Fields,
@@ -129,7 +134,7 @@ class RegisterProxy : private Impl
     auto write(Field f, Fields... fs) noexcept
     {
         const auto fields = detail::fold_fields<storage_type>(f, fs...);
-        return Impl::write_field(
+        return static_cast<Impl*>(this)->write_field(
             fields
             | detail::BasicField<storage_type, static_zero & ~fields.mask()>{
                 0});
@@ -138,7 +143,7 @@ class RegisterProxy : private Impl
 
     auto read() const noexcept -> Snapshot
     {
-        return Snapshot{Impl::volatile_read()};
+        return Snapshot{static_cast<const Impl*>(this)->volatile_read()};
     }
 
 

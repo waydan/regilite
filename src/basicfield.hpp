@@ -1,7 +1,9 @@
 #ifndef REGILITE_BASICFIELD_HPP
 #define REGILITE_BASICFIELD_HPP
 
+#include <cassert>
 #include <type_traits>
+
 
 #include "bitmask.hpp"
 
