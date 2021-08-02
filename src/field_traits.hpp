@@ -1,5 +1,5 @@
-#ifndef REGILITE_FIELD_ACCESS_HPP
-#define REGILITE_FIELD_ACCESS_HPP
+#ifndef REGILITE_FIELD_TRAITS_HPP
+#define REGILITE_FIELD_TRAITS_HPP
 
 #include <type_traits>
 
@@ -13,7 +13,8 @@ enum class SafeWriteDefault
 {
     Zero,
     One,
-    Readback
+    Reset,
+    Volatile
 };
 
 template <typename Field>
@@ -34,23 +35,35 @@ struct SafeWrite<type, Field>
 
 } // namespace detail
 
-struct WriteOnly {};
+template <typename... Fields>
+struct FieldGroup {
+    static constexpr mask_t safe_write_zero =
+        detail::SafeWrite<detail::SafeWriteDefault::Zero, Fields...>{};
+};
+
+struct WriteOnly {
+    static constexpr auto reads_as = detail::SafeWriteDefault::Reset;
+    static constexpr auto safe_write = detail::SafeWriteDefault::Zero;
+};
 using WO = WriteOnly;
 
-struct ReadOnly {};
+struct ReadOnly {
+    static constexpr auto reads_as = detail::SafeWriteDefault::Volatile;
+    static constexpr auto safe_write = detail::SafeWriteDefault::Volatile;
+};
 using RO = ReadOnly;
 
 struct WriteOneToClear {
-    static constexpr auto reads_as = detail::SafeWriteDefault::Readback;
+    static constexpr auto reads_as = detail::SafeWriteDefault::Volatile;
     static constexpr auto safe_write = detail::SafeWriteDefault::Zero;
 };
 using W1C = WriteOneToClear;
 
 struct ReadWrite {
-    static constexpr auto reads_as = detail::SafeWriteDefault::Readback;
-    static constexpr auto safe_write = detail::SafeWriteDefault::Readback;
+    static constexpr auto reads_as = detail::SafeWriteDefault::Volatile;
+    static constexpr auto safe_write = detail::SafeWriteDefault::Volatile;
 };
 using RW = ReadWrite;
 
 } // namespace regilite
-#endif // REGILITE_FIELD_ACCESS_HPP
+#endif // REGILITE_FIELD_TRAITS_HPP

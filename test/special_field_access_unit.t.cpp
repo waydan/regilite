@@ -2,7 +2,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "field.hpp"
-#include "field_access.hpp"
+#include "field_traits.hpp"
 #include "test_registers.hpp"
 
 

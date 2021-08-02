@@ -5,7 +5,7 @@
 #include <type_traits>
 
 #include "bitmask.hpp"
-#include "field_access.hpp"
+#include "field_traits.hpp"
 #include "traits.hpp"
 #include "utility.hpp"
 

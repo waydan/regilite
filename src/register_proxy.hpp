@@ -5,7 +5,7 @@
 #include <type_traits>
 
 #include "basicfield.hpp"
-#include "field_access.hpp"
+#include "field_traits.hpp"
 #include "utility.hpp"
 
 namespace regilite {
@@ -22,6 +22,8 @@ class RegisterProxy
     template <typename... Fields>
     static constexpr bool is_member_field = traits::conjunction(
         traits::is_pack_element<Fields, MemberFields...>{}...);
+
+    using FieldSet = FieldGroup<MemberFields...>;
 
     static constexpr mask_t static_zero =
         detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
@@ -144,8 +146,8 @@ class RegisterProxy
         const auto fields = detail::fold_fields<storage_type>(f, fs...);
         return static_cast<Impl*>(this)->write_field(
             fields
-            | detail::BasicField<storage_type, static_zero & ~fields.mask()>{
-                0});
+            | detail::BasicField<storage_type, FieldSet::safe_write_zero
+                                                   & ~fields.mask()>{0});
     }
 
 
