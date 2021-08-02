@@ -28,9 +28,9 @@ class Write
 };
 
 
-template <typename UInt, typename... MemberFields>
+template <typename UInt, UInt reset, typename... MemberFields>
 class PartitionRegister
-    : public RegisterProxy<PartitionRegister<UInt, MemberFields...>,
+    : public RegisterProxy<PartitionRegister<UInt, reset, MemberFields...>,
                            MemberFields...>
 {
     friend RegisterProxy<PartitionRegister, MemberFields...>;
@@ -89,8 +89,8 @@ class PartitionRegister
 };
 
 namespace detail {
-template <typename UInt, typename... MemberFields>
-struct register_traits<PartitionRegister<UInt, MemberFields...>> {
+template <typename UInt, UInt reset, typename... MemberFields>
+struct register_traits<PartitionRegister<UInt, reset, MemberFields...>> {
     using storage_type = UInt;
 };
 } // namespace detail

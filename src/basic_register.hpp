@@ -7,9 +7,10 @@
 
 namespace regilite {
 
-template <typename UInt, typename... MemberFields>
-class BasicRegister : public RegisterProxy<BasicRegister<UInt, MemberFields...>,
-                                           MemberFields...>
+template <typename UInt, UInt reset, typename... MemberFields>
+class BasicRegister
+    : public RegisterProxy<BasicRegister<UInt, reset, MemberFields...>,
+                           MemberFields...>
 {
     friend RegisterProxy<BasicRegister, MemberFields...>;
 
@@ -41,8 +42,8 @@ class BasicRegister : public RegisterProxy<BasicRegister<UInt, MemberFields...>,
 };
 
 namespace detail {
-template <typename UInt, typename... MemberFields>
-struct register_traits<BasicRegister<UInt, MemberFields...>> {
+template <typename UInt, UInt reset, typename... MemberFields>
+struct register_traits<BasicRegister<UInt, reset, MemberFields...>> {
     using storage_type = UInt;
 };
 } // namespace detail

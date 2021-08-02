@@ -10,7 +10,7 @@ using Fx =
     regilite::Field<std::uint8_t, regilite::Mask<0>{}, regilite::RW, void>;
 using Flag = regilite::Field<bool, regilite::Mask<7>{}, regilite::W1C, void>;
 
-regilite::BasicRegister<std::uint8_t, Fx, Flag> special_reg;
+regilite::BasicRegister<std::uint8_t, 0, Fx, Flag> special_reg;
 
 TEST_GROUP(WriteSpecialFields)
 {
