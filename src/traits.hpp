@@ -44,17 +44,13 @@ struct is_pack_element<Elem, NotElem, Pack...>
     : is_pack_element<Elem, Pack...> {};
 
 
-template <bool pred, bool... preds>
-struct conjunction;
+constexpr auto conjunction(bool pred) noexcept -> bool { return pred; }
 
-template <bool... preds>
-struct conjunction<false, preds...> : std::false_type {};
-
-template <bool... preds>
-struct conjunction<true, preds...> : conjunction<preds...> {};
-
-template <>
-struct conjunction<true> : std::true_type {};
+template <typename... Bs>
+constexpr auto conjunction(bool pred, Bs... preds) noexcept -> bool
+{
+    return pred and conjunction(static_cast<bool>(preds)...);
+}
 
 
 } // namespace traits

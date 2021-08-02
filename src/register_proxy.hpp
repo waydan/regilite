@@ -15,8 +15,8 @@ class RegisterProxy
 {
   protected:
     template <typename... Fields>
-    using is_member_field = traits::conjunction<
-        traits::is_pack_element<Fields, MemberFields...>{}...>;
+    static constexpr bool is_member_field = traits::conjunction(
+        traits::is_pack_element<Fields, MemberFields...>{}...);
 
     static constexpr mask_t static_zero =
         detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
@@ -46,7 +46,7 @@ class RegisterProxy
             constexpr FieldExtractor(storage_type s) noexcept : state_{s} {}
 
             template <typename Field,
-                      typename = std::enable_if_t<is_member_field<Field>{}>>
+                      typename = std::enable_if_t<is_member_field<Field>>>
             constexpr operator Field() const noexcept
             {
                 return Field{static_cast<typename Field::value_type>(
@@ -69,7 +69,7 @@ class RegisterProxy
 
         template <typename Field, typename... Fields>
         auto modify(Field f, Fields... fs) noexcept -> std::enable_if_t<
-            is_member_field<Field>{}
+            is_member_field<Field>
                 and !detail::fields_overlap<Field, Fields...>{},
             Snapshot&>
         {
@@ -87,7 +87,7 @@ class RegisterProxy
 
         template <typename Field>
         auto match(Field f) const noexcept
-            -> std::enable_if_t<is_member_field<Field>{}, bool>
+            -> std::enable_if_t<is_member_field<Field>, bool>
         {
             return f == decltype(f){extract_field()};
         }
@@ -96,7 +96,7 @@ class RegisterProxy
         template <typename Field, typename... Fields>
         auto match_all(Field f, Fields... fs) const noexcept
             -> std::enable_if_t<
-                is_member_field<Field, Fields...>{}
+                is_member_field<Field, Fields...>
                     and !detail::fields_overlap<Field, Fields...>{},
                 bool>
         {
@@ -107,14 +107,14 @@ class RegisterProxy
 
         template <typename Field>
         auto match_any(Field f) const noexcept
-            -> std::enable_if_t<is_member_field<Field>{}, bool>
+            -> std::enable_if_t<is_member_field<Field>, bool>
         {
             return match(f);
         }
 
         template <typename Field, typename... Fields>
         auto match_any(Field f, Fields... fs) const noexcept
-            -> std::enable_if_t<is_member_field<Field, Fields...>{}, bool>
+            -> std::enable_if_t<is_member_field<Field, Fields...>, bool>
         {
             return match_any(f) or match_any(fs...);
         }
@@ -129,7 +129,7 @@ class RegisterProxy
 
     template <typename Field, typename... Fields,
               typename = std::enable_if_t<
-                  is_member_field<Field, Fields...>{}
+                  is_member_field<Field, Fields...>
                   and !detail::fields_overlap<Field, Fields...>{}>>
     auto write(Field f, Fields... fs) noexcept
     {
@@ -155,7 +155,7 @@ class RegisterProxy
 
     template <typename Field>
     auto match(Field f) const noexcept
-        -> std::enable_if_t<is_member_field<Field>{}, bool>
+        -> std::enable_if_t<is_member_field<Field>, bool>
     {
         return read().match(f);
     }
@@ -163,7 +163,7 @@ class RegisterProxy
 
     template <typename Field, typename... Fields>
     auto match_all(Field f, Fields... fs) const noexcept
-        -> std::enable_if_t<is_member_field<Field, Fields...>{}
+        -> std::enable_if_t<is_member_field<Field, Fields...>
                                 and !detail::fields_overlap<Field, Fields...>{},
                             bool>
     {
@@ -173,7 +173,7 @@ class RegisterProxy
 
     template <typename Field, typename... Fields>
     auto match_any(Field f, Fields... fs) const noexcept
-        -> std::enable_if_t<is_member_field<Field, Fields...>{}, bool>
+        -> std::enable_if_t<is_member_field<Field, Fields...>, bool>
     {
         return read().match_any(f, fs...);
     }
