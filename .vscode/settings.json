@@ -5,5 +5,8 @@
         "editor.wordWrap": "wordWrapColumn",
         "editor.wrappingIndent": "same",
         "editor.wordWrapColumn": 80
-    }
+    },
+    "clang-tidy.compilerArgs": [
+        "-DNDEBUG"
+    ]
 }
