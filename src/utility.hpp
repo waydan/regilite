@@ -13,7 +13,6 @@ template <typename Int>
 constexpr auto lsb(Int value) noexcept
     -> std::enable_if_t<std::is_integral<Int>{}, int>
 {
-    assert(value != 1);
     auto x = static_cast<std::make_unsigned_t<Int>>(value);
     int lsb = sizeof(x) * 8;
     for (; x != 0; x <<= 1u)
