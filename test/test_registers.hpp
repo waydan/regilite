@@ -11,7 +11,7 @@ template <typename ValType, regilite::mask_t mask>
 SimpleString StringFrom(regilite::Field<ValType, mask> f)
 {
     return SimpleString{"Field value: "}
-           + StringFrom(regilite::traits::as_uint(f.value()));
+           + StringFrom(regilite::traits::to_uint(f.value()));
 }
 
 template <typename Register>

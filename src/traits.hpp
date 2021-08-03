@@ -24,9 +24,16 @@ static_assert(not is_storage_type<signed int>{},
 
 
 template <typename T>
-constexpr auto as_uint(const T& x) -> std::make_unsigned_t<T>
+constexpr auto to_uint(const T& x) noexcept -> std::make_unsigned_t<T>
 {
     return static_cast<std::make_unsigned_t<T>>(x);
+}
+
+template <typename B>
+constexpr auto to_uint(B x) noexcept
+    -> std::enable_if_t<std::is_same<bool, B>{}, unsigned char>
+{
+    return static_cast<unsigned char>(x);
 }
 
 
