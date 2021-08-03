@@ -1,7 +1,7 @@
 #ifndef REGILITE_PARTITION_REGISTER_HPP
 #define REGILITE_PARTITION_REGISTER_HPP
 
-#include "basicfield.hpp"
+#include "basic_field.hpp"
 #include "partition_type.hpp"
 #include "register_proxy.hpp"
 #include "traits.hpp"
