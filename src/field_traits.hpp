@@ -37,8 +37,15 @@ struct SafeWrite<type, Field>
 
 template <typename... Fields>
 struct FieldGroup {
+    static constexpr mask_t reserved = ~detail::fold_masks(Fields::mask()...);
+
     static constexpr mask_t safe_write_zero =
         detail::SafeWrite<detail::SafeWriteDefault::Zero, Fields...>{};
+    static constexpr mask_t safe_write_one =
+        detail::SafeWrite<detail::SafeWriteDefault::One, Fields...>{};
+    static constexpr mask_t safe_write_reset =
+        detail::SafeWrite<detail::SafeWriteDefault::Reset, Fields...>{}
+        | reserved;
 };
 
 struct WriteOnly {

@@ -1,11 +1,17 @@
 #ifndef REGILITE_BASIC_REGISTER_HPP
 #define REGILITE_BASIC_REGISTER_HPP
 
+#include <type_traits>
+
 #include "basic_field.hpp"
 #include "register_proxy.hpp"
 #include "traits.hpp"
 
 namespace regilite {
+
+struct Overwrite {};
+
+struct ReadModifyWrite {};
 
 template <typename UInt, UInt reset, typename... MemberFields>
 class BasicRegister
@@ -20,25 +26,51 @@ class BasicRegister
     using storage_type =
         typename detail::register_traits<BasicRegister>::storage_type;
 
+    static constexpr auto can_safely_overwrite(mask_t mask) noexcept -> bool
+    {
+        constexpr auto static_write_mask = FieldSet::safe_write_zero
+                                           | FieldSet::safe_write_one
+                                           | FieldSet::safe_write_reset;
+        constexpr storage_type storage_mask = ~storage_type{0u};
+
+        return static_cast<storage_type>(static_write_mask | mask)
+               == storage_mask;
+    }
+
   private:
     storage_type state_;
 
+
   protected:
     template <typename Field>
-    auto write_field(Field field)
+    auto select_write(Field field, std::false_type) noexcept
     {
-        // if (all other bits have safe static write value)
-        //     detail::overwrite(field);
-        // else if (all used bits read as zero)
-        //     detail::or_with_register(field);
-        // else
-
-        const storage_type modified_state = detail::insert_bits(
-            volatile_read(),
-            (field
-             | detail::BasicField<storage_type, FieldSet::safe_write_zero
-                                                    & ~field.mask()>{0}));
+        constexpr auto zero_field =
+            detail::BasicField<storage_type,
+                               FieldSet::safe_write_zero & ~field.mask()>{0};
+        const storage_type modified_state =
+            detail::insert_bits(volatile_read(), field | zero_field);
         volatile_write(modified_state);
+        return ReadModifyWrite{};
+    }
+
+
+    template <typename Field>
+    auto select_write(Field field, std::true_type) noexcept
+    {
+        volatile_write(static_cast<storage_type>(
+            (field.value() << field.offset())
+            | (reset & FieldSet::safe_write_reset & ~field.mask())));
+        return Overwrite{};
+    }
+
+
+    template <typename Field>
+    auto write_field(Field field) noexcept
+    {
+        return select_write(
+            field,
+            std::integral_constant<bool, can_safely_overwrite(field.mask())>{});
     }
 
     auto volatile_write(storage_type s) noexcept -> void
@@ -50,7 +82,7 @@ class BasicRegister
     {
         return *const_cast<const volatile storage_type*>(&state_);
     }
-};
+}; // namespace regilite
 
 namespace detail {
 template <typename UInt, UInt reset, typename... MemberFields>
