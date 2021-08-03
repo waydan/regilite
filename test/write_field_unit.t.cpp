@@ -32,6 +32,9 @@ TEST(WriteFieldsToRegister, WritesOnlyModifyBitsInField)
 TEST(WriteFieldsToRegister, FieldUnsetBitsAreCleared)
 {
     register_view(test_register) = 0b1111;
-    test_register.write(F1{1}, F0{0});
+    const auto audit = test_register.write(F1{1}, F0{0});
+    static_assert(
+        std::is_same<decltype(audit), const regilite::ReadModifyWrite>{},
+        "Test expects reserved fields will keep dynamic value");
     REGISTER_EQUALS(0b1010, test_register);
 }
