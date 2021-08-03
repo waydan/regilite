@@ -8,5 +8,6 @@
     },
     "clang-tidy.compilerArgs": [
         "-DNDEBUG"
-    ]
+    ],
+    "clang-tidy.buildPath": "../build"
 }
