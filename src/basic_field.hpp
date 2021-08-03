@@ -11,12 +11,20 @@ namespace regilite {
 namespace detail {
 
 template <typename UInt, mask_t bit_mask>
-struct BasicField {
+class BasicField
+{
     static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
                   "Register<> type requires an unsigned integral as its "
                   "underlying representation.");
 
+  public:
+    using value_type = UInt;
+
+  private:
     UInt value_;
+
+  public:
+    explicit constexpr BasicField(value_type val) noexcept : value_(val) {}
 
     static constexpr auto mask() -> mask_t { return bit_mask; }
     static constexpr auto offset() -> mask_t { return 0; }
@@ -24,13 +32,13 @@ struct BasicField {
     constexpr auto value() const noexcept -> UInt { return value_; }
 
     template <mask_t rhs_mask>
-    friend constexpr auto operator|(BasicField lhs,
-                                    BasicField<UInt, rhs_mask> rhs) noexcept
+    friend constexpr auto
+    operator|(BasicField lhs, BasicField<value_type, rhs_mask> rhs) noexcept
         -> std::enable_if_t<!masks_overlap<mask(), rhs_mask>{},
-                            BasicField<UInt, mask() | rhs_mask>>
+                            BasicField<value_type, mask() | rhs_mask>>
     {
-        return BasicField<UInt, mask() | rhs_mask>{
-            static_cast<UInt>(lhs.value() | rhs.value())};
+        return BasicField<value_type, mask() | rhs_mask>{
+            static_cast<value_type>(lhs.value() | rhs.value())};
     }
 };
 
