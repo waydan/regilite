@@ -2,6 +2,7 @@
 #define REGILITE_BIT_MASK_HPP
 
 #include <cstdint>
+#include <type_traits>
 
 namespace regilite {
 
@@ -51,7 +52,7 @@ constexpr auto fold_masks(Int m) noexcept
 }
 
 template <typename Int, typename... Ints>
-constexpr auto fold_masks(Int m, Ints... ms) noexcept -> decltype(fold_masks(m))
+constexpr auto fold_masks(Int m, Ints... ms) noexcept
 {
     return fold_masks(m) | fold_masks(ms...);
 }
