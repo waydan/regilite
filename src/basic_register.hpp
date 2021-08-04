@@ -82,7 +82,7 @@ class BasicRegister
     {
         return *const_cast<const volatile storage_type*>(&state_);
     }
-}; // namespace regilite
+};
 
 namespace detail {
 template <typename UInt, UInt reset, typename... MemberFields>
