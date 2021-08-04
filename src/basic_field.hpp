@@ -70,8 +70,9 @@ constexpr auto fold_fields(Field f) noexcept -> BasicField<UInt, Field::mask()>
 }
 
 template <typename UInt, typename Field, typename... Fields>
-constexpr auto fold_fields(Field f, Fields... fs) noexcept
-    -> BasicField<UInt, fold_masks(Field::mask(), Fields::mask()...)>
+constexpr auto fold_fields(Field f, Fields... fs) noexcept -> std::enable_if_t<
+    not fields_overlap<Field, Fields...>{},
+    BasicField<UInt, fold_masks(Field::mask(), Fields::mask()...)>>
 {
     return fold_fields<UInt>(f) + fold_fields<UInt>(fs...);
 }
