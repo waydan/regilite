@@ -57,6 +57,7 @@ constexpr auto to_basicfield(Field f) noexcept
         static_cast<UInt>(static_cast<UInt>(f.value()) << f.offset())};
 }
 
+// This cannot be a function: it must be evaluated without instantiated objects
 template <typename F, typename... Fs>
 using fields_overlap =
     std::integral_constant<bool, masks_overlap(F::mask(), Fs::mask()...)>;
