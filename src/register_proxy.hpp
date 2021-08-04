@@ -71,7 +71,7 @@ class RegisterProxy
         auto match(detail::BasicField<storage_type, mask> f) const noexcept
             -> bool
         {
-            return f.value() == (state_ & mask);
+            return f.value() == (state_ & static_cast<storage_type>(mask));
         }
 
 
