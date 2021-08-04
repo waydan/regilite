@@ -49,7 +49,7 @@ class BasicRegister
             detail::BasicField<storage_type,
                                FieldSet::safe_write_zero & ~field.mask()>{0};
         const storage_type modified_state =
-            detail::insert_bits(volatile_read(), field | zero_field);
+            detail::insert_bits(volatile_read(), field + zero_field);
         volatile_write(modified_state);
         return ReadModifyWrite{};
     }

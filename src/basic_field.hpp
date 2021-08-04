@@ -33,7 +33,7 @@ class BasicField
 
     template <mask_t rhs_mask>
     friend constexpr auto
-    operator|(BasicField lhs, BasicField<value_type, rhs_mask> rhs) noexcept
+    operator+(BasicField lhs, BasicField<value_type, rhs_mask> rhs) noexcept
         -> std::enable_if_t<!masks_overlap<mask(), rhs_mask>{},
                             BasicField<value_type, mask() | rhs_mask>>
     {
@@ -63,7 +63,7 @@ template <typename UInt, typename Field, typename... Fields>
 constexpr auto fold_fields(Field f, Fields... fs) noexcept
     -> BasicField<UInt, fold_masks(Field::mask(), Fields::mask()...)>
 {
-    return fold_fields<UInt>(f) | fold_fields<UInt>(fs...);
+    return fold_fields<UInt>(f) + fold_fields<UInt>(fs...);
 }
 
 
