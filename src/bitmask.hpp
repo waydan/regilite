@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "traits.hpp"
+
 namespace regilite {
 
 using mask_t = std::uint64_t;
@@ -19,29 +21,27 @@ struct Mask : std::integral_constant<mask_t, (~1ul << msb) ^ (~0ul << lsb)> {
 
 namespace detail {
 
-template <bool test, mask_t accum, mask_t... masks>
-struct masks_overlap_impl;
+constexpr auto masks_overlap(mask_t) noexcept { return false; }
 
-template <mask_t accum>
-struct masks_overlap_impl<false, accum> : std::false_type {};
+constexpr auto masks_overlap(mask_t a, mask_t b) noexcept
+{
+    return mask_t{0u} != (a & b);
+}
 
-template <mask_t accum, mask_t... masks>
-struct masks_overlap_impl<true, accum, masks...> : std::true_type {};
-
-template <mask_t accum, mask_t mask, mask_t... masks>
-struct masks_overlap_impl<false, accum, mask, masks...>
-    : masks_overlap_impl<(accum | mask) != (accum ^ mask), accum | mask,
-                         masks...> {};
-
-template <mask_t mask, mask_t... masks>
-using masks_overlap = masks_overlap_impl<false, mask, masks...>;
-
+template <typename... M>
+constexpr auto masks_overlap(mask_t a, mask_t b, M... c) noexcept
+    -> std::enable_if_t<
+        traits::conjunction(std::is_convertible<M, mask_t>{}...), bool>
+{
+    return masks_overlap(a, b)
+           or masks_overlap(a | b, static_cast<mask_t>(c)...);
+}
 
 // Test masks_overlap
-static_assert(!masks_overlap<0x1234>{}, "Single mask does not overlap");
-static_assert(!masks_overlap<0x0F, 0xF0>{}, "These masks do not overlap");
-static_assert(masks_overlap<0x0F, 0xF8>{}, "These masks do overlap");
-static_assert(masks_overlap<0x0F, 0xF0, 0x01>{}, "Final mask overlaps");
+static_assert(!masks_overlap(0x1234), "Single mask does not overlap");
+static_assert(!masks_overlap(0x0F, 0xF0), "These masks do not overlap");
+static_assert(masks_overlap(0x0F, 0xF8), "These masks do overlap");
+static_assert(masks_overlap(0x0F, 0xF0, 0x01), "Final mask overlaps");
 
 
 template <typename Int>

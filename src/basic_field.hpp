@@ -34,7 +34,7 @@ class BasicField
     template <mask_t rhs_mask>
     friend constexpr auto
     operator+(BasicField lhs, BasicField<value_type, rhs_mask> rhs) noexcept
-        -> std::enable_if_t<!masks_overlap<mask(), rhs_mask>{},
+        -> std::enable_if_t<!masks_overlap(mask(), rhs_mask),
                             BasicField<value_type, mask() | rhs_mask>>
     {
         return BasicField<value_type, mask() | rhs_mask>{
@@ -58,7 +58,8 @@ constexpr auto to_basicfield(Field f) noexcept
 }
 
 template <typename F, typename... Fs>
-using fields_overlap = masks_overlap<F::mask(), Fs::mask()...>;
+using fields_overlap =
+    std::integral_constant<bool, masks_overlap(F::mask(), Fs::mask()...)>;
 
 
 template <typename UInt, typename Field>

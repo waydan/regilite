@@ -3,6 +3,7 @@
 
 #include <type_traits>
 
+#include "basic_field.hpp"
 #include "bitmask.hpp"
 
 namespace regilite {
