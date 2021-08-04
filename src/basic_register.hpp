@@ -40,8 +40,6 @@ class BasicRegister
   private:
     storage_type state_;
 
-
-  protected:
     template <typename Field>
     auto select_write(Field field, std::false_type) noexcept
     {
@@ -58,13 +56,15 @@ class BasicRegister
     template <typename Field>
     auto select_write(Field field, std::true_type) noexcept
     {
-        volatile_write(static_cast<storage_type>(
-            (field.value() << field.offset())
-            | (reset & FieldSet::safe_write_reset & ~field.mask())));
+        const auto overwrite_field = fold_exclusive(
+            field, detail::BasicField<storage_type, FieldSet::safe_write_reset>{
+                       reset & FieldSet::safe_write_reset});
+        volatile_write(static_cast<storage_type>(overwrite_field.value()
+                                                 << field.offset()));
         return Overwrite{};
     }
 
-
+  protected:
     template <typename Field>
     auto write_field(Field field) noexcept
     {

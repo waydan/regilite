@@ -40,6 +40,14 @@ class BasicField
         return BasicField<value_type, mask() | rhs_mask>{
             static_cast<value_type>(lhs.value() | rhs.value())};
     }
+
+    template <mask_t rhs_mask>
+    friend constexpr auto operator-(BasicField lhs,
+                                    BasicField<value_type, rhs_mask>) noexcept
+    {
+        return BasicField<value_type, mask() & ~rhs_mask>{
+            static_cast<value_type>(lhs.value() & ~rhs_mask)};
+    }
 };
 
 template <typename UInt, typename Field>
@@ -64,6 +72,18 @@ constexpr auto fold_fields(Field f, Fields... fs) noexcept
     -> BasicField<UInt, fold_masks(Field::mask(), Fields::mask()...)>
 {
     return fold_fields<UInt>(f) + fold_fields<UInt>(fs...);
+}
+
+template <typename FieldA, typename FieldB>
+constexpr auto fold_exclusive(FieldA a, FieldB b) noexcept
+{
+    return a + (b - a);
+}
+
+template <typename FieldA, typename FieldB, typename... Fields>
+constexpr auto fold_exclusive(FieldA a, FieldB b, Fields... fs) noexcept
+{
+    return fold_exclusive(fold_exclusive(a, b), fs...);
 }
 
 
