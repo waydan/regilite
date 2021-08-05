@@ -40,7 +40,8 @@ TEST(WriteSpecialFields, ResetValueIsPreservedInReservedFields)
 {
     register_view(special_reg) = 0b01111110;
     const auto audit = special_reg.write(Fx{1});
-    static_assert(std::is_same<decltype(audit), const regilite::Overwrite>{},
+    static_assert(regilite::traits::match_unqualified<decltype(audit),
+                                                      regilite::Overwrite>,
                   "Whole field should be overwritten");
     REGISTER_EQUALS(0x01, special_reg);
 }

@@ -1,5 +1,6 @@
 #include "CppUTest/TestHarness.h"
 #include "test_registers.hpp"
+#include "traits.hpp"
 
 
 TestReg test_register;
@@ -34,7 +35,8 @@ TEST(WriteFieldsToRegister, FieldUnsetBitsAreCleared)
     register_view(test_register) = 0b1111;
     const auto audit = test_register.write(F1{1}, F0{0});
     static_assert(
-        std::is_same<decltype(audit), const regilite::ReadModifyWrite>{},
+        regilite::traits::match_unqualified<decltype(audit),
+                                            regilite::ReadModifyWrite>,
         "Test expects reserved fields will keep dynamic value");
     REGISTER_EQUALS(0b1010, test_register);
 }
