@@ -24,7 +24,7 @@ class Write
         : addr_(reinterpret_cast<std::uintptr_t>(ptr))
     {}
 
-    constexpr auto address() -> std::uintptr_t { return addr_; }
+    constexpr auto address() const noexcept { return addr_; }
 };
 
 
