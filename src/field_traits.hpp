@@ -34,11 +34,9 @@ struct SafeWrite<type, Field>
     : std::integral_constant<mask_t, safe_write<Field>(type)> {};
 
 
-} // namespace detail
-
 template <typename... Fields>
 struct FieldGroup {
-    static constexpr mask_t reserved = ~detail::fold_masks(Fields::mask()...);
+    using Reserved = detail::BasicField<~detail::fold_masks(Fields::mask()...)>;
 
     static constexpr mask_t safe_write_zero =
         detail::SafeWrite<detail::SafeWriteDefault::Zero, Fields...>{};
@@ -46,8 +44,9 @@ struct FieldGroup {
         detail::SafeWrite<detail::SafeWriteDefault::One, Fields...>{};
     static constexpr mask_t safe_write_reset =
         detail::SafeWrite<detail::SafeWriteDefault::Reset, Fields...>{}
-        | reserved;
+        | Reserved::mask();
 };
+} // namespace detail
 
 struct WriteOnly {
     static constexpr auto reads_as = detail::SafeWriteDefault::Reset;

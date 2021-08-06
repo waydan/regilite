@@ -29,7 +29,7 @@ class RegisterProxy
     static constexpr bool is_member_field = traits::conjunction(
         traits::is_pack_element<Fields, MemberFields...>{}...);
 
-    using FieldSet = FieldGroup<MemberFields...>;
+    using FieldSet = detail::FieldGroup<MemberFields...>;
 
     static constexpr mask_t static_zero =
         detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
