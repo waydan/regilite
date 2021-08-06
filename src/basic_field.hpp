@@ -10,51 +10,47 @@
 namespace regilite {
 namespace detail {
 
-template <typename UInt, mask_t bit_mask>
+template <mask_t bit_mask>
 class BasicField
 {
-    static_assert(std::is_unsigned<UInt>{} and not std::is_same<UInt, bool>{},
-                  "Register<> type requires an unsigned integral as its "
-                  "underlying representation.");
-
-  public:
-    using value_type = UInt;
 
   private:
-    UInt value_;
+    mask_t value_;
 
   public:
-    explicit constexpr BasicField(value_type val) noexcept : value_(val) {}
+    explicit constexpr BasicField(mask_t val) noexcept : value_(val) {}
 
     static constexpr auto mask() -> mask_t { return bit_mask; }
-    static constexpr auto offset() -> mask_t { return 0; }
+    static constexpr auto offset() -> mask_t { return 0u; }
 
-    constexpr auto value() const noexcept -> UInt { return value_; }
+    constexpr auto value() const noexcept { return value_; }
 
     template <mask_t rhs_mask>
-    friend constexpr auto
-    operator+(BasicField lhs, BasicField<value_type, rhs_mask> rhs) noexcept
+    friend constexpr auto operator+(BasicField lhs,
+                                    BasicField<rhs_mask> rhs) noexcept
         -> std::enable_if_t<!masks_overlap(mask(), rhs_mask),
-                            BasicField<value_type, mask() | rhs_mask>>
+                            BasicField<mask() | rhs_mask>>
     {
-        return BasicField<value_type, mask() | rhs_mask>{
-            static_cast<value_type>(lhs.value() | rhs.value())};
+        return BasicField<mask() | rhs_mask>{
+            static_cast<mask_t>(lhs.value() | rhs.value())};
     }
 
     template <mask_t rhs_mask>
     friend constexpr auto operator-(BasicField lhs,
-                                    BasicField<value_type, rhs_mask>) noexcept
+                                    BasicField<rhs_mask>) noexcept
     {
-        return BasicField<value_type, mask() & ~rhs_mask>{
-            static_cast<value_type>(lhs.value() & ~rhs_mask)};
+        return BasicField<mask() & ~rhs_mask>{
+            static_cast<mask_t>(lhs.value() & ~rhs_mask)};
     }
 };
 
-template <typename UInt, typename Field>
+template <typename Field>
 constexpr auto to_basicfield(Field f) noexcept
+    -> std::enable_if_t<sizeof(typename Field::value_type) <= sizeof(mask_t),
+                        detail::BasicField<Field::mask()>>
 {
-    return detail::BasicField<UInt, f.mask()>{
-        static_cast<UInt>(static_cast<UInt>(f.value()) << f.offset())};
+    return detail::BasicField<f.mask()>{
+        static_cast<mask_t>(static_cast<mask_t>(f.value()) << f.offset())};
 }
 
 // This cannot be a function: it must be evaluated without instantiated objects
@@ -63,18 +59,18 @@ using fields_overlap =
     std::integral_constant<bool, masks_overlap(F::mask(), Fs::mask()...)>;
 
 
-template <typename UInt, typename Field>
-constexpr auto fold_fields(Field f) noexcept -> BasicField<UInt, Field::mask()>
+template <typename Field>
+constexpr auto fold_fields(Field f) noexcept -> decltype(to_basicfield(f))
 {
-    return to_basicfield<UInt>(f);
+    return to_basicfield(f);
 }
 
-template <typename UInt, typename Field, typename... Fields>
+template <typename Field, typename... Fields>
 constexpr auto fold_fields(Field f, Fields... fs) noexcept -> std::enable_if_t<
     not fields_overlap<Field, Fields...>{},
-    BasicField<UInt, fold_masks(Field::mask(), Fields::mask()...)>>
+    BasicField<fold_masks(Field::mask(), Fields::mask()...)>>
 {
-    return fold_fields<UInt>(f) + fold_fields<UInt>(fs...);
+    return to_basicfield(f) + fold_fields(fs...);
 }
 
 template <typename FieldA, typename FieldB>
@@ -91,10 +87,11 @@ constexpr auto fold_exclusive(FieldA a, FieldB b, Fields... fs) noexcept
 
 
 template <typename UInt, mask_t mask>
-constexpr auto insert_bits(UInt value, BasicField<UInt, mask> field) noexcept
-    -> UInt
+constexpr auto insert_bits(UInt value, BasicField<mask> field) noexcept
+    -> std::enable_if_t<sizeof(UInt) <= sizeof(mask_t), UInt>
 {
-    return (value & ~static_cast<UInt>(mask)) | field.value();
+    return (value & ~static_cast<UInt>(mask))
+           | static_cast<UInt>(field.value() << field.offset());
 }
 
 

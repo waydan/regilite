@@ -68,10 +68,10 @@ class RegisterProxy
         };
 
         template <mask_t mask>
-        auto match(detail::BasicField<storage_type, mask> f) const noexcept
-            -> bool
+        auto match(detail::BasicField<mask> f) const noexcept -> bool
         {
-            return f.value() == (state_ & static_cast<storage_type>(mask));
+            return static_cast<storage_type>(f.value())
+                   == (state_ & static_cast<storage_type>(mask));
         }
 
 
@@ -86,7 +86,7 @@ class RegisterProxy
                 Field> and !detail::fields_overlap<Field, Fields...>{},
             Snapshot&>
         {
-            const auto fields = detail::fold_fields<storage_type>(f, fs...);
+            const auto fields = detail::fold_fields(f, fs...);
             state_ = detail::insert_bits(state_, fields);
             return *this;
         }
@@ -114,7 +114,7 @@ class RegisterProxy
                     Fields...> and !detail::fields_overlap<Field, Fields...>{},
                 bool>
         {
-            const auto fields = detail::fold_fields<storage_type>(f, fs...);
+            const auto fields = detail::fold_fields(f, fs...);
             return match(fields);
         }
 
@@ -146,7 +146,7 @@ class RegisterProxy
                 Fields...> and !detail::fields_overlap<Field, Fields...>{}>>
     auto write(Field f, Fields... fs) noexcept
     {
-        const auto fields = detail::fold_fields<storage_type>(f, fs...);
+        const auto fields = detail::fold_fields(f, fs...);
         return impl().write_field(fields);
     }
 

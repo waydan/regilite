@@ -44,8 +44,7 @@ class BasicRegister
     auto select_write(Field field, std::false_type) noexcept
     {
         constexpr auto zero_field =
-            detail::BasicField<storage_type,
-                               FieldSet::safe_write_zero & ~field.mask()>{0};
+            detail::BasicField<FieldSet::safe_write_zero & ~field.mask()>{0};
         const storage_type modified_state =
             detail::insert_bits(volatile_read(), field + zero_field);
         volatile_write(modified_state);
@@ -57,7 +56,7 @@ class BasicRegister
     auto select_write(Field field, std::true_type) noexcept
     {
         const auto overwrite_field = fold_exclusive(
-            field, detail::BasicField<storage_type, FieldSet::safe_write_reset>{
+            field, detail::BasicField<FieldSet::safe_write_reset>{
                        reset & FieldSet::safe_write_reset});
         volatile_write(static_cast<storage_type>(overwrite_field.value()
                                                  << field.offset()));

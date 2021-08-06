@@ -8,7 +8,7 @@
 
 namespace regilite {
 
-using mask_t = std::uint64_t;
+using mask_t = std::uintptr_t;
 
 
 template <int msb, int lsb = msb>
