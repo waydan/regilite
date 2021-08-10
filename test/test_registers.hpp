@@ -14,18 +14,12 @@ SimpleString StringFrom(regilite::Field<ValType, mask> f)
            + StringFrom(regilite::traits::to_uint(f.value()));
 }
 
-template <typename Register>
-auto& register_view(Register& reg)
-{
-    return *reinterpret_cast<typename Register::storage_type*>(&reg);
-}
-
 
 template <typename Register, typename UInt>
 void REGISTER_EQUALS(UInt value, Register& reg)
 {
     LONGS_EQUAL(static_cast<typename Register::storage_type>(value),
-                register_view(reg));
+                reg.raw_read());
 }
 
 

@@ -8,7 +8,7 @@ TestReg test_register;
 
 TEST_GROUP(WriteFieldsToRegister)
 {
-    void setup() { register_view(test_register) = 0u; };
+    void setup() { test_register.raw_write(0u); };
 };
 
 TEST(WriteFieldsToRegister, SetOneBit)
@@ -25,14 +25,14 @@ TEST(WriteFieldsToRegister, SetTwoAdjacentFields)
 
 TEST(WriteFieldsToRegister, WritesOnlyModifyBitsInField)
 {
-    register_view(test_register) = 0b100u;
+    test_register.raw_write(0b100u);
     test_register.write(F0{1});
     REGISTER_EQUALS(0b101, test_register);
 }
 
 TEST(WriteFieldsToRegister, FieldUnsetBitsAreCleared)
 {
-    register_view(test_register) = 0b1111;
+    test_register.raw_write(0b1111);
     const auto audit = test_register.write(F1{1}, F0{0});
     static_assert(
         regilite::traits::match_unqualified<decltype(audit),

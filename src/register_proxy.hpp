@@ -123,8 +123,15 @@ class RegisterProxy
         }
     }; // class Snapshot
 
+    auto raw_read() const noexcept -> storage_type
+    {
+        return impl().volatile_read();
+    }
 
-    auto write(Snapshot s) noexcept -> void { impl().volatile_write(s.raw()); }
+    auto raw_write(storage_type state) noexcept -> void
+    {
+        impl().volatile_write(state);
+    }
 
 
     template <

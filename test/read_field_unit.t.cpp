@@ -5,7 +5,7 @@ TestReg test_register;
 
 TEST_GROUP(ReadFieldFromRegister)
 {
-    void setup() { register_view(test_register) = 0u; };
+    void setup() { test_register.raw_write(0u); };
 };
 
 TEST(ReadFieldFromRegister, ReadSingleClearedBit)

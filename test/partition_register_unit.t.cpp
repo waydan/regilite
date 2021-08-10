@@ -9,7 +9,7 @@ PartableReg test_register;
 
 TEST_GROUP(PartitionRegisterAccess)
 {
-    void setup() { register_view(test_register) = 0u; };
+    void setup() { test_register.raw_write(0u); };
 };
 
 TEST(PartitionRegisterAccess, WriteBitInLowestByte)

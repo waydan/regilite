@@ -20,12 +20,12 @@ regilite::BasicRegister<std::uint8_t, 0, Fx, Flag> special_reg;
 
 TEST_GROUP(WriteSpecialFields)
 {
-    void setup() { register_view(special_reg) = 0u; };
+    void setup() { special_reg.raw_write(0u); };
 };
 
 TEST(WriteSpecialFields, ImplicitlyWrite1ToW1C)
 {
-    register_view(special_reg) = 0x80;
+    special_reg.raw_write(0x80);
     special_reg.write(Fx{1});
     REGISTER_EQUALS(0x01, special_reg);
 }
@@ -38,7 +38,7 @@ TEST(WriteSpecialFields, ExplicitWritePreventsImplicitWrite)
 
 TEST(WriteSpecialFields, ResetValueIsPreservedInReservedFields)
 {
-    register_view(special_reg) = 0b01111110;
+    special_reg.raw_write(0b01111110);
     const auto audit = special_reg.write(Fx{1});
     static_assert(regilite::traits::match_unqualified<decltype(audit),
                                                       regilite::Overwrite>,
