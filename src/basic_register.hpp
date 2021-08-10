@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "basic_field.hpp"
+#include "bitmask.hpp"
 #include "register_proxy.hpp"
 #include "traits.hpp"
 
@@ -28,13 +29,11 @@ class BasicRegister
 
     static constexpr auto can_safely_overwrite(mask_t mask) noexcept -> bool
     {
-        constexpr auto static_write_mask = FieldSet::SafeWriteZero::mask()
-                                           | FieldSet::SafeWriteOne::mask()
-                                           | FieldSet::SafeWriteReset::mask();
-        constexpr storage_type storage_mask = ~storage_type{0u};
-
-        return static_cast<storage_type>(static_write_mask | mask)
-               == storage_mask;
+        return static_cast<storage_type>(
+                   detail::fold_masks(FieldSet::SafeWriteZero::mask(),
+                                      FieldSet::SafeWriteOne::mask(),
+                                      FieldSet::SafeWriteReset::mask(), mask))
+               == static_cast<storage_type>(~storage_type{0u});
     }
 
   private:
@@ -88,7 +87,6 @@ struct register_traits<BasicRegister<UInt, reset, MemberFields...>> {
     using storage_type = UInt;
 };
 } // namespace detail
-
 } // namespace regilite
 
 #endif // REGILITE_BASIC_REGISTER_HPP
