@@ -26,12 +26,10 @@ constexpr auto safe_write(SafeWriteDefault type) noexcept -> mask_t
 
 template <SafeWriteDefault type, typename Field, typename... Fields>
 struct SafeWrite
-    : std::integral_constant<mask_t, SafeWrite<type, Fields...>{}
-                                         | safe_write<Field>(type)> {};
-
-template <SafeWriteDefault type, typename Field>
-struct SafeWrite<type, Field>
-    : std::integral_constant<mask_t, safe_write<Field>(type)> {};
+    : std::integral_constant<mask_t,
+                             detail::fold_masks(safe_write<Field>(type),
+                                                safe_write<Fields>(type)...)> {
+};
 
 
 template <typename... Fields>
@@ -45,29 +43,42 @@ struct FieldGroup {
     using SafeWriteReset =
         BasicField<SafeWrite<SafeWriteDefault::Reset, Fields...>{}
                    | Reserved::mask()>;
+    using SafeWriteVolatile =
+        BasicField<SafeWrite<SafeWriteDefault::Volatile, Fields...>{}
+                   | Reserved::mask()>;
+
+    // using AlwaysReadsZero =
+    //     BasicField<ReadsAs<SafeWriteDefault::Zero, Fields...>{}>;
+    // using AlwaysReadsOne =
+    //     BasicField<ReadsAs<SafeWriteDefault::One, Fields...>{}>;
+    // using AlwaysReadsReset =
+    //     BasicField<ReadsAs<SafeWriteDefault::Reset, Fields...>{}
+    //                | Reserved::mask()>;
+    // using AlwaysReadsVolatile =
+    //     BasicField<ReadsAs<SafeWriteDefault::Volatile, Fields...>{}>;
 };
 } // namespace detail
 
 struct WriteOnly {
-    static constexpr auto reads_as = detail::SafeWriteDefault::Reset;
+    static constexpr auto always_reads = detail::SafeWriteDefault::Reset;
     static constexpr auto safe_write = detail::SafeWriteDefault::Zero;
 };
 using WO = WriteOnly;
 
 struct ReadOnly {
-    static constexpr auto reads_as = detail::SafeWriteDefault::Volatile;
+    static constexpr auto always_reads = detail::SafeWriteDefault::Volatile;
     static constexpr auto safe_write = detail::SafeWriteDefault::Volatile;
 };
 using RO = ReadOnly;
 
 struct WriteOneToClear {
-    static constexpr auto reads_as = detail::SafeWriteDefault::Volatile;
+    static constexpr auto always_reads = detail::SafeWriteDefault::Volatile;
     static constexpr auto safe_write = detail::SafeWriteDefault::Zero;
 };
 using W1C = WriteOneToClear;
 
 struct ReadWrite {
-    static constexpr auto reads_as = detail::SafeWriteDefault::Volatile;
+    static constexpr auto always_reads = detail::SafeWriteDefault::Volatile;
     static constexpr auto safe_write = detail::SafeWriteDefault::Volatile;
 };
 using RW = ReadWrite;
