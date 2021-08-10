@@ -44,9 +44,8 @@ class BasicField
                                     BasicField<rhs_mask>) noexcept
     {
         using ResultField = BasicField<mask() & ~rhs_mask>;
-        return ResultField{
-            static_cast<typename ResultField::value_type>(lhs.value())
-            & ~static_cast<typename ResultField::value_type>(rhs_mask)};
+        return ResultField{static_cast<typename ResultField::value_type>(
+            lhs.value() & ~rhs_mask)};
     }
 };
 

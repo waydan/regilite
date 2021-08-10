@@ -36,15 +36,15 @@ struct SafeWrite<type, Field>
 
 template <typename... Fields>
 struct FieldGroup {
-    using Reserved = detail::BasicField<~detail::fold_masks(Fields::mask()...)>;
+    using Reserved = BasicField<~fold_masks(Fields::mask()...)>;
 
-    static constexpr mask_t safe_write_zero =
-        detail::SafeWrite<detail::SafeWriteDefault::Zero, Fields...>{};
-    static constexpr mask_t safe_write_one =
-        detail::SafeWrite<detail::SafeWriteDefault::One, Fields...>{};
-    static constexpr mask_t safe_write_reset =
-        detail::SafeWrite<detail::SafeWriteDefault::Reset, Fields...>{}
-        | Reserved::mask();
+    using SafeWriteZero =
+        BasicField<SafeWrite<SafeWriteDefault::Zero, Fields...>{}>;
+    using SafeWriteOne =
+        BasicField<SafeWrite<SafeWriteDefault::One, Fields...>{}>;
+    using SafeWriteReset =
+        BasicField<SafeWrite<SafeWriteDefault::Reset, Fields...>{}
+                   | Reserved::mask()>;
 };
 } // namespace detail
 

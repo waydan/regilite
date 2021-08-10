@@ -28,9 +28,9 @@ class BasicRegister
 
     static constexpr auto can_safely_overwrite(mask_t mask) noexcept -> bool
     {
-        constexpr auto static_write_mask = FieldSet::safe_write_zero
-                                           | FieldSet::safe_write_one
-                                           | FieldSet::safe_write_reset;
+        constexpr auto static_write_mask = FieldSet::SafeWriteZero::mask()
+                                           | FieldSet::SafeWriteOne::mask()
+                                           | FieldSet::SafeWriteReset::mask();
         constexpr storage_type storage_mask = ~storage_type{0u};
 
         return static_cast<storage_type>(static_write_mask | mask)
@@ -43,10 +43,9 @@ class BasicRegister
     template <typename Field>
     auto select_write(Field field, std::false_type) noexcept
     {
-        constexpr auto zero_field =
-            detail::BasicField<FieldSet::safe_write_zero & ~field.mask()>{0};
-        const storage_type modified_state =
-            detail::insert_bits(volatile_read(), field + zero_field);
+        const storage_type modified_state = detail::insert_bits(
+            volatile_read(),
+            fold_exclusive(field, typename FieldSet::SafeWriteZero{0}));
         volatile_write(modified_state);
         return ReadModifyWrite{};
     }
@@ -56,8 +55,8 @@ class BasicRegister
     auto select_write(Field field, std::true_type) noexcept
     {
         const auto overwrite_field = fold_exclusive(
-            field, detail::BasicField<FieldSet::safe_write_reset>{
-                       reset & FieldSet::safe_write_reset});
+            field, typename FieldSet::SafeWriteReset{
+                       reset & FieldSet::SafeWriteReset::mask()});
         volatile_write(static_cast<storage_type>(overwrite_field.value()
                                                  << field.offset()));
         return Overwrite{};
