@@ -11,24 +11,41 @@ namespace regilite {
 namespace detail {
 
 template <int size>
-struct Block;
+struct Bytes;
 
 template <>
-struct Block<1> {
+struct Bytes<1> {
     using type = std::uint8_t;
 };
 template <>
-struct Block<2> {
+struct Bytes<2> {
     using type = std::uint16_t;
 };
 template <>
-struct Block<4> {
+struct Bytes<4> {
     using type = std::uint32_t;
 };
 template <>
-struct Block<8> {
+struct Bytes<8> {
     using type = std::uint64_t;
 };
+
+// Returns the minimum number of bytes to contain an integral value
+template <typename T>
+constexpr auto min_bytes(T x)
+    -> std::enable_if_t<std::is_integral<T>{}, std::uint8_t>
+{
+    for (unsigned char n_bytes = 1u; n_bytes < sizeof(T); n_bytes *= 2)
+        if (x <= (T{1} << (n_bytes * 8)) - 1)
+            return n_bytes;
+    return sizeof(T);
+}
+
+static_assert(min_bytes(0) == 1, "One byte needed to hold value zero");
+static_assert(min_bytes(1) == 1, "One byte needed to hold value one");
+static_assert(min_bytes(255) == 1, "2^8 - 1 = 255");
+static_assert(min_bytes(256) == 2, "2^8 = 256");
+static_assert(min_bytes(65536) == 4, "2^16 = 65536");
 
 
 template <mask_t mask>
@@ -36,7 +53,7 @@ struct Partition {
     static_assert(mask != 0, "Mask must include at least one set bit.");
 
     using type =
-        typename Block<(1 << (msb((msb(mask) ^ lsb(mask)) / 8) + 1))>::type;
+        typename Bytes<(1 << (msb((msb(mask) ^ lsb(mask)) / 8) + 1))>::type;
     static constexpr auto size() noexcept -> int { return sizeof(type) * 8; }
     static constexpr auto offset() noexcept -> int
     {

@@ -6,6 +6,7 @@
 
 
 #include "bitmask.hpp"
+#include "partition_type.hpp"
 
 namespace regilite {
 namespace detail {
@@ -13,12 +14,14 @@ namespace detail {
 template <mask_t bit_mask>
 class BasicField
 {
+  public:
+    using value_type = typename Bytes<min_bytes(bit_mask)>::type;
 
   private:
-    mask_t value_;
+    value_type value_;
 
   public:
-    explicit constexpr BasicField(mask_t val) noexcept : value_(val) {}
+    explicit constexpr BasicField(value_type val) noexcept : value_(val) {}
 
     static constexpr auto mask() -> mask_t { return bit_mask; }
     static constexpr auto offset() -> mask_t { return 0u; }
@@ -31,16 +34,19 @@ class BasicField
         -> std::enable_if_t<!masks_overlap(mask(), rhs_mask),
                             BasicField<mask() | rhs_mask>>
     {
-        return BasicField<mask() | rhs_mask>{
-            static_cast<mask_t>(lhs.value() | rhs.value())};
+        using ResultField = BasicField<mask() | rhs_mask>;
+        return ResultField{static_cast<typename ResultField::value_type>(
+            lhs.value() | rhs.value())};
     }
 
     template <mask_t rhs_mask>
     friend constexpr auto operator-(BasicField lhs,
                                     BasicField<rhs_mask>) noexcept
     {
-        return BasicField<mask() & ~rhs_mask>{
-            static_cast<mask_t>(lhs.value() & ~rhs_mask)};
+        using ResultField = BasicField<mask() & ~rhs_mask>;
+        return ResultField{
+            static_cast<typename ResultField::value_type>(lhs.value())
+            & ~static_cast<typename ResultField::value_type>(rhs_mask)};
     }
 };
 
@@ -49,8 +55,10 @@ constexpr auto to_basicfield(Field f) noexcept
     -> std::enable_if_t<sizeof(typename Field::value_type) <= sizeof(mask_t),
                         detail::BasicField<Field::mask()>>
 {
-    return detail::BasicField<f.mask()>{
-        static_cast<mask_t>(static_cast<mask_t>(f.value()) << f.offset())};
+    using ResultField = BasicField<f.mask()>;
+    return ResultField{static_cast<typename ResultField::value_type>(
+        static_cast<typename ResultField::value_type>(f.value())
+        << f.offset())};
 }
 
 // This cannot be a function: it must be evaluated without instantiated objects
