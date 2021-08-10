@@ -47,11 +47,12 @@ Writing to a Register
 ~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: Cpp
 
-    // Able to write one or more field values simultaneously
+    // Writing a single field to the register
     reg.write(SlewRate::Fast);
+    // Writing multiple fields to the register
     reg.write(Mux{5}, DriveStrength::Low);
 
-    // Error! Cannot write different values to the same field
+    // Error: Cannot write the same field twice in one expression
     reg.write(SlewRate::Fast, SlewRate::Slow);
 
 Capturing Register State
@@ -75,8 +76,8 @@ Extracting a Field
     PullSelect selector = snapshot.extract();
 
 
-Testing Fields
-~~~~~~~~~~~~~~
+Testing Field Values
+~~~~~~~~~~~~~~~~~~~~
 .. code-block:: Cpp
 
     // Check if single field matches register state
