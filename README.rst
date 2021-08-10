@@ -63,17 +63,6 @@ Capturing Register State
 
 Sometimes a piece of code will need to refer to the same register state multiple times while assuming it has not changed. `Register::read()` copies the state of the volatile register to a non-volatile object for later processing.
 
-Changing Saved Register State
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. code-block:: Cpp
-
-    // Modifying a saved register state uses different syntax
-    snapshot.modify(SlewRate::Fast);
-    snapshot.modify(Mux{5}, DriveStrength::Low);
-
-    // Modification may be chained
-    snapshot.modify(Mux{5}).modify(DriveStrength::Low);
-
 
 Extracting a Field
 ~~~~~~~~~~~~~~~~~~

@@ -80,17 +80,6 @@ class RegisterProxy
 
         constexpr auto raw() const noexcept -> storage_type { return state_; }
 
-        // template <typename Field, typename... Fields>
-        // auto modify(Field f, Fields... fs) noexcept -> std::enable_if_t<
-        //     is_member_field<
-        //         Field> and !detail::fields_overlap<Field, Fields...>{},
-        //     Snapshot&>
-        // {
-        //     const auto fields = detail::fold_fields(f, fs...);
-        //     state_ = detail::insert_bits(state_, fields);
-        //     return *this;
-        // }
-
 
         constexpr auto extract_field() const noexcept
         {
@@ -130,7 +119,7 @@ class RegisterProxy
         auto match_any(Field f, Fields... fs) const noexcept
             -> std::enable_if_t<is_member_field<Field, Fields...>, bool>
         {
-            return match_any(f) or match_any(fs...);
+            return match(f) or match_any(fs...);
         }
     }; // class Snapshot
 
