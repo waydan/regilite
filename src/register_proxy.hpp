@@ -63,7 +63,7 @@ class RegisterProxy
             constexpr operator Field() const noexcept
             {
                 return Field{static_cast<typename Field::value_type>(
-                    (state_ & Field::mask()) >> detail::lsb(Field::mask()))};
+                    (state_ & Field::mask()) >> Field::offset())};
             }
         };
 
