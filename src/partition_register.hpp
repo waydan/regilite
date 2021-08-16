@@ -64,27 +64,27 @@ class PartitionRegister
 
     auto volatile_write(storage_type s) noexcept -> void
     {
-        *const_cast<volatile storage_type*>(&state_) = s;
+        *static_cast<volatile storage_type*>(&state_) = s;
     }
 
     template <typename T>
     auto volatile_write(T* address, T state) noexcept
         -> std::enable_if_t<traits::is_storage_type<T>{}, Write<T>>
     {
-        *const_cast<volatile T*>(address) = state;
+        *static_cast<volatile T*>(address) = state;
         return Write<T>{address};
     }
 
     auto volatile_read() const noexcept -> storage_type
     {
-        return *const_cast<const volatile storage_type*>(&state_);
+        return *static_cast<const volatile storage_type*>(&state_);
     }
 
     template <typename T>
     auto volatile_read(T* address)
         -> std::enable_if_t<traits::is_storage_type<T>{}, T>
     {
-        return *const_cast<volatile T*>(address);
+        return *static_cast<volatile T*>(address);
     }
 };
 

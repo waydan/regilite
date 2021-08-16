@@ -72,12 +72,12 @@ class BasicRegister
 
     auto volatile_write(storage_type s) noexcept -> void
     {
-        *const_cast<volatile storage_type*>(&state_) = s;
+        *static_cast<volatile storage_type*>(&state_) = s;
     }
 
     auto volatile_read() const noexcept -> storage_type
     {
-        return *const_cast<const volatile storage_type*>(&state_);
+        return *static_cast<const volatile storage_type*>(&state_);
     }
 };
 
