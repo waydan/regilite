@@ -9,5 +9,21 @@
     "clang-tidy.compilerArgs": [
         "-DNDEBUG"
     ],
-    "clang-tidy.buildPath": "../build"
+    "clang-tidy.buildPath": "../build",
+    "clang-tidy.blacklist": [
+        ".*.t.cpp"
+    ],
+    "clang-tidy.checks": [
+        "readability-*",
+        "modernize-*",
+        "portability-*",
+        "misc-*",
+        "cppcoreguidelines-*",
+        "-*-reinterpret-cast",
+        "-modernize-use-trailing-return-type",
+        "-*-uppercase-literal-suffix",
+        "-*-named-parameter",
+        "-*-magic-numbers",
+        "-readability-braces-around-statements"
+    ]
 }
