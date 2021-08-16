@@ -58,6 +58,11 @@ class RegisterProxy
           public:
             constexpr FieldExtractor(storage_type s) noexcept : state_{s} {}
 
+            FieldExtractor(const FieldExtractor&) = delete;
+            FieldExtractor& operator=(const FieldExtractor&) = delete;
+            FieldExtractor& operator=(FieldExtractor&&) = delete;
+            ~FieldExtractor() = default;
+
             template <typename Field,
                       typename = std::enable_if_t<is_member_field<Field>>>
             constexpr operator Field() const noexcept
