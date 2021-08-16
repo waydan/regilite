@@ -15,11 +15,10 @@ SimpleString StringFrom(regilite::Field<ValType, mask> f)
 }
 
 
-template <typename Register, typename UInt>
-void REGISTER_EQUALS(UInt value, Register& reg)
+template <typename Register>
+void REGISTER_EQUALS(typename Register::storage_type value, Register& reg)
 {
-    LONGS_EQUAL(static_cast<typename Register::storage_type>(value),
-                reg.raw_read());
+    LONGS_EQUAL(value, reg.raw_read());
 }
 
 
