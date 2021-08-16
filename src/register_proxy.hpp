@@ -18,8 +18,8 @@ struct register_traits;
 template <typename Impl, typename... MemberFields>
 class RegisterProxy
 {
-    auto& impl() noexcept { return *static_cast<Impl*>(this); }
-    const auto& impl() const noexcept
+    decltype(auto) impl() noexcept { return *static_cast<Impl*>(this); }
+    decltype(auto) impl() const noexcept
     {
         return *static_cast<const Impl*>(this);
     }
