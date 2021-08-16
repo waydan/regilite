@@ -35,10 +35,11 @@ template <typename T>
 constexpr auto min_bytes(T x)
     -> std::enable_if_t<std::is_integral<T>{}, std::uint8_t>
 {
-    for (unsigned char n_bytes = 1u; n_bytes < sizeof(T); n_bytes *= 2)
+    constexpr auto type_size = static_cast<std::uint8_t>(sizeof(T));
+    for (unsigned char n_bytes = 1u; n_bytes < type_size; n_bytes *= 2)
         if (x <= (T{1} << (n_bytes * 8)) - 1)
             return n_bytes;
-    return sizeof(T);
+    return type_size;
 }
 
 static_assert(min_bytes(0) == 1, "One byte needed to hold value zero");
