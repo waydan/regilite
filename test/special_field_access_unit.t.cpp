@@ -41,7 +41,7 @@ TEST(WriteSpecialFields, ResetValueIsPreservedInReservedFields)
     special_reg.raw_write(0b01111110);
     const auto audit = special_reg.write(Fx{1});
     static_assert(regilite::traits::match_unqualified<decltype(audit),
-                                                      regilite::Overwrite>,
+                                                      regilite::Overwrite>{},
                   "Whole field should be overwritten");
     REGISTER_EQUALS(0x01, special_reg);
 }

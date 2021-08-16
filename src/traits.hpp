@@ -10,10 +10,9 @@ template <typename T>
 using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
 template <typename T, typename U>
-constexpr bool match_unqualified =
-    std::is_same<remove_cvref_t<T>, remove_cvref_t<U>>{};
+using match_unqualified = std::is_same<remove_cvref_t<T>, remove_cvref_t<U>>;
 
-static_assert(match_unqualified<int volatile&&, int const&>,
+static_assert(match_unqualified<int volatile&&, int const&>{},
               "Only checks unqualified type");
 
 

@@ -8,7 +8,7 @@ TestReg test_register;
 
 TEST_GROUP(WriteFieldsToRegister)
 {
-    void setup() { test_register.raw_write(0u); };
+    void setup() override { test_register.raw_write(0u); };
 };
 
 TEST(WriteFieldsToRegister, SetOneBit)
@@ -36,7 +36,7 @@ TEST(WriteFieldsToRegister, FieldUnsetBitsAreCleared)
     const auto audit = test_register.write(F1{1}, F0{0});
     static_assert(
         regilite::traits::match_unqualified<decltype(audit),
-                                            regilite::ReadModifyWrite>,
+                                            regilite::ReadModifyWrite>{},
         "Test expects reserved fields will keep dynamic value");
     REGISTER_EQUALS(0b1010, test_register);
 }

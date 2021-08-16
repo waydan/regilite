@@ -35,7 +35,7 @@ TEST(PartitionRegisterAccess, WriteOnlyUpperByte)
     const auto access_audit = test_register.write(F3{F3Val::D});
     static_assert(
         regilite::traits::match_unqualified<decltype(access_audit),
-                                            regilite::Write<std::uint8_t>>,
+                                            regilite::Write<std::uint8_t>>{},
         "Access the smallest aligned span which covers all fields.");
     REGISTER_EQUALS(0x800, test_register);
 
