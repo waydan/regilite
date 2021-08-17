@@ -2,7 +2,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "test_registers.hpp"
-
+#include "check_register.hpp"
 
 PartableReg test_register;
 

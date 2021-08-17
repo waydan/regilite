@@ -7,20 +7,6 @@
 #include "partition_register.hpp"
 #include "traits.hpp"
 
-template <typename ValType, regilite::mask_t mask>
-SimpleString StringFrom(regilite::Field<ValType, mask> f)
-{
-    return SimpleString{"Field value: "}
-           + StringFrom(regilite::traits::to_uint(f.value()));
-}
-
-
-template <typename Register>
-void REGISTER_EQUALS(typename Register::storage_type value, Register& reg)
-{
-    LONGS_EQUAL(value, reg.raw_read());
-}
-
 
 // TestReg layout
 // +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+

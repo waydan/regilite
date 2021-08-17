@@ -1,5 +1,14 @@
 #include "CppUTest/TestHarness.h"
+#include "field.hpp"
 #include "test_registers.hpp"
+
+template <typename ValType, regilite::mask_t mask, typename Access,
+          typename Shadow>
+SimpleString StringFrom(regilite::Field<ValType, mask, Access, Shadow> f)
+{
+    return SimpleString{"Field value: "}
+           + StringFrom(regilite::traits::to_uint(f.value()));
+}
 
 TestReg test_register;
 
