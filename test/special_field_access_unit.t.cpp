@@ -20,7 +20,7 @@ regilite::BasicRegister<std::uint8_t, 0, Fx, Flag> special_reg;
 
 TEST_GROUP(WriteSpecialFields)
 {
-    void setup() { special_reg.raw_write(0u); };
+    void setup() override { special_reg.raw_write(0u); };
 };
 
 TEST(WriteSpecialFields, ImplicitlyWrite1ToW1C)

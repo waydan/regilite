@@ -5,7 +5,7 @@ TestReg test_register;
 
 TEST_GROUP(ReadRegisterSnapshot)
 {
-    void setup() { test_register.raw_write(0u); };
+    void setup() override { test_register.raw_write(0u); };
 };
 
 TEST(ReadRegisterSnapshot, SnapshotMatchesState)
@@ -25,6 +25,5 @@ TEST(ReadRegisterSnapshot, SnapshotCopiedAfterWriteIsUpdated)
 {
     test_register.write(F1{3});
     const auto snapshot = test_register.read();
-    LONGS_EQUAL(test_register.raw_read(), snapshot.raw()
-    );
+    LONGS_EQUAL(test_register.raw_read(), snapshot.raw());
 }

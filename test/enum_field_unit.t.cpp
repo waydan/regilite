@@ -7,7 +7,7 @@ TestReg test_register;
 
 TEST_GROUP(EnumTypeField)
 {
-    void setup() { test_register.raw_write(0u); };
+    void setup() override { test_register.raw_write(0u); };
 };
 
 TEST(EnumTypeField, CreateEnumField) { F3 enum_field{F3Val::A}; }

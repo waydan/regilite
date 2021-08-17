@@ -5,7 +5,7 @@ TestReg test_register;
 
 TEST_GROUP(MatchFieldValues)
 {
-    void setup() { test_register.raw_write(0u); };
+    void setup() override { test_register.raw_write(0u); };
 };
 
 TEST(MatchFieldValues, RegisterStateMatchesFieldArgument)
