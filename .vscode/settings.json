@@ -11,7 +11,7 @@
     ],
     "clang-tidy.buildPath": "../build",
     "clang-tidy.blacklist": [
-        ".*.t.cpp"
+        ".*.t.cpp" // Test framework macros should not be checked
     ],
     "clang-tidy.checks": [
         "readability-*",
