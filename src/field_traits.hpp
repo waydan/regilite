@@ -32,6 +32,19 @@ struct SafeWrite
 };
 
 
+template <typename Field>
+constexpr auto always_reads(SafeWriteDefault type) noexcept -> mask_t
+{
+    return (Field::access_type::always_reads == type) ? Field::mask() : 0u;
+}
+
+template <SafeWriteDefault type, typename Field, typename... Fields>
+struct ReadsAs
+    : std::integral_constant<mask_t, detail::fold_masks(
+                                         always_reads<Field>(type),
+                                         always_reads<Fields>(type)...)> {};
+
+
 template <typename... Fields>
 struct FieldGroup {
     using Reserved = BasicField<~fold_masks(Fields::mask()...)>;
@@ -46,14 +59,13 @@ struct FieldGroup {
     using SafeWriteVolatile =
         BasicField<SafeWrite<SafeWriteDefault::Volatile, Fields...>{}
                    | Reserved::mask()>;
-
-    // using AlwaysReadsZero =
-    //     BasicField<ReadsAs<SafeWriteDefault::Zero, Fields...>{}>;
+    using AlwaysReadsZero =
+        BasicField<ReadsAs<SafeWriteDefault::Zero, Fields...>{}>;
     // using AlwaysReadsOne =
     //     BasicField<ReadsAs<SafeWriteDefault::One, Fields...>{}>;
-    // using AlwaysReadsReset =
-    //     BasicField<ReadsAs<SafeWriteDefault::Reset, Fields...>{}
-    //                | Reserved::mask()>;
+    using AlwaysReadsReset =
+        BasicField<ReadsAs<SafeWriteDefault::Reset, Fields...>{}
+                   | Reserved::mask()>;
     // using AlwaysReadsVolatile =
     //     BasicField<ReadsAs<SafeWriteDefault::Volatile, Fields...>{}>;
 };

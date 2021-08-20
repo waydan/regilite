@@ -42,10 +42,15 @@ class BasicRegister
     template <typename Field>
     auto select_write(Field field, std::false_type) noexcept
     {
-        const storage_type modified_state = detail::insert_bits(
-            volatile_read(),
-            fold_exclusive(field, typename FieldSet::SafeWriteZero{0}));
-        volatile_write(modified_state);
+        const auto composite_field =
+            fold_exclusive(field, typename FieldSet::SafeWriteZero{0});
+        volatile_write(
+            (volatile_read()
+             & static_cast<storage_type>(~composite_field.mask()
+                                         | FieldSet::AlwaysReadsZero::mask()
+                                         | (FieldSet::AlwaysReadsReset::mask()
+                                            & ~static_cast<mask_t>(reset))))
+            | composite_field.value());
         return ReadModifyWrite{};
     }
 
