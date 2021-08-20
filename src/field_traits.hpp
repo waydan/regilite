@@ -24,12 +24,10 @@ constexpr auto safe_write(SafeWriteDefault type) noexcept -> mask_t
     return (Field::access_type::safe_write == type) ? Field::mask() : 0u;
 }
 
-template <SafeWriteDefault type, typename Field, typename... Fields>
-struct SafeWrite
-    : std::integral_constant<mask_t,
-                             detail::fold_masks(safe_write<Field>(type),
-                                                safe_write<Fields>(type)...)> {
-};
+template <SafeWriteDefault type, typename... Fields>
+using SafeWrite =
+    std::integral_constant<mask_t,
+                           detail::fold_masks(safe_write<Fields>(type)...)>;
 
 
 template <typename Field>
@@ -38,11 +36,10 @@ constexpr auto always_reads(SafeWriteDefault type) noexcept -> mask_t
     return (Field::access_type::always_reads == type) ? Field::mask() : 0u;
 }
 
-template <SafeWriteDefault type, typename Field, typename... Fields>
-struct ReadsAs
-    : std::integral_constant<mask_t, detail::fold_masks(
-                                         always_reads<Field>(type),
-                                         always_reads<Fields>(type)...)> {};
+template <SafeWriteDefault type, typename... Fields>
+using ReadsAs =
+    std::integral_constant<mask_t,
+                           detail::fold_masks(always_reads<Fields>(type)...)>;
 
 
 template <typename... Fields>
