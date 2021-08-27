@@ -31,9 +31,6 @@ class RegisterProxy
 
     using FieldSet = detail::FieldGroup<MemberFields...>;
 
-    static constexpr mask_t static_zero =
-        detail::SafeWrite<detail::SafeWriteDefault::Zero, MemberFields...>{};
-
   public:
     using storage_type = typename detail::register_traits<Impl>::storage_type;
     static_assert(traits::is_storage_type<storage_type>{},

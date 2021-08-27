@@ -29,10 +29,12 @@ class BasicRegister
 
     static constexpr auto can_safely_overwrite(mask_t mask) noexcept -> bool
     {
-        return static_cast<storage_type>(
-                   detail::fold_masks(FieldSet::SafeWriteZero::mask(),
-                                      FieldSet::SafeWriteOne::mask(),
-                                      FieldSet::SafeWriteReset::mask(), mask))
+        return static_cast<storage_type>(detail::fold_masks(
+                   mask, FieldSet::Reserved::mask(),
+                   detail::mask_if<
+                       MemberFields,
+                       MemberFields::access_type::safe_write
+                           != detail::SafeWriteDefault::Volatile>{}...))
                == static_cast<storage_type>(~storage_type{0u});
     }
 

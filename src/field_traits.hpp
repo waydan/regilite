@@ -18,53 +18,32 @@ enum class SafeWriteDefault
     Volatile
 };
 
-template <typename Field>
-constexpr auto safe_write(SafeWriteDefault type) noexcept -> mask_t
-{
-    return (Field::access_type::safe_write == type) ? Field::mask() : 0u;
-}
-
-template <SafeWriteDefault type, typename... Fields>
-using SafeWrite =
-    std::integral_constant<mask_t,
-                           detail::fold_masks(safe_write<Fields>(type)...)>;
-
-
-template <typename Field>
-constexpr auto always_reads(SafeWriteDefault type) noexcept -> mask_t
-{
-    return (Field::access_type::always_reads == type) ? Field::mask() : 0u;
-}
-
-template <SafeWriteDefault type, typename... Fields>
-using ReadsAs =
-    std::integral_constant<mask_t,
-                           detail::fold_masks(always_reads<Fields>(type)...)>;
+template <typename Field, bool predicate>
+using mask_if = std::integral_constant<mask_t, predicate ? Field::mask() : 0u>;
 
 
 template <typename... Fields>
 struct FieldGroup {
     using Reserved = BasicField<~fold_masks(Fields::mask()...)>;
 
-    using SafeWriteZero =
-        BasicField<SafeWrite<SafeWriteDefault::Zero, Fields...>{}>;
-    using SafeWriteOne =
-        BasicField<SafeWrite<SafeWriteDefault::One, Fields...>{}>;
-    using SafeWriteReset =
-        BasicField<SafeWrite<SafeWriteDefault::Reset, Fields...>{}
-                   | Reserved::mask()>;
-    using SafeWriteVolatile =
-        BasicField<SafeWrite<SafeWriteDefault::Volatile, Fields...>{}
-                   | Reserved::mask()>;
-    using AlwaysReadsZero =
-        BasicField<ReadsAs<SafeWriteDefault::Zero, Fields...>{}>;
-    // using AlwaysReadsOne =
-    //     BasicField<ReadsAs<SafeWriteDefault::One, Fields...>{}>;
-    using AlwaysReadsReset =
-        BasicField<ReadsAs<SafeWriteDefault::Reset, Fields...>{}
-                   | Reserved::mask()>;
-    // using AlwaysReadsVolatile =
-    //     BasicField<ReadsAs<SafeWriteDefault::Volatile, Fields...>{}>;
+    using SafeWriteZero = BasicField<fold_masks(
+        mask_if<Fields, Fields::access_type::safe_write
+                            == SafeWriteDefault::Zero>{}...)>;
+    using SafeWriteReset = BasicField<fold_masks(
+        Reserved::mask(),
+        mask_if<Fields, Fields::access_type::safe_write
+                            == SafeWriteDefault::Reset>{}...)>;
+    using SafeWriteVolatile = BasicField<fold_masks(
+        Reserved::mask(),
+        mask_if<Fields, Fields::access_type::safe_write
+                            == SafeWriteDefault::Volatile>{}...)>;
+    using AlwaysReadsZero = BasicField<fold_masks(
+        mask_if<Fields, Fields::access_type::always_reads
+                            == SafeWriteDefault::Zero>{}...)>;
+    using AlwaysReadsReset = BasicField<fold_masks(
+        Reserved::mask(),
+        mask_if<Fields, Fields::access_type::always_reads
+                            == SafeWriteDefault::Reset>{}...)>;
 };
 } // namespace detail
 
