@@ -44,17 +44,12 @@ static_assert(masks_overlap(0x0F, 0xF8), "These masks do overlap");
 static_assert(masks_overlap(0x0F, 0xF0, 0x01), "Final mask overlaps");
 
 
-template <typename Int>
-constexpr auto fold_masks(Int m) noexcept
-    -> std::enable_if_t<std::is_integral<Int>{}, mask_t>
-{
-    return static_cast<mask_t>(m);
-}
+constexpr auto fold_masks(mask_t m) noexcept { return m; }
 
-template <typename Int, typename... Ints>
-constexpr auto fold_masks(Int m, Ints... ms) noexcept
+template <typename... Ints>
+constexpr auto fold_masks(mask_t m, Ints... ms) noexcept
 {
-    return fold_masks(m) | fold_masks(ms...);
+    return static_cast<mask_t>(m | fold_masks(ms...));
 }
 
 
