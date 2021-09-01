@@ -33,20 +33,6 @@ static_assert(not is_storage_type<signed int>{},
               "Storage types must be unsigned.");
 
 
-template <typename T>
-constexpr auto to_uint(const T& x) noexcept -> std::make_unsigned_t<T>
-{
-    return static_cast<std::make_unsigned_t<T>>(x);
-}
-
-template <typename B>
-constexpr auto to_uint(B x) noexcept
-    -> std::enable_if_t<std::is_same<bool, B>{}, unsigned char>
-{
-    return static_cast<unsigned char>(x);
-}
-
-
 template <typename Elem, typename... Pack>
 struct is_pack_element;
 
