@@ -21,7 +21,11 @@ class BasicField
     value_type value_;
 
   public:
-    explicit constexpr BasicField(value_type val) noexcept : value_(val) {}
+    explicit constexpr BasicField(value_type val) noexcept : value_(val)
+    {
+        assert((~mask() & static_cast<mask_t>(val)) == 0u
+               and "Value overflows the field boundary");
+    }
 
     static constexpr auto mask() -> mask_t { return bit_mask; }
     static constexpr auto offset() -> mask_t { return 0u; }
