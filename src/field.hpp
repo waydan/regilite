@@ -30,10 +30,9 @@ class Field
   public:
     constexpr explicit Field(value_type value) noexcept : value_(value)
     {
-        assert(0u
-                   == (~static_cast<decltype(traits::to_uint(value))>(
-                           mask() >> offset())
-                       & traits::to_uint(value))
+        assert((~static_cast<mask_t>(mask() >> offset())
+                & static_cast<mask_t>(value))
+                   == 0u
                and "Value overflows the field boundary");
     }
     static constexpr auto mask() noexcept -> mask_t { return bit_mask; }
