@@ -1,3 +1,6 @@
+// Copyright 2021 Daniel Way
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef REGILITE_REGISTER_HPP
 #define REGILITE_REGISTER_HPP
 

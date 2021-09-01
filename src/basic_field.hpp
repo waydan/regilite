@@ -1,3 +1,6 @@
+// Copyright 2021 Daniel Way
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef REGILITE_BASIC_FIELD_HPP
 #define REGILITE_BASIC_FIELD_HPP
 
