@@ -3,8 +3,6 @@
 
 #include <type_traits>
 
-#include "traits.hpp"
-
 namespace regilite {
 namespace detail {
 
