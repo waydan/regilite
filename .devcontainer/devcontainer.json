@@ -8,6 +8,8 @@
 		"xaver.clang-format",
 		"twxs.cmake",
 		"lextudio.restructuredtext",
-		"notskm.clang-tidy"
+		"trond-snekvik.simple-rst",
+		"notskm.clang-tidy",
+		"ms-python.python"
 	],
 }
