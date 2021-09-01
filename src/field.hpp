@@ -16,13 +16,13 @@ template <typename ValType, mask_t bit_mask, typename FieldAccess = RW,
           typename = void /*shadow type*/>
 class Field
 {
-    static_assert(
-        std::is_unsigned<ValType>{} or std::is_enum<ValType>{},
-        "Field only supports unsigned integrals or enumeration types");
+    static_assert(std::is_unsigned<ValType>{} or std::is_enum<ValType>{},
+                  "Field only supports unsigned integrals, booleans or "
+                  "enumeration types");
 
   public:
     using value_type = ValType;
-    using access_type = FieldAccess;
+    using access = FieldAccess;
 
   private:
     value_type value_;

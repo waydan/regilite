@@ -33,7 +33,7 @@ class BasicRegister
                    mask, FieldSet::Reserved::mask(),
                    detail::mask_if<
                        MemberFields,
-                       MemberFields::access_type::safe_write
+                       MemberFields::access::safe_write
                            != detail::SafeWriteDefault::Volatile>{}...))
                == static_cast<storage_type>(~storage_type{0u});
     }

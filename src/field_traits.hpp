@@ -27,23 +27,23 @@ struct FieldGroup {
     using Reserved = BasicField<~fold_masks(Fields::mask()...)>;
 
     using SafeWriteZero = BasicField<fold_masks(
-        mask_if<Fields, Fields::access_type::safe_write
-                            == SafeWriteDefault::Zero>{}...)>;
+        mask_if<Fields,
+                Fields::access::safe_write == SafeWriteDefault::Zero>{}...)>;
     using SafeWriteReset = BasicField<fold_masks(
         Reserved::mask(),
-        mask_if<Fields, Fields::access_type::safe_write
-                            == SafeWriteDefault::Reset>{}...)>;
+        mask_if<Fields,
+                Fields::access::safe_write == SafeWriteDefault::Reset>{}...)>;
     using SafeWriteVolatile = BasicField<fold_masks(
         Reserved::mask(),
-        mask_if<Fields, Fields::access_type::safe_write
+        mask_if<Fields, Fields::access::safe_write
                             == SafeWriteDefault::Volatile>{}...)>;
     using AlwaysReadsZero = BasicField<fold_masks(
-        mask_if<Fields, Fields::access_type::always_reads
-                            == SafeWriteDefault::Zero>{}...)>;
+        mask_if<Fields,
+                Fields::access::always_reads == SafeWriteDefault::Zero>{}...)>;
     using AlwaysReadsReset = BasicField<fold_masks(
         Reserved::mask(),
-        mask_if<Fields, Fields::access_type::always_reads
-                            == SafeWriteDefault::Reset>{}...)>;
+        mask_if<Fields,
+                Fields::access::always_reads == SafeWriteDefault::Reset>{}...)>;
 };
 } // namespace detail
 
