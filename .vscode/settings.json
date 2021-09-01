@@ -1,5 +1,4 @@
 {
-    "restructuredtext.confPath": "",
     "python.pythonPath": "/usr/bin/python3",
     "[restructuredtext]": {
         "editor.wordWrap": "wordWrapColumn",
