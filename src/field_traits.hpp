@@ -50,28 +50,26 @@ struct FieldGroup {
 };
 } // namespace detail
 
-struct WriteOnly {
-    static constexpr auto always_reads = detail::SafeWriteDefault::Reset;
-    static constexpr auto safe_write = detail::SafeWriteDefault::Zero;
+template <detail::SafeWriteDefault read, detail::SafeWriteDefault write>
+struct AccessType {
+    static constexpr auto always_reads = read;
+    static constexpr auto safe_write = write;
 };
+
+using WriteOnly =
+    AccessType<detail::SafeWriteDefault::Reset, detail::SafeWriteDefault::Zero>;
 using WO = WriteOnly;
 
-struct ReadOnly {
-    static constexpr auto always_reads = detail::SafeWriteDefault::Volatile;
-    static constexpr auto safe_write = detail::SafeWriteDefault::Volatile;
-};
+using ReadOnly = AccessType<detail::SafeWriteDefault::Volatile,
+                            detail::SafeWriteDefault::Volatile>;
 using RO = ReadOnly;
 
-struct WriteOneToClear {
-    static constexpr auto always_reads = detail::SafeWriteDefault::Volatile;
-    static constexpr auto safe_write = detail::SafeWriteDefault::Zero;
-};
+using WriteOneToClear = AccessType<detail::SafeWriteDefault::Volatile,
+                                   detail::SafeWriteDefault::Zero>;
 using W1C = WriteOneToClear;
 
-struct ReadWrite {
-    static constexpr auto always_reads = detail::SafeWriteDefault::Volatile;
-    static constexpr auto safe_write = detail::SafeWriteDefault::Volatile;
-};
+using ReadWrite = AccessType<detail::SafeWriteDefault::Volatile,
+                             detail::SafeWriteDefault::Volatile>;
 using RW = ReadWrite;
 
 } // namespace regilite
