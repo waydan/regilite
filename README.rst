@@ -24,8 +24,6 @@ The most common operation for a memory-mapped hardware register is probably read
 Read-modify-write, however, is actually an implementation detail. Usually a user just wants to update one or more fields in a register. In Regilite, this is expressed as :cpp-code:`register.write(field)`. Here, `field` is an object of some `Field`-like type defined in the library, and it carries metadata to perform all bit-shifting and masking behind the scenes.
 
 
-
-
 .. csv-table:: Port Control Register
     :header: "Bits", "Field", "Access"
     :align: center
@@ -97,8 +95,6 @@ Passing a single field object to `match_any` or `match_all` is valid and semanti
 
 A single call to `Register::match` will result in exactly one read to the memory-mapped hardware.
 
-Notes
------
 
 Rationale
 ---------
@@ -112,20 +108,30 @@ Often silicon vendors will provide a header file which groups registers into a s
 
     typedef struct {
         uint8_t volatile CONFIG;
-        uint8_t volatile MISSILE_COMMAND;
-        } FROB;
+        /* more registers... */
+        } COMM;
 
-    #define FROB0 ((FROB* const)(0x1000))
-    #define GIBBLE_SHIFT    (5)
-    #define GIBBLE_MASK     ((uint8_t)(7u << GIBBLE_SHIFT))
-    #define GIBBLE(x)       ((uint8_t)((x) << GIBBLE_SHIFT))
+    #define COMM0 ((COMM* const)(0x1000))
+    #define CONFIG_PARITY_SHIFT    (5)
+    #define CONFIG_PARITY_MASK     ((uint8_t)(7u << CONFIG_PARITY_SHIFT))
+    #define CONFIG_PARITY(x)       ((uint8_t)((x) << CONFIG_PARITY_SHIFT))
+    /* Definitions for each field... */
 
 
     A function in the hardware abstraction layer may then contain code which looks like:
 
 .. code-block:: C
 
-        FROB0->CONFIG = (FROB0->CONFIG & ~GIBBLE_MASK) | GIBBLE(2u);
+        COMM0->CONFIG = (COMM0->CONFIG & ~CONFIG_PARITY_MASK) | CONFIG_PARITY(2u);
+
+This is not the only way to define special function registers in C or C++; the `regbits documentation`_ contains examples of different conventional syntaxes. These techniques. However, these techniques have several drawbacks.
+
+- Fields are associated with registers by naming convention without a programatic way to verify the relation.
+- Field values rely on "magic numbers" with little semantic information about the purpose or function
+- Handling of different access types (e.g. the problematic write-1-to-clear) is purely manual.
+
+.. _`regbits documentation`: https://github.com/thanks4opensource/regbits#comparison_with_other_approaches
+
 
 Prior Art
 ---------
@@ -149,6 +155,8 @@ Reduce Errors
 
 - Only Predefined ``Field``\ s may be written to a ``Register``
 - Overlapping ``Field``\ s can be detected at compile-time
+- Fields may be parameterized to only accept enumeration values
+- Special fields (e.g. write-1-to-clear) are guarded against unintentional modification
 
 
 Copyright |copy| 2021 by Daniel Way
