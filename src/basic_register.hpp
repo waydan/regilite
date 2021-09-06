@@ -34,10 +34,9 @@ class BasicRegister
     {
         return static_cast<storage_type>(detail::fold_masks(
                    mask, FieldSet::Reserved::mask(),
-                   detail::mask_if<
-                       MemberFields,
-                       MemberFields::access::safe_write
-                           != detail::SafeWriteDefault::Volatile>{}...))
+                   detail::mask_if<MemberFields,
+                                   MemberFields::access::safe_write
+                                       != detail::BitState::Volatile>{}...))
                == static_cast<storage_type>(~storage_type{0u});
     }
 
