@@ -1,0 +1,5 @@
+union {
+    {%- for member in member_list %}
+    {{ member | indent(4, False) }};
+    {%- endfor %}
+} {{- ' {}'.format(union.name) if not union.name is none }}

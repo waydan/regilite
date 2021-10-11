@@ -1,0 +1,22 @@
+{%- set underlying_type = 'std::uint{:d}_t'.format(8 * ((field.msb() - field.lsb()) // 8 + 1)) %}
+{%- set mask = 'regilite::Mask<' + ('{}'.format(field.lsb()) if field.msb() == field.lsb() else '{}, {}'.format(field.msb(), field.lsb())) + '>{}'%}
+{%- if field.value_type is none %}
+// {{ field.description }}
+using {{ field.name }} = regilite::Field<{{ underlying_type }}, {{ mask }}, regilite::{{ field.access }}, struct {{ register_key }}>;
+{%- else %}
+{%- set enum_type = field.name + '_e' %}
+enum class {{ enum_type }} : {{ underlying_type }} {
+    {%- for enum in field.value_type %}
+    {{ enum.name }} = {{ enum.value }}{{ ',' if not loop.last else ' '}}{{ '\t// ' + enum.description }}
+    {%- endfor %}
+};
+{%- set base_field = field.name + '_' %}
+using {{ base_field }} = regilite::Field<{{ enum_type }}, {{ mask }}, regilite::{{ field.access }}, struct {{ register_key }}>;
+// {{ field.description }}
+struct {{ field.name }} : {{ base_field }} {
+    explicit constexpr {{ field.name }}({{ enum_type }} value) : {{ base_field }}(value) {}
+    {%- for enum in field.value_type %}
+    static constexpr {{ base_field }} {{ enum.name }}{ {{- enum_type }}::{{ enum.name -}} };{{ '\t// ' + enum.description }}
+    {%- endfor %}
+};
+{%- endif %}
