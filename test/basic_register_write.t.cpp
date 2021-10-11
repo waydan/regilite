@@ -14,7 +14,7 @@ TEST_GROUP(basic_register_write)
     // |   Reserved   |  F1 |F0|
     // +--+--+--+--+--+--+--+--+
     //   7  6  5  4  3  2  1  0
-    regilite::BasicRegister<std::uint8_t, 0, F0, F1> test_register;
+    regilite::DefaultRegister<std::uint8_t, 0, F0, F1> test_register;
 };
 
 TEST(basic_register_write, set_one_bit)
@@ -62,7 +62,7 @@ TEST_GROUP(write_w1c_field)
     // |Fy|    Reserved     |Fx|
     // +--+--+--+--+--+--+--+--+
     //   7  6  5  4  3  2  1  0
-    regilite::BasicRegister<std::uint8_t, 0, Fx, Fy> test_register;
+    regilite::DefaultRegister<std::uint8_t, 0, Fx, Fy> test_register;
 };
 
 TEST(write_w1c_field, implicitly_write_0_to_w1c)
@@ -91,7 +91,7 @@ TEST_GROUP(optimized_register_write)
     // |   Fk   | Res.|Fj|Fi|Fh|
     // +--+--+--+--+--+--+--+--+
     //   7  6  5  4  3  2  1  0
-    regilite::BasicRegister<std::uint8_t, 0b0001'0010, Fh, Fk, Fi, Fj>
+    regilite::DefaultRegister<std::uint8_t, 0b0001'0010, Fh, Fk, Fi, Fj>
         test_register;
 };
 

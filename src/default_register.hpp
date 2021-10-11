@@ -18,17 +18,17 @@ struct Overwrite {};
 struct ReadModifyWrite {};
 
 template <typename UInt, UInt reset, typename... MemberFields>
-class BasicRegister
-    : public RegisterProxy<BasicRegister<UInt, reset, MemberFields...>,
+class DefaultRegister
+    : public RegisterProxy<DefaultRegister<UInt, reset, MemberFields...>,
                            MemberFields...>
 {
-    using Base = RegisterProxy<BasicRegister, MemberFields...>;
+    using Base = RegisterProxy<DefaultRegister, MemberFields...>;
     friend Base;
     using typename Base::FieldSet;
 
   public:
     using storage_type =
-        typename detail::register_traits<BasicRegister>::storage_type;
+        typename detail::register_traits<DefaultRegister>::storage_type;
 
     static constexpr auto can_safely_overwrite(mask_t mask) noexcept -> bool
     {
@@ -92,7 +92,7 @@ class BasicRegister
 
 namespace detail {
 template <typename UInt, UInt reset, typename... MemberFields>
-struct register_traits<BasicRegister<UInt, reset, MemberFields...>> {
+struct register_traits<DefaultRegister<UInt, reset, MemberFields...>> {
     using storage_type = UInt;
 };
 } // namespace detail

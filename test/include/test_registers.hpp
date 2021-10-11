@@ -28,10 +28,10 @@ using F2 = regilite::Field<std::uint16_t, regilite::Mask<6, 4>{}>;
 using F3 = regilite::Field<F3Val, regilite::Mask<11, 8>{}>;
 
 
-using TestReg = regilite::BasicRegister<std::uint16_t, 0, F0, F1, F2, F3>;
+using TestReg = regilite::DefaultRegister<std::uint16_t, 0, F0, F1, F2, F3>;
 
 static_assert(std::is_standard_layout<TestReg>{},
-              "BasicRegister<> type must be standard layout.");
+              "DefaultRegister<> type must be standard layout.");
 
 static_assert(
     std::is_standard_layout<TestReg::Snapshot>{},

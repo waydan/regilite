@@ -37,7 +37,7 @@ class RegisterProxy
   public:
     using storage_type = typename detail::register_traits<Impl>::storage_type;
     static_assert(traits::is_storage_type<storage_type>{},
-                  "BasicRegister<> type requires an unsigned integral as its "
+                  "DefaultRegister<> type requires an unsigned integral as its "
                   "underlying representation.");
 
 
