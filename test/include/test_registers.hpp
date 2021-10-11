@@ -2,7 +2,7 @@
 #define TEST_REGISTER_HPP
 
 #include "CppUTest/TestHarness.h"
-#include "basic_register.hpp"
+#include "default_register.hpp"
 #include "field.hpp"
 #include "partition_register.hpp"
 #include "traits.hpp"
