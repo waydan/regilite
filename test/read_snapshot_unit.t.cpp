@@ -10,13 +10,13 @@ TEST_GROUP(ReadRegisterSnapshot)
 
 TEST(ReadRegisterSnapshot, SnapshotMatchesState)
 {
-    const auto snapshot = test_register.read();
+    const auto snapshot = test_register.capture_state();
     LONGS_EQUAL(0u, snapshot.raw());
 }
 
 TEST(ReadRegisterSnapshot, SnapshotCopiedBeforWriteNotUpdated)
 {
-    const auto snapshot = test_register.read();
+    const auto snapshot = test_register.capture_state();
     test_register.write(F1{3});
     CHECK(test_register.raw_read() != snapshot.raw());
 }
@@ -24,6 +24,6 @@ TEST(ReadRegisterSnapshot, SnapshotCopiedBeforWriteNotUpdated)
 TEST(ReadRegisterSnapshot, SnapshotCopiedAfterWriteIsUpdated)
 {
     test_register.write(F1{3});
-    const auto snapshot = test_register.read();
+    const auto snapshot = test_register.capture_state();
     LONGS_EQUAL(test_register.raw_read(), snapshot.raw());
 }

@@ -152,7 +152,7 @@ class RegisterProxy
     }
 
 
-    auto read() const noexcept -> Snapshot
+    auto capture_state() const noexcept -> Snapshot
     {
         return Snapshot{impl().volatile_read()};
     }
@@ -160,7 +160,7 @@ class RegisterProxy
 
     constexpr auto extract_field() const noexcept
     {
-        return read().extract_field();
+        return capture_state().extract_field();
     }
 
 
@@ -168,7 +168,7 @@ class RegisterProxy
     auto match(Field f) const noexcept
         -> std::enable_if_t<is_member_field<Field>, bool>
     {
-        return read().match(f);
+        return capture_state().match(f);
     }
 
 
@@ -178,7 +178,7 @@ class RegisterProxy
             Field, Fields...> and !detail::fields_overlap<Field, Fields...>{},
         bool>
     {
-        return read().match_all(f, fs...);
+        return capture_state().match_all(f, fs...);
     }
 
 
@@ -186,7 +186,7 @@ class RegisterProxy
     auto match_any(Field f, Fields... fs) const noexcept
         -> std::enable_if_t<is_member_field<Field, Fields...>, bool>
     {
-        return read().match_any(f, fs...);
+        return capture_state().match_any(f, fs...);
     }
 };
 

@@ -58,7 +58,7 @@ Capturing Register State
 .. code-block:: Cpp
 
     // Saves the state of a register as non-volatile value
-    auto snapshot = reg.read();
+    auto snapshot = reg.capture_state();
 
 Sometimes a piece of code will need to refer to the same register state multiple times while assuming it has not changed. `Register::read()` copies the state of the volatile register to a non-volatile object for later processing.
 
