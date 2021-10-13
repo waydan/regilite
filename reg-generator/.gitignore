@@ -1,0 +1,4 @@
+# Ignore python temporary or build-related files
+**/dist
+**/__pycache__
+**/*.egg-info
