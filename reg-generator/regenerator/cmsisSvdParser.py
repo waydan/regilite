@@ -7,7 +7,7 @@ Created on Fri Sep  3 13:39:54 2021
 """
 import re
 from functools import singledispatch
-from structuralModel import Peripheral, Struct, Union, Array, Register, Field, Enumeration
+from .structuralModel import Peripheral, Struct, Union, Array, Register, Field, Enumeration
 
 
 # Peripheral Parser
@@ -31,7 +31,7 @@ def getPeripheral(peripheral_element):
     register_list = peripheral_element.find('registers').findall('register')
     register_list.sort(key=offsetof)
     member_list = [getMember(register) for register in register_list]
-    
+
     peripheral.struct.addMember(member_list.pop(0))
     for member in member_list:
         if membersOverlap(peripheral.struct.members[-1], member):
@@ -45,7 +45,7 @@ def getPeripheral(peripheral_element):
 def joinMembers(x, x_position, y, y_position):
     raise RuntimeError(f"Type {type(x)} does not match the domain "
                        "(Register, Array, Union, or Struct)")
-    
+
 @joinMembers.register(Array)
 def _(x, x_position, y, y_position):
     assert(x_position <= y_position)
@@ -57,7 +57,7 @@ def _(x, x_position, y, y_position):
     else:
         raise RuntimeError('Could not resolve dissimilar arrays '
                            f'{x.element.name} and {y.element.name}')
-    
+
 @joinMembers.register(Struct)
 def _(x, x_position, y, y_position):
     assert(x_position <= y_position)
@@ -67,13 +67,13 @@ def _(x, x_position, y, y_position):
         return (x.addMember(joinMembers(*x.members.pop(), y, y_position)), x_position)
     else:
         return (x.addMember((y, y_position)), x_position)
-    
+
 @joinMembers.register(Union)
 def _(x, x_position, y, y_position):
     assert(x_position <= y_position)
     y.name = removePrefix(x.name, y.name)
     return (x.addMember((y, y_position - x_position)), x_position)
-    
+
 @joinMembers.register(Register)
 def _(x, x_position, y, y_position):
     assert(x_position <= y_position)
@@ -89,7 +89,7 @@ def _(x, x_position, y, y_position):
     else:
         return (Struct(common_prefix, [(x, 0), (y, y_position - x_position)]),
                 x_position)
-            
+
 
 def getMember(register_elem):
     def getArray(register_elem):
@@ -117,8 +117,8 @@ def getAllFields(register_elem):
 
 def getField(field_elem):
     return Field(name=field_elem.find('name').text,
-                 mask=((1 << strToUint(field_elem.find('bitWidth').text)) - 1)<< 
-                     strToUint(field_elem.find('bitOffset').text), 
+                 mask=((1 << strToUint(field_elem.find('bitWidth').text)) - 1)<<
+                     strToUint(field_elem.find('bitOffset').text),
                  access=ACCESS_TYPE[field_elem.find('access').text],
                  value_type=getValueType(field_elem),
                  description=field_elem.find('description').text)
@@ -136,9 +136,10 @@ def getValueType(field_elem):
 def getEnum(enum):
     def makeId(name: str):
         return name if CPP_IDENTIFIER.match(name) else 'v' + name
+    description = enum.find('description')
     return Enumeration(makeId(enum.find('name').text),
                        strToUint(enum.find('value').text),
-                       enum.find('description').text)
+                       description.text if description else "")
 
 
 
@@ -147,7 +148,7 @@ def strToUint(number: str):
     return int(integer['num'], base=(16 if integer['hex'] \
                                      else (2 if integer['bin'] \
                                            else 10)))
-        
+
 def inGroup(peripheral_element):
     return peripheral_element.find('groupName') != None
 
@@ -155,8 +156,8 @@ def getName(peripheral_element):
     return peripheral_element.find('groupName').text \
             if peripheral_element.find('groupName') != None \
             else peripheral_element.find('name').text
-            
-            
+
+
 def isArray (register_element):
     return register_element.find('dim') != None
 

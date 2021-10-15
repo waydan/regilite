@@ -7,7 +7,8 @@ Created on Tue Sep  7 13:26:45 2021
 import re
 from jinja2 import Template
 from functools import singledispatch
-from structuralModel import Struct, Register, Array, Union
+from .structuralModel import Struct, Register, Array, Union
+from .. templates import TEMPLATES
 
 def generatePeripheral(peripheral, device):
     return TEMPLATES['peripheral'].render(device=device,
@@ -20,7 +21,7 @@ def generatePeripheral(peripheral, device):
 @singledispatch
 def generate(element, **kwargs):
     raise TypeError(f"Unrecognized argument type: {type(element)}")
-    
+
 @generate.register(Struct)
 def _(struct, prefix=[], **kwargs):
     typename = kwargs['typename'] if 'typename' in kwargs else None
@@ -40,7 +41,7 @@ def _(struct, prefix=[], **kwargs):
 
 @generate.register(Union)
 def _(union, prefix=[], **kwargs):
-    member_list = [generate(member, prefix + [union.name] if union.name else prefix) 
+    member_list = [generate(member, prefix + [union.name] if union.name else prefix)
                    for member, _ in union.members]
     return TEMPLATES['union'].render(union=union, member_list=member_list)
 
@@ -68,7 +69,7 @@ def generateRegisterFieldGroup(register, prefix):
                          for field in register.fields] if register.fields else []
     return TEMPLATES['decl_reg'].render(register=register, reg_prefix=prefix,
                                         field_definitions=field_definitions)
-    
+
 
 @singledispatch
 def listRegisters(x, prefix=[]):
@@ -96,15 +97,3 @@ def isSequentialNumeric(index: list):
         return all(map(lambda x: x[0] == x[1], zip(map(int, index), range(len(index)))))
     except ValueError:
         return False
-
-
-TEMPLATES = {'peripheral' : Template(open('templates/peripheral.stub').read()),
-             'struct'     : Template(open('templates/struct.stub').read()),
-             'union'      : Template(open('templates/union.stub').read()),
-             'array'      : Template(open('templates/array.stub').read()),
-             'register'   : Template(open('templates/register.stub').read()),
-             'padding'    : Template(open('templates/padding.stub').read()),
-             'decl_reg'   : Template(open('templates/decl_register.stub').read()),
-             'field'     : Template(open('templates/field.stub').read())}
-
-
