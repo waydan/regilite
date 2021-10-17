@@ -4,7 +4,7 @@
         {
             "label": "configure",
             "type": "shell",
-            "command": "cmake -S${workspaceFolder} -GNinja -B ${workspaceFolder}/../build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ${input:cmake-config}",
+            "command": "cmake -S${workspaceFolder} -GNinja -B ${workspaceFolder}/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ${input:cmake-config}",
             "group": "build",
             "presentation": {
                 "reveal": "always"
@@ -14,7 +14,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "cmake --build ${workspaceFolder}/../build",
+            "command": "cmake --build ${workspaceFolder}/build",
             "group": "build",
             "presentation": {
                 "reveal": "silent"
@@ -39,7 +39,7 @@
             "label": "test",
             "type": "shell",
             "options": {
-                "cwd": "${workspaceFolder}/../build"
+                "cwd": "${workspaceFolder}/build"
             },
             "command": "ctest -j4 --output-on-failure",
             "group": "test"
