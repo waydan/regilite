@@ -12,7 +12,7 @@
             "problemMatcher": []
         },
         {
-            "label": "build",
+            "label": "build-regilite-lib",
             "type": "shell",
             "command": "cmake --build ${workspaceFolder}/build",
             "group": "build",
@@ -36,27 +36,40 @@
             }
         },
         {
-            "label": "test",
+            "label": "test-regilite-lib",
             "type": "shell",
+            "dependsOn": [
+                "build-regilite-lib"
+            ],
+            "dependsOrder": "sequence",
             "options": {
-                "cwd": "${workspaceFolder}/build"
+                "cwd": "${workspaceFolder}/build/regilite"
             },
             "command": "ctest -j4 --output-on-failure",
             "group": "test"
         },
         {
-            "label": "build-and-test",
-            "dependsOrder": "sequence",
+            "label": "test-regenerator-tool",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/build/regenerator"
+            },
+            "command": "ctest -j4 --output-on-failure",
+            "group": "test"
+        },
+        {
+            "label": "test-all",
+            "dependsOrder": "parallel",
             "dependsOn": [
-                "build",
-                "test"
+                "test-regilite-lib",
+                "test-regenerator-tool"
             ],
-            "group": "build",
+            "group": "test",
             "presentation": {
                 "reveal": "silent"
             },
             "problemMatcher": []
-        }
+        },
     ],
     "inputs": [
         {
