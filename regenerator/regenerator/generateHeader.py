@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Sep  7 13:26:45 2021
+Copyright 2021 Daniel Way
+SPDX-License-Identifier: Apache-2.0
+"""
 
-@author: w6733
-"""
 import re
 from jinja2 import Template
 from functools import singledispatch

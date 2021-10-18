@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Sep 28 10:01:49 2021
+Copyright 2021 Daniel Way
+SPDX-License-Identifier: Apache-2.0
+"""
 
-@author: w6733
-"""
 import os
 from xml.etree import ElementTree
 import cmsisSvdParser

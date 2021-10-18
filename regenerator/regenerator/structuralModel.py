@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Sep 13 09:42:21 2021
+Copyright 2021 Daniel Way
+SPDX-License-Identifier: Apache-2.0
+"""
 
-@author: w6733
-"""
 from math import floor, log2
 
 class Peripheral:

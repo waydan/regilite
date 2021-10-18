@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Sep  3 13:39:54 2021
+Copyright 2021 Daniel Way
+SPDX-License-Identifier: Apache-2.0
+"""
 
-@author: Daniel Way
-@license: Apache 2.0
-"""
 import re
 from functools import singledispatch
 from .structuralModel import Peripheral, Struct, Union, Array, Register, Field, Enumeration
