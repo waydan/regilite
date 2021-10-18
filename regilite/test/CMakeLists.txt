@@ -6,9 +6,9 @@ endfunction()
 
 include_directories(include)
 
-new_test(basic-register-write basic_register_write.t.cpp test_main.cpp)
-new_test(basic-register-extract basic_register_extract.t.cpp test_main.cpp)
-new_test(basic-register-match basic_register_match.t.cpp test_main.cpp)
+new_test(default-register-write default_register_write.t.cpp test_main.cpp)
+new_test(default-register-extract default_register_extract.t.cpp test_main.cpp)
+new_test(default-register-match default_register_match.t.cpp test_main.cpp)
 new_test(partition-register-write partition_register_write.t.cpp test_main.cpp)
 # new_test(partition-register-extract read_field_unit.t.cpp test_main.cpp)
 # new_test(partition-register-match match_field_unit.t.cpp test_main.cpp)
