@@ -13,23 +13,24 @@ class TestEnumParser(unittest.TestCase):
 
     def test_read_name_and_value_from_svd(self):
         enum_xml = ElementTree.fromstring(
-            ''' <enumeratedValue>'''
-            '''     <name>enum_name</name>'''
-            '''     <value>#001</value>'''
-            ''' </enumeratedValue>''')
+            """ <enumeratedValue>"""
+            """     <name>enum_name</name>"""
+            """     <value>#001</value>"""
+            """ </enumeratedValue>"""
+        )
         print(type(enum_xml))
         enum = cmsisSvdParser.getEnum(enum_xml)
-        self.assertEqual(enum, structuralModel.Enumeration(
-            name='enum_name', value=1))
+        self.assertEqual(enum, structuralModel.Enumeration(name="enum_name", value=1))
 
     def test_append_v_to_numeric_name(self):
         enum_xml = ElementTree.fromstring(
-            ''' <enumeratedValue>'''
-            '''     <name>001</name>'''
-            '''     <value>#001</value>'''
-            ''' </enumeratedValue>''')
+            """ <enumeratedValue>"""
+            """     <name>001</name>"""
+            """     <value>#001</value>"""
+            """ </enumeratedValue>"""
+        )
         enum = cmsisSvdParser.getEnum(enum_xml)
-        self.assertEqual('v001', enum.name)
+        self.assertEqual("v001", enum.name)
 
 
 if __name__ == "__main__":

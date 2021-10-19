@@ -16,7 +16,8 @@ class Peripheral:
     def addInstance(self, name: str, address: int):
         if name in self.instances:
             raise RuntimeError(
-                "{:s} is already included in the peripheral".format(name))
+                "{:s} is already included in the peripheral".format(name)
+            )
         else:
             self.instances[name] = address
 
@@ -28,9 +29,10 @@ class Uint:
     def __post_init__(self):
         def isPow2(x):
             return floor(log2(x)) == log2(x)
-        assert(self.size != 0)
-        assert(self.size % 8 == 0)
-        assert(isPow2(self.size))
+
+        assert self.size != 0
+        assert self.size % 8 == 0
+        assert isPow2(self.size)
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -49,8 +51,7 @@ class Field:
     name: str
     mask: int
     access: str
-    value_type: 'list[Enumeration]' = field(
-        compare=False, default_factory=list)
+    value_type: "list[Enumeration]" = field(compare=False, default_factory=list)
     description: str = field(compare=False, default="")
 
     def __post_init__(self):
@@ -73,7 +74,7 @@ class Register:
     name: str
     size: InitVar[int]
     reset_value: int
-    fields: 'list[Field]' = field(default_factory=list)
+    fields: "list[Field]" = field(default_factory=list)
     description: str = field(compare=False, default="")
     storage_type: Uint = None
 
@@ -115,9 +116,9 @@ class Union(object):
 
 @dataclass
 class Array:
-    index: 'list[str]'
+    index: "list[str]"
     increment: int
-    element: 'Union[Struct, Union, Register]'
+    element: "Union[Struct, Union, Register]"
 
     def setElement(self, element):
         self.element = element
@@ -128,5 +129,5 @@ class Array:
         return self.increment * len(self.index)
 
     def similarTo(self, other):
-        assert(type(other) == Array)
+        assert type(other) == Array
         return self.index == other.index and self.increment == other.increment
