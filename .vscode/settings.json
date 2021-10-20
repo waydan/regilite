@@ -25,5 +25,12 @@
         "-*-named-parameter",
         "-*-magic-numbers",
         "-readability-braces-around-statements"
-    ]
+    ],
+    "python.testing.unittestArgs": [
+        "-s",
+        "./regenerator",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.unittestEnabled": true
 }
