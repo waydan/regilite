@@ -27,6 +27,22 @@ class TestStructRegisterJoining(unittest.TestCase):
             ),
         )
 
+    def test_inserted_register_positioned_relative_to_struct(self):
+        self.assertEqual(
+            cmsisSvdParser.joinMembers(
+                structuralModel.Struct(name="a_only", members=[(self.a, 0)]),
+                10,
+                self.b,
+                11,
+            ),
+            (
+                structuralModel.Struct(
+                    name="a_only", members=[(self.a, 0), (self.b, 1)]
+                ),
+                10,
+            ),
+        )
+
     prefix_b = structuralModel.Register(name="prefix_b", size=8, reset_value=0)
 
     def test_remove_register_name_prifix_if_matches_struct_name(self):
