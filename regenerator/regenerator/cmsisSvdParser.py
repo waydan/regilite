@@ -2,9 +2,10 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-
+from typing import Any, Callable
 import re
 from functools import singledispatch
+from typing import Any
 from .structuralModel import (
     Peripheral,
     Struct,
@@ -16,11 +17,18 @@ from .structuralModel import (
 )
 
 
-def mbind(value, fn, default):
+def getName(peripheral_elem):
+    return mbind(
+        peripheral_elem.find("groupName"),
+        lambda x: x.text,
+        peripheral_elem.find("name").text,
+    )
+
+
+def mbind(value: Any, fn: Callable, default):
     return fn(value) if value != None else default
 
 
-# Peripheral Parser
 def getAllPeripherals(device_elem):
     peripherals = {}
     for p_elem in device_elem.find("peripherals").findall("peripheral"):
@@ -117,11 +125,14 @@ def _(x, x_position: int, y, y_position: int):
 
 
 def getMember(register_elem):
+    def isArray(register_elem):
+        return register_elem.find("dim") != None
+
     return (
         getArray(register_elem)
         if isArray(register_elem)
         else getRegister(register_elem),
-        strToUint(register_elem.find("addressOffset").text),
+        offsetof(register_elem),
     )
 
 
@@ -143,6 +154,9 @@ def getRegister(register_elem):
 
 
 def getArray(register_elem):
+    def getIndex(register_elem):
+        return re.split(r",\s*", register_elem.find("dimIndex").text)
+
     return Array(
         index=getIndex(register_elem),
         increment=strToUint(register_elem.find("dimIncrement").text),
@@ -185,26 +199,6 @@ def strToUint(number: str):
     return int(
         integer["num"], base=(16 if integer["hex"] else (2 if integer["bin"] else 10))
     )
-
-
-def inGroup(peripheral_elem):
-    return peripheral_elem.find("groupName") != None
-
-
-def getName(peripheral_elem):
-    return (
-        peripheral_elem.find("groupName").text
-        if peripheral_elem.find("groupName") != None
-        else peripheral_elem.find("name").text
-    )
-
-
-def isArray(register_elem):
-    return register_elem.find("dim") != None
-
-
-def getIndex(register_elem):
-    return re.split(r",\s*", register_elem.find("dimIndex").text)
 
 
 def offsetof(register_elem):
