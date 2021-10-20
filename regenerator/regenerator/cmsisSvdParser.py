@@ -21,9 +21,9 @@ def mbind(value, fn, default):
 
 
 # Peripheral Parser
-def getAllPeripherals(device_element):
+def getAllPeripherals(device_elem):
     peripherals = {}
-    for p_elem in device_element.find("peripherals").findall("peripheral"):
+    for p_elem in device_elem.find("peripherals").findall("peripheral"):
         try:
             p_name = getName(p_elem)
             if p_name not in peripherals:
@@ -37,9 +37,9 @@ def getAllPeripherals(device_element):
     return peripherals.values()
 
 
-def getPeripheral(peripheral_element):
-    peripheral = Peripheral(name=getName(peripheral_element))
-    register_list = peripheral_element.find("registers").findall("register")
+def getPeripheral(peripheral_elem):
+    peripheral = Peripheral(name=getName(peripheral_elem))
+    register_list = peripheral_elem.find("registers").findall("register")
     register_list.sort(key=offsetof)
     member_list = [getMember(register) for register in register_list]
 
@@ -63,7 +63,7 @@ def joinMembers(x, x_position, y, y_position):
 
 
 @joinMembers.register(Array)
-def _(x, x_position, y, y_position):
+def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     if isinstance(y, Array) and x.similarTo(y):
         return (
@@ -80,7 +80,7 @@ def _(x, x_position, y, y_position):
 
 
 @joinMembers.register(Struct)
-def _(x, x_position, y, y_position):
+def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     y.name = removePrefix(x.name, y.name)
     y_position -= x_position
@@ -91,14 +91,14 @@ def _(x, x_position, y, y_position):
 
 
 @joinMembers.register(Union)
-def _(x, x_position, y, y_position):
+def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     y.name = removePrefix(x.name, y.name)
     return (x.addMember((y, y_position - x_position)), x_position)
 
 
 @joinMembers.register(Register)
-def _(x, x_position, y, y_position):
+def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     assert isinstance(y, Register)
     common_prefix = mbind(getCommonPrefix(x.name, y.name), lambda x: x, "")
@@ -187,28 +187,28 @@ def strToUint(number: str):
     )
 
 
-def inGroup(peripheral_element):
-    return peripheral_element.find("groupName") != None
+def inGroup(peripheral_elem):
+    return peripheral_elem.find("groupName") != None
 
 
-def getName(peripheral_element):
+def getName(peripheral_elem):
     return (
-        peripheral_element.find("groupName").text
-        if peripheral_element.find("groupName") != None
-        else peripheral_element.find("name").text
+        peripheral_elem.find("groupName").text
+        if peripheral_elem.find("groupName") != None
+        else peripheral_elem.find("name").text
     )
 
 
-def isArray(register_element):
-    return register_element.find("dim") != None
+def isArray(register_elem):
+    return register_elem.find("dim") != None
 
 
-def getIndex(register_element):
-    return re.split(r",\s*", register_element.find("dimIndex").text)
+def getIndex(register_elem):
+    return re.split(r",\s*", register_elem.find("dimIndex").text)
 
 
-def offsetof(register_element):
-    return strToUint(register_element.find("addressOffset").text)
+def offsetof(register_elem):
+    return strToUint(register_elem.find("addressOffset").text)
 
 
 def membersOverlap(x, y):
