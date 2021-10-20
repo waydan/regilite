@@ -86,10 +86,10 @@ class Register:
         return self.storage_type.sizeof()
 
 
+@dataclass
 class Struct:
-    def __init__(self, name: str, members: list):
-        self.name = name
-        self.members = members
+    name: str = ""
+    members: list = field(default_factory=list)
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -100,10 +100,10 @@ class Struct:
         return self
 
 
+@dataclass
 class Union(object):
-    def __init__(self, name: str, members: list):
-        self.name = name
-        self.members = members
+    name: str = ""
+    members: list = field(default_factory=list)
 
     def sizeof(self):
         """returns size in bytes of object"""

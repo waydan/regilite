@@ -101,9 +101,7 @@ def _(x, x_position, y, y_position):
 def _(x, x_position, y, y_position):
     assert x_position <= y_position
     assert isinstance(y, Register)
-    common_prefix = getCommonPrefix(x.name, y.name)
-    if not common_prefix:
-        common_prefix = "CONTROL"
+    common_prefix = mbind(getCommonPrefix(x.name, y.name), lambda x: x, "")
     x.name = removePrefix(common_prefix, x.name)
     y.name = removePrefix(common_prefix, y.name)
     if membersOverlap((x, x_position), (y, y_position)):
