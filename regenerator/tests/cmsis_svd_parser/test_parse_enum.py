@@ -18,7 +18,6 @@ class TestEnumParser(unittest.TestCase):
             """     <value>#001</value>"""
             """ </enumeratedValue>"""
         )
-        print(type(enum_xml))
         enum = cmsisSvdParser.getEnum(enum_xml)
         self.assertEqual(enum, structuralModel.Enumeration(name="enum_name", value=1))
 
