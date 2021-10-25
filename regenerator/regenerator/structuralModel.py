@@ -2,24 +2,9 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-
+import typing
 from dataclasses import dataclass, field, InitVar
 from math import floor, log2
-
-
-class Peripheral:
-    def __init__(self, name: str):
-        self.name = name
-        self.struct = Struct(None, [])
-        self.instances = {}
-
-    def addInstance(self, name: str, address: int):
-        if name in self.instances:
-            raise RuntimeError(
-                "{:s} is already included in the peripheral".format(name)
-            )
-        else:
-            self.instances[name] = address
 
 
 @dataclass
@@ -89,7 +74,9 @@ class Register:
 @dataclass
 class Struct:
     name: str = ""
-    members: list = field(default_factory=list)
+    members: "list[tuple[typing.Union[Register, Array, Struct, Union]]]" = field(
+        default_factory=list
+    )
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -103,7 +90,9 @@ class Struct:
 @dataclass
 class Union(object):
     name: str = ""
-    members: list = field(default_factory=list)
+    members: "list[tuple[typing.Union[Register, Array, Struct, Union]]]" = field(
+        default_factory=list
+    )
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -118,7 +107,7 @@ class Union(object):
 class Array:
     index: "list[str]"
     increment: int
-    element: "Union[Struct, Union, Register]"
+    element: "typing.Union[Struct, Union, Register]"
 
     def setElement(self, element):
         self.element = element
@@ -131,3 +120,18 @@ class Array:
     def similarTo(self, other):
         assert type(other) == Array
         return self.index == other.index and self.increment == other.increment
+
+
+@dataclass
+class Peripheral:
+    name: str = ""
+    structure: Struct = field(default_factory=Struct)
+    instances: dict = field(default_factory=dict)
+
+    def addInstance(self, name: str, address: int):
+        if name in self.instances:
+            raise RuntimeError(
+                "{:s} is already included in the peripheral".format(name)
+            )
+        else:
+            self.instances[name] = address

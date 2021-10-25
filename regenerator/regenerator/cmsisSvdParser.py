@@ -42,31 +42,26 @@ def getAllPeripherals(device_elem):
         except:
             print(f"failed with an error when parsing {p_name}")
             pass
-    return peripherals.values()
+    return list(peripherals.values())
 
 
 def getPeripheral(peripheral_elem):
     peripheral = Peripheral(name=getName(peripheral_elem))
-    register_list = peripheral_elem.find("registers").findall("register")
+    register_list = mbind(
+        peripheral_elem.find("registers"), lambda x: x.findall("register"), []
+    )
     register_list.sort(key=offsetof)
     member_list = [getMember(register) for register in register_list]
 
-    peripheral.struct.addMember(member_list.pop(0))
     for member in member_list:
-        if membersOverlap(peripheral.struct.members[-1], member):
-            peripheral.struct.addMember(
-                joinMembers(*peripheral.struct.members.pop(), *member)
-            )
-        else:
-            peripheral.struct.addMember(member)
+        peripheral.structure = joinMembers(peripheral.structure, 0, *member)[0]
     return peripheral
 
 
 @singledispatch
 def joinMembers(x, x_position, y, y_position):
     raise RuntimeError(
-        f"Type {type(x)} does not match the domain "
-        "(Register, Array, Union, or Struct)"
+        f"Type {type(x)} does not match the domain (Register, Array, Union, or Struct)"
     )
 
 
@@ -91,7 +86,7 @@ def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     y.name = removePrefix(x.name, y.name)
     y_position -= x_position
-    if membersOverlap(x.members[-1], (y, y_position)):
+    if x.members and membersOverlap(x.members[-1], (y, y_position)):
         return (x.addMember(joinMembers(*x.members.pop(), y, y_position)), x_position)
     else:
         return (x.addMember((y, y_position)), x_position)
