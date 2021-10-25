@@ -79,11 +79,10 @@ def _(x, x_position: int, y, y_position: int):
             x_position,
         )
     elif x_position == y_position:
-        return (Union(None, [(x, 0), (y, 0)]), x_position)
+        return (Union(members=[(x, 0), (y, 0)]), x_position)
     else:
         raise RuntimeError(
-            "Could not resolve dissimilar arrays "
-            f"{x.element.name} and {y.element.name}"
+            f"Could not resolve array and overlapping member {x} and {y}"
         )
 
 
