@@ -7,7 +7,7 @@ import re
 from jinja2 import Template
 from functools import singledispatch
 from .structuralModel import Struct, Register, Array, Union
-from ..templates import TEMPLATES
+from templates import TEMPLATES
 
 
 def generatePeripheral(peripheral, device):
@@ -80,6 +80,10 @@ def _(register, prefix=[], **kwargs):
 
 def generateFields(register_list):
     return [generateRegisterFieldGroup(reg, prefix) for reg, prefix in register_list]
+
+
+def generateField(field, register_key=None):
+    return TEMPLATES["field"].render(field=field, register_key=register_key)
 
 
 def generateRegisterFieldGroup(register, prefix):
