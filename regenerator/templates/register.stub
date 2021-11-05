@@ -1,2 +1,1 @@
-// {{ register.description }}
-{{ '{0}_::reg\t{0}'.format('_'.join(reg_prefix + [register.name])) }}
+{{ register.typename }}_::reg {{ register.name }}; {{- '\t//' + register.description if register.description }}
