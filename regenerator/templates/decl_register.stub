@@ -1,4 +1,4 @@
-{%- set register_namespace = '_'.join(reg_prefix + [register.name]) + '_' -%}
+{%- set register_namespace = register.typename + '_' -%}
 inline namespace {{ register_namespace }} {
 {%- for field in field_definitions %}
 {{ field }}

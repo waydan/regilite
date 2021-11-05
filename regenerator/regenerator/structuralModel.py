@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import typing
 from dataclasses import dataclass, field, InitVar
 from math import floor, log2
+import re
 
 
 @dataclass
@@ -60,10 +61,12 @@ class Register:
     reset_value: int
     fields: "list[Field]" = field(default_factory=list)
     description: str = field(compare=False, default="")
-    storage_type: Uint = None
+    storage_type: Uint = field(init=False)
+    typename: str = field(init=False, compare=False)
 
     def __post_init__(self, size):
         self.storage_type = Uint(size)
+        self.typename = "x".join(re.split(r"{}", self.name))
 
     def sizeof(self):
         """returns size in bytes of object"""

@@ -139,7 +139,7 @@ def getRegister(register_elem):
         )
 
     return Register(
-        name="".join(re.split("%s", register_elem.find("name").text)),
+        name="{}".join(re.split("%s", register_elem.find("name").text)),
         size=strToUint(register_elem.find("size").text),
         reset_value=strToUint(register_elem.find("resetValue").text),
         fields=getAllFields(register_elem),
@@ -201,7 +201,7 @@ def offsetof(register_elem):
 
 def membersOverlap(x, y):
     x_obj, x_position = x
-    y_obj, y_position = y
+    _, y_position = y
     return x_position + x_obj.sizeof() > y_position
 
 

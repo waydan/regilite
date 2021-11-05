@@ -27,7 +27,7 @@ def generate(element, **kwargs):
 
 
 @generate.register(Struct)
-def _(struct, prefix=[], **kwargs):
+def _(struct, **kwargs):
     typename = kwargs["typename"] if "typename" in kwargs else None
     insert_pos = 0
     reserved_cnt = 0
@@ -40,9 +40,7 @@ def _(struct, prefix=[], **kwargs):
                 )
             )
             reserved_cnt += 1
-        member_list.append(
-            generate(member, prefix + [struct.name] if struct.name else prefix)
-        )
+        member_list.append(generate(member))
         insert_pos = position + member.sizeof()
     return TEMPLATES["struct"].render(
         struct=struct, member_list=member_list, type_name=typename
@@ -50,19 +48,16 @@ def _(struct, prefix=[], **kwargs):
 
 
 @generate.register(Union)
-def _(union, prefix=[], **kwargs):
-    member_list = [
-        generate(member, prefix + [union.name] if union.name else prefix)
-        for member, _ in union.members
-    ]
+def _(union, **kwargs):
+    member_list = [generate(member) for member, _ in union.members]
     return TEMPLATES["union"].render(union=union, member_list=member_list)
 
 
 @generate.register(Array)
-def _(array, prefix=[], **kwargs):
+def _(array, **kwargs):
     element = re.match(
         r"^(?P<type>(?:.*?)[\}\s]\s*)" "(?P<name>[_a-zA-z][_0-9a-zA-z]*)\s*$",
-        generate(array.element, prefix),
+        generate(array.element),
         re.S,
     )
     names = (
@@ -74,19 +69,19 @@ def _(array, prefix=[], **kwargs):
 
 
 @generate.register(Register)
-def _(register, prefix=[], **kwargs):
-    return TEMPLATES["register"].render(register=register, reg_prefix=prefix)
+def _(register, **kwargs):
+    return TEMPLATES["register"].render(register=register)
 
 
 def generateFields(register_list):
-    return [generateRegisterFieldGroup(reg, prefix) for reg, prefix in register_list]
+    return [generateRegisterFieldGroup(reg) for reg in register_list]
 
 
 def generateField(field, register_key=None):
     return TEMPLATES["field"].render(field=field, register_key=register_key)
 
 
-def generateRegisterFieldGroup(register, prefix=[]):
+def generateRegisterFieldGroup(register):
     field_definitions = (
         [
             generateField(field=field, register_key=register.name + "_")
@@ -96,31 +91,31 @@ def generateRegisterFieldGroup(register, prefix=[]):
         else []
     )
     return TEMPLATES["decl_reg"].render(
-        register=register, reg_prefix=prefix, field_definitions=field_definitions
+        register=register, field_definitions=field_definitions
     )
 
 
 @singledispatch
-def listRegisters(x, prefix=[]):
+def listRegisters(x):
     """returns a flat generator of all Register objects in the peripheral"""
     raise TypeError(f"Unrecognized argument type: {type(x)}")
 
 
 @listRegisters.register(Register)
-def _(x, prefix=[]):
-    yield (x, prefix)
+def _(x):
+    yield x
 
 
 @listRegisters.register(Struct)
 @listRegisters.register(Union)
-def _(x, prefix=[]):
+def _(x):
     for member, _ in x.members:
-        yield from listRegisters(member, prefix + [x.name] if x.name else prefix)
+        yield from listRegisters(member)
 
 
 @listRegisters.register(Array)
-def _(x, prefix=[]):
-    yield from listRegisters(x.element, prefix)
+def _(x):
+    yield from listRegisters(x.element)
 
 
 def isSequentialNumeric(index: list):

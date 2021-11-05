@@ -70,6 +70,14 @@ class TestRegisterTypeGenerator(unittest.TestCase):
                 rf"\b{field_model.name}{'_' if field_model.value_type else ''}\b",
             )
 
+    def test_generating_register_type_for_array(self):
+        self.assertRegex(
+            generateHeader.generateRegisterFieldGroup(
+                structuralModel.Register(name="REGISTER{}_TYPE", size=32, reset_value=0)
+            ),
+            r"^(inline)?\s+namespace\s+REGISTERx_TYPE_\s*{.*}(?s)",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
