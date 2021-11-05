@@ -70,7 +70,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
             generateHeader.generateRegisterFieldGroup(
                 structuralModel.Register(name="REGISTER{}_TYPE", size=32, reset_value=0)
             ),
-            r"^(inline)?\s+namespace\s+REGISTERx_TYPE_\s*{.*}(?s)",
+            r"(?s)^(inline)?\s+namespace\s+REGISTERx_TYPE_\s*{.*}",
         )
 
 
