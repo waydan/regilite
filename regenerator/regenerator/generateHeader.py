@@ -56,16 +56,22 @@ def _(union, **kwargs):
 @generate.register(Array)
 def _(array, **kwargs):
     element = re.match(
-        r"^(?P<type>(?:.*?)[\}\s]\s*)" "(?P<name>[_a-zA-z][_0-9a-zA-z]*)\s*$",
+        r"^(?P<type>(.*?)[\}\s]\s*)(?P<name>[_a-zA-z]\w*(?P<indexible>{})?\w*)\s*;(?P<description>\s*//.*)?$",
         generate(array.element),
         re.S,
     )
     names = (
-        element["name"] + f"[{len(array.index)}]"
-        if isSequentialNumeric(array.index)
+        (
+            element["name"].format(f"[{len(array.index)}]")
+            if isSequentialNumeric(array.index) and re.search(r"{}$", element["name"])
+            else ", ".join([element["name"].format(str(i)) for i in array.index])
+        )
+        if element["indexible"]
         else ", ".join([element["name"] + str(i) for i in array.index])
     )
-    return TEMPLATES["array"].render(body=element["type"], names=names)
+    return TEMPLATES["array"].render(
+        body=element["type"], names=names, description=element["description"]
+    )
 
 
 @generate.register(Register)
