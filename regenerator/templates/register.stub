@@ -1,1 +1,1 @@
-{{ register.typename }}_::reg {{ register.name }}; {{- '\t//' + register.description if register.description }}
+{{ register.typename }}_::reg {{ register.name }}; {{- '\t// ' + register.description if register.description }}

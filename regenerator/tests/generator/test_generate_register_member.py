@@ -7,7 +7,7 @@ import unittest
 from regenerator import structuralModel, generateHeader
 
 
-class TestRegisterTypeGenerator(unittest.TestCase):
+class TestRegisterMemberGenerator(unittest.TestCase):
     def test_generating_register_member_without_description(self):
         self.assertRegex(
             generateHeader.generate(
