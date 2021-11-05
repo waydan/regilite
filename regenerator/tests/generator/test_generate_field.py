@@ -2,19 +2,13 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-
 import unittest
+from . import string_unittest_utils
 import re
 from regenerator import structuralModel, generateHeader
 
 
-class TestFieldGenerator(unittest.TestCase):
-    def assertRegexExtractMatch(self, text, regex, regex_flags=0):
-        match = re.search(regex, text, regex_flags)
-        if not match:
-            self.fail(f"Regex didn't match: {regex!r} not found in {text!r}")
-        return match
-
+class TestFieldGenerator(string_unittest_utils.TestCase):
     def test_non_enum_field_definition(self):
         test_alias = self.assertRegexExtractMatch(
             generateHeader.generateField(
