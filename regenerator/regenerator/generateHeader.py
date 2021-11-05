@@ -86,10 +86,10 @@ def generateField(field, register_key=None):
     return TEMPLATES["field"].render(field=field, register_key=register_key)
 
 
-def generateRegisterFieldGroup(register, prefix):
+def generateRegisterFieldGroup(register, prefix=[]):
     field_definitions = (
         [
-            TEMPLATES["field"].render(field=field, register_key=register.name + "_")
+            generateField(field=field, register_key=register.name + "_")
             for field in register.fields
         ]
         if register.fields
