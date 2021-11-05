@@ -41,13 +41,12 @@ class Field:
 
     def __post_init__(self):
         self.value_type.sort(key=lambda x: x.value)
+        assert self.mask > 0, "Field mask value may not be less-than or equal to zero"
 
     def msb(self):
-        return int(log2(self.mask)) if self.mask != 0 else None
+        return int(log2(self.mask))
 
     def lsb(self):
-        if self.mask == 0:
-            return None
         lsb = 0
         while self.mask & (1 << lsb) == 0:
             lsb += 1
