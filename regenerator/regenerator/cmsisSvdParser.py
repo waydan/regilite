@@ -84,7 +84,7 @@ def _(x, x_position: int, y, y_position: int):
 @joinMembers.register(Struct)
 def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
-    y.name = removePrefix(x.name, y.name)
+    renameMember(y, lambda name: removePrefix(x.name, name))
     y_position -= x_position
     if x.members and membersOverlap(x.members[-1], (y, y_position)):
         return (x.addMember(joinMembers(*x.members.pop(), y, y_position)), x_position)
@@ -217,6 +217,21 @@ def getCommonPrefix(x: str, y: str):
 
 def removePrefix(prefix: str, string: str):
     return re.match(f"({re.escape(prefix)})?(_*)(?P<suffix>.+)", string)["suffix"]
+
+
+@singledispatch
+def renameMember(member, renaming_fn):
+    raise TypeError(f"Function called with unrecognized type: {type(member)}")
+
+
+@renameMember.register(Register)
+def _(member, renaming_fn):
+    member.name = renaming_fn(member.name)
+
+
+@renameMember.register(Array)
+def _(member, renaming_fn):
+    renameMember(member.element, renaming_fn)
 
 
 ACCESS_TYPE = {
