@@ -1,5 +1,5 @@
 struct {{- ' {}'.format(type_name) if type_name else '' }} {
     {%- for member in member_list %}
     {{ member | indent(4, False) }}
-    {% endfor %}
+    {%- endfor %}
 }{{ ' ' + struct.name if struct.name else '' }};
