@@ -4,10 +4,40 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import re
-from jinja2 import Template
 from functools import singledispatch
 from .structuralModel import Struct, Register, Array, Union
 from templates import TEMPLATES
+
+
+def generateDataMember(register):
+    return f"{generateType(register)} {register.name};"
+
+
+@singledispatch
+def generateType(model_type):
+    pass
+
+
+@generateType.register(Struct)
+def _(struct):
+    member_data = []
+    current_offset = 0
+    padding_counter = 0
+    for member, member_offset in struct.members:
+        if member_offset > current_offset:
+            member_data.append(
+                f"regilite::padding<{member_offset - current_offset}> _reserved_{padding_counter};"
+            )
+            current_offset = member_offset
+            padding_counter += 1
+        member_data.append(generateDataMember(member))
+        current_offset += member.sizeof()
+    return TEMPLATES["struct_type"].render(struct=struct, data_member_list=member_data)
+
+
+@generateType.register(Register)
+def _(register):
+    return f"r1_::reg{register.sizeof()*8}_t"
 
 
 def generatePeripheral(peripheral, device):

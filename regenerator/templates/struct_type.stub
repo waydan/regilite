@@ -1,0 +1,5 @@
+struct {
+    {%- for member_data in data_member_list %}
+    {{ member_data }}
+    {%- endfor %}
+}

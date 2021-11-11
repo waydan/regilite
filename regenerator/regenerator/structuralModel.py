@@ -58,7 +58,7 @@ class Field:
 class Register:
     name: str
     size: InitVar[int]
-    reset_value: int
+    reset_value: int = 0
     fields: "list[Field]" = field(default_factory=list)
     description: str = field(compare=False, default="")
     storage_type: Uint = field(init=False)
