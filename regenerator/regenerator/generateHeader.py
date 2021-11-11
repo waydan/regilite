@@ -56,7 +56,7 @@ def _(union, **kwargs):
 @generate.register(Array)
 def _(array, **kwargs):
     element = re.match(
-        r"^(?P<type>(.*?)[\}\s]\s*)(?P<name>[_a-zA-z]\w*(?P<indexible>{})?\w*)\s*;(?P<description>\s*//.*)?$",
+        r"^(?P<type>(.*?\{.*\}|[\w:]+)\s+)(?P<name>[_a-zA-z]\w*(?P<indexible>{})?\w*)\s*;(?P<description>\s*//.*)?$",
         generate(array.element),
         re.S,
     )

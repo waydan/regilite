@@ -64,7 +64,7 @@ class TestArrayMemberGenerator(unittest.TestCase):
             r"^Rx_::reg\s+R1\s*;\s*//\s*description$",
         )
 
-    def test_generating_struct_array_with_description(self):
+    def test_generating_struct_array_without_description(self):
         self.assertRegex(
             generateHeader.generate(
                 structuralModel.Array(
@@ -86,6 +86,31 @@ class TestArrayMemberGenerator(unittest.TestCase):
                 ),
             ),
             r"^struct\s*{\s*R_::reg\s+R\s*;\s*}\s*ST1\s*;",
+        )
+
+    def test_generating_struct_array_with_description(self):
+        self.assertRegex(
+            generateHeader.generate(
+                structuralModel.Array(
+                    element=structuralModel.Struct(
+                        name="ST",
+                        members=[
+                            (
+                                structuralModel.Register(
+                                    name="R",
+                                    size=32,
+                                    reset_value=0,
+                                    description="description",
+                                ),
+                                0,
+                            )
+                        ],
+                    ),
+                    index=["1"],
+                    increment=4,
+                ),
+            ),
+            r"^struct\s*{\s*R_::reg\s+R\s*;\s*//\s*description\s*}\s*ST1\s*;",
         )
 
 
