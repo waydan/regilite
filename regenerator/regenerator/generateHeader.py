@@ -9,6 +9,10 @@ from .structuralModel import Struct, Register, Array, Union
 from templates import TEMPLATES
 
 
+def getRegisterNamespace(register):
+    return register.typename + "_"
+
+
 def generateDataMember(register):
     return f"{generateType(register)} {register.name};"
 
@@ -28,16 +32,15 @@ def _(struct):
             member_data.append(
                 f"regilite::padding<{member_offset - current_offset}> _reserved_{padding_counter};"
             )
-            current_offset = member_offset
             padding_counter += 1
         member_data.append(generateDataMember(member))
-        current_offset += member.sizeof()
+        current_offset += member_offset + member.sizeof()
     return TEMPLATES["struct_type"].render(struct=struct, data_member_list=member_data)
 
 
 @generateType.register(Register)
 def _(register):
-    return f"r1_::reg{register.sizeof()*8}_t"
+    return f"{getRegisterNamespace(register)}::reg{register.sizeof()*8}_t"
 
 
 def generatePeripheral(peripheral, device):
