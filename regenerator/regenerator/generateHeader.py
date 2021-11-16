@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import re
 from functools import singledispatch
+from dataclasses import dataclass
 from typing import Type
 from .structuralModel import Struct, Register, Array, Union
 from templates import TEMPLATES
@@ -14,8 +15,36 @@ def getRegisterNamespace(register):
     return register.typename + "_"
 
 
-def generateDataMember(register):
-    return f"{generateType(register)} {register.name};"
+@dataclass
+class DataMember:
+    type: str
+    name: str = ""
+    description: str = ""
+
+    def __str__(self):
+        return f"{self.type} {self.name};{' // ' + self.description if self.description else ''}"
+
+
+@singledispatch
+def makeDataMember(model_type):
+    return DataMember(
+        type=generateType(model_type),
+        name=model_type.name,
+        description=model_type.description,
+    )
+
+
+@makeDataMember.register(Array)
+def _(array):
+    data_member = makeDataMember(array.element)
+    if isSequentialNumeric(array.index):
+        data_member.name = data_member.name.format(f"[{len(array.index)}]")
+    else:
+        data_member.name = ", ".join(
+            [data_member.name.format(index) for index in array.index]
+        )
+
+    return data_member
 
 
 @singledispatch
@@ -34,14 +63,14 @@ def _(struct):
                 f"regilite::padding<{member_offset - current_offset}> _reserved_{padding_counter};"
             )
             padding_counter += 1
-        member_data.append(generateDataMember(member))
+        member_data.append(makeDataMember(member))
         current_offset += member_offset + member.sizeof()
     return TEMPLATES["struct_type"].render(struct=struct, data_member_list=member_data)
 
 
 @generateType.register(Union)
 def _(union):
-    member_data = [generateDataMember(member[0]) for member in union.members]
+    member_data = [makeDataMember(member[0]) for member in union.members]
     return TEMPLATES["union_type"].render(union=union, data_member_list=member_data)
 
 
