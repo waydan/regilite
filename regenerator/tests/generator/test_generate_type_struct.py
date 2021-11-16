@@ -21,7 +21,7 @@ class TestStructTypeGenerator(unittest.TestCase):
     def test_generating_struct_with_single_zero_offset_member(self):
         self.assertRegex(
             generateHeader.generateType(structuralModel.Struct(members=[(self.R1, 0)])),
-            r"^struct \s*{{\s*{}\s*}}$".format(
+            r"^struct\s*{{\s*{}\s*}}$".format(
                 generateHeader.generateDataMember(self.R1)
             ),
         )
@@ -31,7 +31,7 @@ class TestStructTypeGenerator(unittest.TestCase):
             generateHeader.generateType(
                 structuralModel.Struct(members=[(self.R1, 0), (self.R2, 4)])
             ),
-            r"^struct \s*{{\s*{}\s*{}\s*}}$".format(
+            r"^struct\s*{{\s*{}\s*{}\s*}}$".format(
                 generateHeader.generateDataMember(self.R1),
                 generateHeader.generateDataMember(self.R2),
             ),
@@ -40,7 +40,7 @@ class TestStructTypeGenerator(unittest.TestCase):
     def test_add_padding_if_first_member_not_at_zero_offset(self):
         self.assertRegex(
             generateHeader.generateType(structuralModel.Struct(members=[(self.R1, 4)])),
-            r"^struct \s*{{\s*regilite::padding<4> _reserved_\d+;\s*{}\s*}}".format(
+            r"^struct\s*{{\s*regilite::padding<4> _reserved_\d+;\s*{}\s*}}".format(
                 generateHeader.generateDataMember(self.R1)
             ),
         )
@@ -50,7 +50,7 @@ class TestStructTypeGenerator(unittest.TestCase):
             generateHeader.generateType(
                 structuralModel.Struct(members=[(self.R1, 0), (self.R3, 6)])
             ),
-            r"^struct \s*{{\s*{}\s*regilite::padding<2> _reserved_\d+;\s*{}\s*}}".format(
+            r"^struct\s*{{\s*{}\s*regilite::padding<2> _reserved_\d+;\s*{}\s*}}".format(
                 generateHeader.generateDataMember(self.R1),
                 generateHeader.generateDataMember(self.R3),
             ),
@@ -61,7 +61,7 @@ class TestStructTypeGenerator(unittest.TestCase):
             generateHeader.generateType(
                 structuralModel.Struct(members=[(self.R3, 2), (self.R2, 8)])
             ),
-            r"^struct \s*{{\s*regilite::padding<2> _reserved_0;\s*{}"
+            r"^struct\s*{{\s*regilite::padding<2> _reserved_0;\s*{}"
             r"\s*regilite::padding<4> _reserved_1;\s*{}\s*}}".format(
                 generateHeader.generateDataMember(self.R3),
                 generateHeader.generateDataMember(self.R2),
