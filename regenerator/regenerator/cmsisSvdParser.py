@@ -2,10 +2,9 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-from typing import Any, Callable
 import re
 from functools import singledispatch
-from typing import Any
+from .utils import mbind
 from .structuralModel import (
     Peripheral,
     Struct,
@@ -23,10 +22,6 @@ def getName(peripheral_elem):
         lambda x: x.text,
         peripheral_elem.find("name").text,
     )
-
-
-def mbind(value: Any, fn: Callable, default):
-    return fn(value) if value != None else default
 
 
 def getAllPeripherals(device_elem):
