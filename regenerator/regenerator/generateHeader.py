@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import re
 from functools import singledispatch
+from typing import Type
 from .structuralModel import Struct, Register, Array, Union
 from templates import TEMPLATES
 
@@ -19,7 +20,7 @@ def generateDataMember(register):
 
 @singledispatch
 def generateType(model_type):
-    pass
+    raise TypeError(f"Unrecognized argument type: {type(model_type)}")
 
 
 @generateType.register(Struct)
@@ -36,6 +37,12 @@ def _(struct):
         member_data.append(generateDataMember(member))
         current_offset += member_offset + member.sizeof()
     return TEMPLATES["struct_type"].render(struct=struct, data_member_list=member_data)
+
+
+@generateType.register(Union)
+def _(union):
+    member_data = [generateDataMember(member[0]) for member in union.members]
+    return TEMPLATES["union_type"].render(union=union, data_member_list=member_data)
 
 
 @generateType.register(Register)
