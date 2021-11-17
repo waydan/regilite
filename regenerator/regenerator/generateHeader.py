@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import re
 from functools import singledispatch
 from dataclasses import dataclass
-from typing import Type
+from .utils import mbind
 from .structuralModel import Struct, Register, Array, Union
 from templates import TEMPLATES
 
@@ -22,7 +22,7 @@ class DataMember:
     description: str = ""
 
     def __str__(self):
-        return f"{self.type} {self.name};{' // ' + self.description if self.description else ''}"
+        return f"{self.type} {self.name};{mbind(self.description, lambda d: f' // {d}', '')}"
 
 
 @singledispatch
@@ -36,14 +36,16 @@ def makeDataMember(model_type):
 
 @makeDataMember.register(Array)
 def _(array):
+    def hasSuffix(name):
+        return bool(re.match(r"^\w+{}$", name))
+
     data_member = makeDataMember(array.element)
-    if isSequentialNumeric(array.index):
+    if hasSuffix(data_member.name) and isSequentialNumeric(array.index):
         data_member.name = data_member.name.format(f"[{len(array.index)}]")
     else:
         data_member.name = ", ".join(
             [data_member.name.format(index) for index in array.index]
         )
-
     return data_member
 
 
