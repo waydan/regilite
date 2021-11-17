@@ -70,13 +70,17 @@ def _(struct):
             padding_counter += 1
         member_data.append(makeDataMember(member))
         current_offset += member_offset + member.sizeof()
-    return TEMPLATES["struct_type"].render(struct=struct, data_member_list=member_data)
+    return TEMPLATES["struct_type"].render(
+        struct=struct, data_member_list=[str(member) for member in member_data]
+    )
 
 
 @generateType.register(Union)
 def _(union):
     member_data = [makeDataMember(member[0]) for member in union.members]
-    return TEMPLATES["union_type"].render(union=union, data_member_list=member_data)
+    return TEMPLATES["union_type"].render(
+        union=union, data_member_list=[str(member) for member in member_data]
+    )
 
 
 @generateType.register(Register)
