@@ -86,68 +86,10 @@ def generatePeripheral(peripheral, device):
         device=device,
         peripheral=peripheral,
         field_definitions=generateFields(listRegisters(peripheral.struct)),
-        structure_definition=generate(
+        structure_definition=generateType(
             peripheral.struct, typename=f"{peripheral.name}_t"
         ),
     )
-
-
-@singledispatch
-def generate(element, **kwargs):
-    raise TypeError(f"Unrecognized argument type: {type(element)}")
-
-
-@generate.register(Struct)
-def _(struct, **kwargs):
-    typename = kwargs["typename"] if "typename" in kwargs else None
-    insert_pos = 0
-    reserved_cnt = 0
-    member_list = []
-    for member, position in struct.members:
-        if position > insert_pos:
-            member_list.append(
-                TEMPLATES["padding"].render(
-                    size=position - insert_pos, index=reserved_cnt
-                )
-            )
-            reserved_cnt += 1
-        member_list.append(generate(member))
-        insert_pos = position + member.sizeof()
-    return TEMPLATES["struct"].render(
-        struct=struct, member_list=member_list, type_name=typename
-    )
-
-
-@generate.register(Union)
-def _(union, **kwargs):
-    member_list = [generate(member) for member, _ in union.members]
-    return TEMPLATES["union"].render(union=union, member_list=member_list)
-
-
-@generate.register(Array)
-def _(array, **kwargs):
-    element = re.match(
-        r"^(?P<type>(.*?\{.*\}|[\w:]+)\s+)(?P<name>[_a-zA-z]\w*(?P<indexible>{})?\w*)\s*;(?P<description>\s*//.*)?$",
-        generate(array.element),
-        re.S,
-    )
-    names = (
-        (
-            element["name"].format(f"[{len(array.index)}]")
-            if isSequentialNumeric(array.index) and re.search(r"{}$", element["name"])
-            else ", ".join([element["name"].format(str(i)) for i in array.index])
-        )
-        if element["indexible"]
-        else ", ".join([element["name"] + str(i) for i in array.index])
-    )
-    return TEMPLATES["array"].render(
-        body=element["type"], names=names, description=element["description"]
-    )
-
-
-@generate.register(Register)
-def _(register, **kwargs):
-    return TEMPLATES["register"].render(register=register)
 
 
 def generateFields(register_list):
