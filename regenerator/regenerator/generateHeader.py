@@ -30,7 +30,7 @@ def makeDataMember(model_type):
     return DataMember(
         type=generateType(model_type),
         name=model_type.name,
-        description=model_type.description,
+        description=getattr(model_type, "description", ""),
     )
 
 
