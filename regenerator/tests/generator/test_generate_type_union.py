@@ -20,9 +20,7 @@ class TestUnionTypeGenerator(unittest.TestCase):
     def test_generating_struct_with_single_member(self):
         self.assertRegex(
             generateHeader.generateType(structuralModel.Union(members=[(self.R1, 0)])),
-            r"^union\s*{{\s*{}\s*}}$".format(
-                generateHeader.generateDataMember(self.R1)
-            ),
+            r"^union\s*{{\s*{}\s*}}$".format(generateHeader.makeDataMember(self.R1)),
         )
 
     def test_generating_struct_with_two_same_position_members(self):
@@ -31,8 +29,8 @@ class TestUnionTypeGenerator(unittest.TestCase):
                 structuralModel.Union(members=[(self.R1, 0), (self.R2, 0)])
             ),
             r"^union\s*{{\s*{}\s*{}\s*}}$".format(
-                generateHeader.generateDataMember(self.R1),
-                generateHeader.generateDataMember(self.R2),
+                generateHeader.makeDataMember(self.R1),
+                generateHeader.makeDataMember(self.R2),
             ),
         )
 

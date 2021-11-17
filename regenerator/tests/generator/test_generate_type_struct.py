@@ -21,9 +21,7 @@ class TestStructTypeGenerator(unittest.TestCase):
     def test_generating_struct_with_single_zero_offset_member(self):
         self.assertRegex(
             generateHeader.generateType(structuralModel.Struct(members=[(self.R1, 0)])),
-            r"^struct\s*{{\s*{}\s*}}$".format(
-                generateHeader.generateDataMember(self.R1)
-            ),
+            r"^struct\s*{{\s*{}\s*}}$".format(generateHeader.makeDataMember(self.R1)),
         )
 
     def test_generating_struct_with_two_adjacent_members(self):
@@ -32,8 +30,8 @@ class TestStructTypeGenerator(unittest.TestCase):
                 structuralModel.Struct(members=[(self.R1, 0), (self.R2, 4)])
             ),
             r"^struct\s*{{\s*{}\s*{}\s*}}$".format(
-                generateHeader.generateDataMember(self.R1),
-                generateHeader.generateDataMember(self.R2),
+                generateHeader.makeDataMember(self.R1),
+                generateHeader.makeDataMember(self.R2),
             ),
         )
 
@@ -41,7 +39,7 @@ class TestStructTypeGenerator(unittest.TestCase):
         self.assertRegex(
             generateHeader.generateType(structuralModel.Struct(members=[(self.R1, 4)])),
             r"^struct\s*{{\s*regilite::padding<4> _reserved_\d+;\s*{}\s*}}".format(
-                generateHeader.generateDataMember(self.R1)
+                generateHeader.makeDataMember(self.R1)
             ),
         )
 
@@ -51,8 +49,8 @@ class TestStructTypeGenerator(unittest.TestCase):
                 structuralModel.Struct(members=[(self.R1, 0), (self.R3, 6)])
             ),
             r"^struct\s*{{\s*{}\s*regilite::padding<2> _reserved_\d+;\s*{}\s*}}".format(
-                generateHeader.generateDataMember(self.R1),
-                generateHeader.generateDataMember(self.R3),
+                generateHeader.makeDataMember(self.R1),
+                generateHeader.makeDataMember(self.R3),
             ),
         )
 
@@ -63,8 +61,8 @@ class TestStructTypeGenerator(unittest.TestCase):
             ),
             r"^struct\s*{{\s*regilite::padding<2> _reserved_0;\s*{}"
             r"\s*regilite::padding<4> _reserved_1;\s*{}\s*}}".format(
-                generateHeader.generateDataMember(self.R3),
-                generateHeader.generateDataMember(self.R2),
+                generateHeader.makeDataMember(self.R3),
+                generateHeader.makeDataMember(self.R2),
             ),
         )
 
