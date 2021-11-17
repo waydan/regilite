@@ -62,7 +62,10 @@ def _(struct):
     for member, member_offset in struct.members:
         if member_offset > current_offset:
             member_data.append(
-                f"regilite::padding<{member_offset - current_offset}> _reserved_{padding_counter};"
+                DataMember(
+                    type=f"regilite::padding<{member_offset - current_offset}>",
+                    name=f"_reserved_{padding_counter}",
+                )
             )
             padding_counter += 1
         member_data.append(makeDataMember(member))
