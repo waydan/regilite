@@ -90,13 +90,12 @@ def _(register):
     return f"{getRegisterNamespace(register)}::reg{register.sizeof()*8}_t"
 
 
-def generatePeripheral(peripheral, device):
+def generatePeripheral(peripheral):
     return TEMPLATES["peripheral"].render(
-        device=device,
         peripheral=peripheral,
-        field_definitions=generateFields(listRegisters(peripheral.struct)),
+        field_definitions=generateFields(listRegisters(peripheral.structure)),
         structure_definition=generateType(
-            peripheral.struct, typename=f"{peripheral.name}_t"
+            peripheral.structure, typename=f"{peripheral.name}_t"
         ),
     )
 

@@ -126,7 +126,7 @@ class Array:
 
 @dataclass
 class Peripheral:
-    name: str = ""
+    name: str
     structure: Struct = field(default_factory=Struct)
     instances: dict = field(default_factory=dict)
 
