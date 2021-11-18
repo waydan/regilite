@@ -55,7 +55,7 @@ def generateType(model_type):
 
 
 @generateType.register(Struct)
-def _(struct):
+def _(struct, typename=""):
     member_data = []
     current_offset = 0
     padding_counter = 0
@@ -71,7 +71,9 @@ def _(struct):
         member_data.append(makeDataMember(member))
         current_offset += member_offset + member.sizeof()
     return TEMPLATES["struct_type"].render(
-        struct=struct, data_member_list=[str(member) for member in member_data]
+        struct=struct,
+        typename=typename,
+        data_member_list=[str(member) for member in member_data],
     )
 
 

@@ -66,6 +66,14 @@ class TestStructTypeGenerator(unittest.TestCase):
             ),
         )
 
+    def test_type_is_named_when_passed_non_empty_string(self):
+        self.assertRegex(
+            generateHeader.generateType(
+                structuralModel.Struct(), typename="named_struct"
+            ),
+            r"^struct named_struct\s*{\s*}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
