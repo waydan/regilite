@@ -10,6 +10,7 @@
 		"lextudio.restructuredtext",
 		"trond-snekvik.simple-rst",
 		"notskm.clang-tidy",
-		"ms-python.python"
+		"ms-python.python",
+		"ms-vscode.cpptools"
 	],
 }
