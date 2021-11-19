@@ -5,11 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 from xml.etree import ElementTree
-from regenerator import cmsisSvdParser, structuralModel
+
+from regenerator import cmsisSvdParser
+from regenerator.model import types, datamembers
 
 
-class TestArrayParser(unittest.TestCase):
-    def test_read_register_member_register_tuple(self):
+class TestCreateDataMember(unittest.TestCase):
+    example_register = types.Register(name="register_name", size=32, reset_value=0)
+
+    def test_read_data_member(self):
         member_xml = ElementTree.fromstring(
             """ <register>"""
             """     <name>register_name</name>"""
@@ -21,22 +25,11 @@ class TestArrayParser(unittest.TestCase):
         member = cmsisSvdParser.getMember(member_xml)
         self.assertEqual(
             member,
-            (structuralModel.Register(name="register_name", size=32, reset_value=0), 8),
-        )
-
-    def test_read_register_member_tuple(self):
-        member_xml = ElementTree.fromstring(
-            """ <register>"""
-            """     <name>register_name</name>"""
-            """     <size>32</size>"""
-            """     <addressOffset>0x8</addressOffset>"""
-            """     <resetValue>0</resetValue>"""
-            """ </register>"""
-        )
-        member = cmsisSvdParser.getMember(member_xml)
-        self.assertEqual(
-            member,
-            (structuralModel.Register(name="register_name", size=32, reset_value=0), 8),
+            datamembers.DataMember(
+                type=self.example_register,
+                name="register_name",
+                offset=8,
+            ),
         )
 
     def test_read_array_member_tuple(self):
@@ -47,24 +40,21 @@ class TestArrayParser(unittest.TestCase):
             """     <dimIncrement>0x4</dimIncrement>"""
             """     <name>register_name</name>"""
             """     <size>32</size>"""
-            """     <addressOffset>0x8</addressOffset>"""
+            """     <addressOffset>0</addressOffset>"""
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
         member = cmsisSvdParser.getMember(member_xml)
         self.assertEqual(
             member,
-            (
-                structuralModel.Array(
-                    increment=4,
-                    index=["1", "2", "3"],
-                    element=structuralModel.Register(
-                        name="register_name", size=32, reset_value=0
-                    ),
+            datamembers.MemberArray(
+                datamembers.DataMember(
+                    type=self.example_register, name="register_name", offset=0
                 ),
-                8,
+                index=["1", "2", "3"],
+                increment=4,
             ),
-        )
+        ),
 
 
 if __name__ == "__main__":

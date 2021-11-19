@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 from xml.etree import ElementTree
-from regenerator import cmsisSvdParser, structuralModel
+
+from regenerator import cmsisSvdParser
+from regenerator.model import types
 
 
 class TestEnumParser(unittest.TestCase):
@@ -19,7 +21,7 @@ class TestEnumParser(unittest.TestCase):
             """ </enumeratedValue>"""
         )
         enum = cmsisSvdParser.getEnum(enum_xml)
-        self.assertEqual(enum, structuralModel.Enumeration(name="enum_name", value=1))
+        self.assertEqual(enum, types.Enumeration(name="enum_name", value=1))
 
     def test_append_v_to_numeric_name(self):
         enum_xml = ElementTree.fromstring(

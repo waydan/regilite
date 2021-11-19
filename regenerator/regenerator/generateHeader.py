@@ -7,7 +7,7 @@ import re
 from functools import singledispatch
 from dataclasses import dataclass
 from .utils import mbind
-from .structuralModel import Struct, Register, Array, Union
+from .model.types import Struct, Register, Array, Union
 from templates import TEMPLATES
 
 

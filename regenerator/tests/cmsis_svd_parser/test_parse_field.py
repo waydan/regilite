@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 from xml.etree import ElementTree
-from regenerator import cmsisSvdParser, structuralModel
+
+from regenerator import cmsisSvdParser
+from regenerator.model import types
 
 
 class TestFieldParser(unittest.TestCase):
@@ -19,9 +21,7 @@ class TestFieldParser(unittest.TestCase):
             """ </field>"""
         )
         field = cmsisSvdParser.getField(field_xml)
-        self.assertEqual(
-            field, structuralModel.Field(name="field_name", mask=1792, access="RW")
-        )
+        self.assertEqual(field, types.Field(name="field_name", mask=1792, access="RW"))
 
     def test_read_enum_field_from_svd(self):
         field_xml = ElementTree.fromstring(
@@ -45,13 +45,13 @@ class TestFieldParser(unittest.TestCase):
         field = cmsisSvdParser.getField(field_xml)
         self.assertEqual(
             field,
-            structuralModel.Field(
+            types.Field(
                 name="field_name",
                 mask=1792,
                 access="RW",
                 value_type=[
-                    structuralModel.Enumeration(name="six", value=6),
-                    structuralModel.Enumeration(name="three", value=3),
+                    types.Enumeration(name="six", value=6),
+                    types.Enumeration(name="three", value=3),
                 ],
             ),
         )

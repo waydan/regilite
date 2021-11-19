@@ -5,15 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import re
 from functools import singledispatch
 from .utils import mbind
-from .structuralModel import (
-    Peripheral,
-    Struct,
-    Union,
-    Array,
-    Register,
-    Field,
-    Enumeration,
-)
+from .model import types, datamembers
 
 
 def getName(peripheral_elem):
@@ -41,7 +33,7 @@ def getAllPeripherals(device_elem):
 
 
 def getPeripheral(peripheral_elem):
-    peripheral = Peripheral(name=getName(peripheral_elem))
+    peripheral = types.Peripheral(name=getName(peripheral_elem))
     register_list = mbind(
         peripheral_elem.find("registers"), lambda x: x.findall("register"), []
     )
@@ -56,27 +48,27 @@ def getPeripheral(peripheral_elem):
 @singledispatch
 def joinMembers(x, x_position, y, y_position):
     raise RuntimeError(
-        f"Type {type(x)} does not match the domain (Register, Array, Union, or Struct)"
+        f"Type {type(x)} does not match the domain (types.Register, types.Array, types.Union, or types.Struct)"
     )
 
 
-@joinMembers.register(Array)
+@joinMembers.register(types.Array)
 def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
-    if isinstance(y, Array) and x.similarTo(y):
+    if isinstance(y, types.Array) and x.similarTo(y):
         return (
             x.setElement(joinMembers(x.element, x_position, y.element, y_position)[0]),
             x_position,
         )
     elif x_position == y_position:
-        return (Union(members=[(x, 0), (y, 0)]), x_position)
+        return (types.Union(members=[(x, 0), (y, 0)]), x_position)
     else:
         raise RuntimeError(
             f"Could not resolve array and overlapping member {x} and {y}"
         )
 
 
-@joinMembers.register(Struct)
+@joinMembers.register(types.Struct)
 def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     renameMember(y, lambda name: removePrefix(x.name, name))
@@ -87,28 +79,28 @@ def _(x, x_position: int, y, y_position: int):
         return (x.addMember((y, y_position)), x_position)
 
 
-@joinMembers.register(Union)
+@joinMembers.register(types.Union)
 def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
     y.name = removePrefix(x.name, y.name)
     return (x.addMember((y, y_position - x_position)), x_position)
 
 
-@joinMembers.register(Register)
+@joinMembers.register(types.Register)
 def _(x, x_position: int, y, y_position: int):
     assert x_position <= y_position
-    assert isinstance(y, Register)
+    assert isinstance(y, types.Register)
     common_prefix = mbind(getCommonPrefix(x.name, y.name), lambda x: x, "")
     x.name = removePrefix(common_prefix, x.name)
     y.name = removePrefix(common_prefix, y.name)
     if membersOverlap((x, x_position), (y, y_position)):
         return (
-            Union(common_prefix, [(x, 0), (y, y_position - x_position)]),
+            types.Union(common_prefix, [(x, 0), (y, y_position - x_position)]),
             x_position,
         )
     else:
         return (
-            Struct(common_prefix, [(x, 0), (y, y_position - x_position)]),
+            types.Struct(common_prefix, [(x, 0), (y, y_position - x_position)]),
             x_position,
         )
 
@@ -117,11 +109,19 @@ def getMember(register_elem):
     def isArray(register_elem):
         return register_elem.find("dim") != None
 
+    register = getRegister(register_elem)
+    data_member = datamembers.DataMember(
+        type=register, name=register.name, offset=offsetof(register_elem)
+    )
+
     return (
-        getArray(register_elem)
+        datamembers.MemberArray(
+            member=data_member,
+            index=re.split(r",\s*", register_elem.find("dimIndex").text),
+            increment=strToUint(register_elem.find("dimIncrement").text),
+        )
         if isArray(register_elem)
-        else getRegister(register_elem),
-        offsetof(register_elem),
+        else data_member
     )
 
 
@@ -133,7 +133,7 @@ def getRegister(register_elem):
             [],
         )
 
-    return Register(
+    return types.Register(
         name="{}".join(re.split("%s", register_elem.find("name").text)),
         size=strToUint(register_elem.find("size").text),
         reset_value=strToUint(register_elem.find("resetValue").text),
@@ -146,7 +146,7 @@ def getArray(register_elem):
     def getIndex(register_elem):
         return re.split(r",\s*", register_elem.find("dimIndex").text)
 
-    return Array(
+    return types.Array(
         index=getIndex(register_elem),
         increment=strToUint(register_elem.find("dimIncrement").text),
         element=getRegister(register_elem),
@@ -161,7 +161,7 @@ def getField(field_elem):
             [],
         )
 
-    return Field(
+    return types.Field(
         name=field_elem.find("name").text,
         mask=((1 << strToUint(field_elem.find("bitWidth").text)) - 1)
         << strToUint(field_elem.find("bitOffset").text),
@@ -176,7 +176,7 @@ def getEnum(enum):
         return name if CPP_IDENTIFIER.match(name) else "v" + name
 
     description = enum.find("description")
-    return Enumeration(
+    return types.Enumeration(
         makeId(enum.find("name").text),
         strToUint(enum.find("value").text),
         description.text if description else "",
@@ -219,12 +219,12 @@ def renameMember(member, renaming_fn):
     raise TypeError(f"Function called with unrecognized type: {type(member)}")
 
 
-@renameMember.register(Register)
+@renameMember.register(types.Register)
 def _(member, renaming_fn):
     member.name = renaming_fn(member.name)
 
 
-@renameMember.register(Array)
+@renameMember.register(types.Array)
 def _(member, renaming_fn):
     renameMember(member.element, renaming_fn)
 

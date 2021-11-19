@@ -62,11 +62,10 @@ class Register:
     fields: "list[Field]" = field(default_factory=list)
     description: str = field(compare=False, default="")
     storage_type: Uint = field(init=False)
-    typename: str = field(init=False, compare=False)
 
     def __post_init__(self, size):
         self.storage_type = Uint(size)
-        self.typename = "x".join(re.split(r"{}", self.name))
+        self.name = "x".join(re.split(r"{}", self.name))
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -76,9 +75,7 @@ class Register:
 @dataclass
 class Struct:
     name: str = ""
-    members: "list[tuple[typing.Union[Register, Array, Struct, Union]]]" = field(
-        default_factory=list
-    )
+    members: typing.Any = field(default_factory=list)
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -92,9 +89,7 @@ class Struct:
 @dataclass
 class Union(object):
     name: str = ""
-    members: "list[tuple[typing.Union[Register, Array, Struct, Union]]]" = field(
-        default_factory=list
-    )
+    members: typing.Any = field(default_factory=list)
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -106,29 +101,14 @@ class Union(object):
 
 
 @dataclass
-class Array:
-    index: "list[str]"
-    increment: int
-    element: "typing.Union[Struct, Union, Register]"
-
-    def setElement(self, element):
-        self.element = element
-        return self
-
-    def sizeof(self):
-        """returns size in bytes of object"""
-        return self.increment * len(self.index)
-
-    def similarTo(self, other):
-        assert type(other) == Array
-        return self.index == other.index and self.increment == other.increment
-
-
-@dataclass
 class Peripheral:
     name: str
-    structure: Struct = field(default_factory=Struct)
+    structure: Struct = None
     instances: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        if not self.structure:
+            self.structure = Struct(name=self.name + "_t")
 
     def addInstance(self, name: str, address: int):
         if name in self.instances:
@@ -137,3 +117,7 @@ class Peripheral:
             )
         else:
             self.instances[name] = address
+
+
+class Array:
+    pass
