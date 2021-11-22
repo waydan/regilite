@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import unittest
 from xml.etree import ElementTree
 
-from regenerator import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from regenerator.model import types
 
 
@@ -20,7 +20,7 @@ class TestFieldParser(unittest.TestCase):
             """     <access>read-write</access>"""
             """ </field>"""
         )
-        field = cmsisSvdParser.getField(field_xml)
+        field = cmsissvd.getField(field_xml)
         self.assertEqual(field, types.Field(name="field_name", mask=1792, access="RW"))
 
     def test_read_enum_field_from_svd(self):
@@ -42,7 +42,7 @@ class TestFieldParser(unittest.TestCase):
             """     </enumeratedValues>"""
             """ </field>"""
         )
-        field = cmsisSvdParser.getField(field_xml)
+        field = cmsissvd.getField(field_xml)
         self.assertEqual(
             field,
             types.Field(

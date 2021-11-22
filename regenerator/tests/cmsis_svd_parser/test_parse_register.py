@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 from xml.etree import ElementTree
-from regenerator import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from regenerator.model import types
 
 
@@ -18,7 +18,7 @@ class TestRegisterParser(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        register = cmsisSvdParser.getRegister(register_xml)
+        register = cmsissvd.getRegister(register_xml)
         self.assertEqual(
             register,
             types.Register(name="register_name", size=32, reset_value=0),
@@ -33,7 +33,7 @@ class TestRegisterParser(unittest.TestCase):
             """     <description>test description</description>"""
             """ </register>"""
         )
-        register = cmsisSvdParser.getRegister(register_xml)
+        register = cmsissvd.getRegister(register_xml)
         self.assertEqual(register.description, "test description")
 
 

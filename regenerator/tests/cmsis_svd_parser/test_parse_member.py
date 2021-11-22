@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import unittest
 from xml.etree import ElementTree
 
-from regenerator import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from regenerator.model import types, members
 
 
@@ -22,7 +22,7 @@ class TestCreateDataMember(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        member = cmsisSvdParser.getMember(member_xml)
+        member = cmsissvd.getMember(member_xml)
         self.assertEqual(
             member,
             members.DataMember(
@@ -44,7 +44,7 @@ class TestCreateDataMember(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        member = cmsisSvdParser.getMember(member_xml)
+        member = cmsissvd.getMember(member_xml)
         self.assertEqual(
             member,
             members.MemberArray(

@@ -5,13 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 
 import os
 from xml.etree import ElementTree
-import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from generateHeader import generatePeripheral
 
 
 def generateHeaders(file_name):
     device_xml = ElementTree.fromstring(open(file_name, "r").read())
-    peripherals = cmsisSvdParser.getAllPeripherals(device_xml)
+    peripherals = cmsissvd.getAllPeripherals(device_xml)
     device_name = device_xml.find("name").text
 
     directory = os.path.join(os.getcwd(), device_name)

@@ -4,8 +4,8 @@ SPDX-License-Identifier: Apache-2.0
 """
 import re
 from functools import singledispatch
-from .utils import mbind
-from .model import types, members
+from regenerator.utils import mbind
+from regenerator.model import types, members
 
 
 def getName(peripheral_elem):

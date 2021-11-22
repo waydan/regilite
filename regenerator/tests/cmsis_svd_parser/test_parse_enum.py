@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import unittest
 from xml.etree import ElementTree
 
-from regenerator import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from regenerator.model import types
 
 
@@ -20,7 +20,7 @@ class TestEnumParser(unittest.TestCase):
             """     <value>#001</value>"""
             """ </enumeratedValue>"""
         )
-        enum = cmsisSvdParser.getEnum(enum_xml)
+        enum = cmsissvd.getEnum(enum_xml)
         self.assertEqual(enum, types.Enumeration(name="enum_name", value=1))
 
     def test_append_v_to_numeric_name(self):
@@ -30,7 +30,7 @@ class TestEnumParser(unittest.TestCase):
             """     <value>#001</value>"""
             """ </enumeratedValue>"""
         )
-        enum = cmsisSvdParser.getEnum(enum_xml)
+        enum = cmsissvd.getEnum(enum_xml)
         self.assertEqual("v001", enum.name)
 
 

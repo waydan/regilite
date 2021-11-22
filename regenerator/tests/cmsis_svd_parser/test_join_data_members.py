@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 
-from regenerator import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from regenerator.model import types, members
 
 
@@ -21,7 +21,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_struct_data_member_created_from_nonoverlapping_register_data_members(self):
         self.assertEqual(
-            cmsisSvdParser.smashMembers(
+            cmsissvd.smashMembers(
                 members.DataMember(type=Ra, name="a", offset=0),
                 members.DataMember(type=Rb, name="b", offset=1),
             ),
@@ -39,7 +39,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_union_data_member_created_from_overlapping_register_data_members(self):
         self.assertEqual(
-            cmsisSvdParser.smashMembers(
+            cmsissvd.smashMembers(
                 members.DataMember(type=Ra, name="a", offset=0),
                 members.DataMember(type=Rb, name="b", offset=0),
             ),
@@ -57,7 +57,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_data_member_offsets_rebased_on_containing_member_offset(self):
         self.assertEqual(
-            cmsisSvdParser.smashMembers(
+            cmsissvd.smashMembers(
                 members.DataMember(type=Ra, name="a", offset=4),
                 members.DataMember(type=Rb, name="b", offset=5),
             ),
@@ -75,7 +75,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_struct_data_member_takes_common_prefix_as_name(self):
         self.assertEqual(
-            cmsisSvdParser.smashMembers(prefix_a, prefix_b),
+            cmsissvd.smashMembers(prefix_a, prefix_b),
             members.DataMember(
                 type=types.Struct(
                     members=[

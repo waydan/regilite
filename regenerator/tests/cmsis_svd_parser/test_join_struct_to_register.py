@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 
-from regenerator import cmsisSvdParser
+from regenerator.parser import cmsissvd
 from regenerator.model import types, members
 
 
@@ -18,7 +18,7 @@ member_c = members.DataMember(type=Reg, name="c", offset=0)
 class TestJoiningStructWithDataMember(unittest.TestCase):
     def test_nonoverlapping_member_appended_to_member_list(self):
         self.assertEqual(
-            cmsisSvdParser.insertMember(
+            cmsissvd.insertMember(
                 types.Struct(members=[member_a]),
                 member_b,
             ),
@@ -27,11 +27,11 @@ class TestJoiningStructWithDataMember(unittest.TestCase):
 
     def test_overlapping_members_joined_and_appended_to_member_list(self):
         self.assertEqual(
-            cmsisSvdParser.insertMember(
+            cmsissvd.insertMember(
                 types.Struct(members=[member_a]),
                 member_c,
             ),
-            types.Struct(members=[cmsisSvdParser.smashMembers(member_a, member_c)]),
+            types.Struct(members=[cmsissvd.smashMembers(member_a, member_c)]),
         )
 
 
