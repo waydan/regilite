@@ -73,7 +73,10 @@ def smashMembers(a, b):
 
 
 def insertMember(struct, member):
-    return struct.addMember(member)
+    if struct.members and membersOverlap(struct.members[-1], member):
+        return struct.addMember(smashMembers(struct.members.pop(), member))
+    else:
+        return struct.addMember(member)
 
 
 @singledispatch
