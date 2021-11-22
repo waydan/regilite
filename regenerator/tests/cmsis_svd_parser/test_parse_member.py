@@ -7,7 +7,7 @@ import unittest
 from xml.etree import ElementTree
 
 from regenerator import cmsisSvdParser
-from regenerator.model import types, datamembers
+from regenerator.model import types, members
 
 
 class TestCreateDataMember(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestCreateDataMember(unittest.TestCase):
         member = cmsisSvdParser.getMember(member_xml)
         self.assertEqual(
             member,
-            datamembers.DataMember(
+            members.DataMember(
                 type=self.example_register,
                 name="register_name",
                 offset=8,
@@ -47,8 +47,8 @@ class TestCreateDataMember(unittest.TestCase):
         member = cmsisSvdParser.getMember(member_xml)
         self.assertEqual(
             member,
-            datamembers.MemberArray(
-                datamembers.DataMember(
+            members.MemberArray(
+                members.DataMember(
                     type=self.example_register, name="register_name", offset=0
                 ),
                 index=["1", "2", "3"],

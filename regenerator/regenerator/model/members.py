@@ -14,7 +14,11 @@ class DataMember:
     offset: int
 
     def sizeof(self):
-        return type.sizeof()
+        return self.type.sizeof()
+
+    def rename(self, func):
+        self.name = func(self.name)
+        return self
 
 
 @dataclass

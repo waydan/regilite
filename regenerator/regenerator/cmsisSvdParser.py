@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import re
 from functools import singledispatch
 from .utils import mbind
-from .model import types, datamembers
+from .model import types, members
 
 
 def getName(peripheral_elem):
@@ -45,10 +45,41 @@ def getPeripheral(peripheral_elem):
     return peripheral
 
 
+def smashMembers(a, b):
+    def renameMember(member, func):
+        member.name = func(member.name)
+        return member
+
+    def adjustMemberOffset(member, offset_increment):
+        member.offset += offset_increment
+        return member
+
+    new_name = getCommonPrefix(a.name, b.name)
+    new_type = types.Union if membersOverlap(a, b) else types.Struct
+    member_offset = a.offset
+    return members.DataMember(
+        type=new_type(
+            members=[
+                adjustMemberOffset(
+                    renameMember(member, lambda n: removePrefix(new_name, n)),
+                    -member_offset,
+                )
+                for member in (a, b)
+            ]
+        ),
+        name=new_name,
+        offset=member_offset,
+    )
+
+
+def insertMember(struct, member):
+    return struct.addMember(member)
+
+
 @singledispatch
 def joinMembers(x, x_position, y, y_position):
     raise RuntimeError(
-        f"Type {type(x)} does not match the domain (types.Register, types.Array, types.Union, or types.Struct)"
+        f"Type {type(x)} does not match the domain [Register | Union | Struct]"
     )
 
 
@@ -110,12 +141,12 @@ def getMember(register_elem):
         return register_elem.find("dim") != None
 
     register = getRegister(register_elem)
-    data_member = datamembers.DataMember(
+    data_member = members.DataMember(
         type=register, name=register.name, offset=offsetof(register_elem)
     )
 
     return (
-        datamembers.MemberArray(
+        members.MemberArray(
             member=data_member,
             index=re.split(r",\s*", register_elem.find("dimIndex").text),
             increment=strToUint(register_elem.find("dimIncrement").text),
@@ -194,10 +225,16 @@ def offsetof(register_elem):
     return strToUint(register_elem.find("addressOffset").text)
 
 
+@singledispatch
 def membersOverlap(x, y):
     x_obj, x_position = x
     _, y_position = y
     return x_position + x_obj.sizeof() > y_position
+
+
+@membersOverlap.register(members.DataMember)
+def _(a, b):
+    return a.offset + a.sizeof() > b.offset
 
 
 def getCommonPrefix(x: str, y: str):
@@ -216,11 +253,6 @@ def removePrefix(prefix: str, string: str):
 
 @singledispatch
 def renameMember(member, renaming_fn):
-    raise TypeError(f"Function called with unrecognized type: {type(member)}")
-
-
-@renameMember.register(types.Register)
-def _(member, renaming_fn):
     member.name = renaming_fn(member.name)
 
 

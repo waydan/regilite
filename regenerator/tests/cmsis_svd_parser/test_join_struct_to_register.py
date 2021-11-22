@@ -4,61 +4,25 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import unittest
-from regenerator import cmsisSvdParser, structuralModel
+
+from regenerator import cmsisSvdParser
+from regenerator.model import types, members
 
 
-class TestStructRegisterJoining(unittest.TestCase):
-    a = structuralModel.Register(name="a", size=8, reset_value=0)
-    b = structuralModel.Register(name="b", size=8, reset_value=0)
+class TestJoiningStructWithDataMember(unittest.TestCase):
+    a = types.Register(name="a", size=8, reset_value=0)
+    b = types.Register(name="b", size=8, reset_value=0)
 
-    def test_nonoverlapping_register_appended_to_members(self):
+    member_a = members.DataMember(type=a, name="a", offset=0)
+    member_b = members.DataMember(type=b, name="b", offset=1)
+
+    def test_nonoverlapping_member_appended_to_member_list(self):
         self.assertEqual(
-            cmsisSvdParser.joinMembers(
-                structuralModel.Struct(name="a_only", members=[(self.a, 0)]),
-                0,
-                self.b,
-                1,
+            cmsisSvdParser.insertMember(
+                types.Struct(members=[self.member_a]),
+                self.member_b,
             ),
-            (
-                structuralModel.Struct(
-                    name="a_only", members=[(self.a, 0), (self.b, 1)]
-                ),
-                0,
-            ),
-        )
-
-    def test_inserted_register_positioned_relative_to_struct(self):
-        self.assertEqual(
-            cmsisSvdParser.joinMembers(
-                structuralModel.Struct(name="a_only", members=[(self.a, 0)]),
-                10,
-                self.b,
-                11,
-            ),
-            (
-                structuralModel.Struct(
-                    name="a_only", members=[(self.a, 0), (self.b, 1)]
-                ),
-                10,
-            ),
-        )
-
-    prefix_b = structuralModel.Register(name="prefix_b", size=8, reset_value=0)
-
-    def test_remove_register_name_prifix_if_matches_struct_name(self):
-        self.assertEqual(
-            cmsisSvdParser.joinMembers(
-                structuralModel.Struct(name="prefix", members=[(self.a, 0)]),
-                0,
-                self.prefix_b,
-                1,
-            ),
-            (
-                structuralModel.Struct(
-                    name="prefix", members=[(self.a, 0), (self.b, 1)]
-                ),
-                0,
-            ),
+            types.Struct(members=[self.member_a, self.member_b]),
         )
 
 
