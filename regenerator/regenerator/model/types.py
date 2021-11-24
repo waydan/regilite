@@ -106,10 +106,6 @@ class Peripheral:
     structure: Struct = None
     instances: dict = field(default_factory=dict)
 
-    def __post_init__(self):
-        if not self.structure:
-            self.structure = Struct(name=self.name + "_t")
-
     def addInstance(self, name: str, address: int):
         if name in self.instances:
             raise RuntimeError(

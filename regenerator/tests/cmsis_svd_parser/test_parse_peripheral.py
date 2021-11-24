@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 from xml.etree import ElementTree
-from regenerator import cmsisSvdParser, structuralModel
+
+from regenerator.parser import cmsissvd
+from regenerator.model import types, members
 
 
 class TestPeripheralParser(unittest.TestCase):
@@ -15,10 +17,12 @@ class TestPeripheralParser(unittest.TestCase):
             """     <name>peripheral_name</name>"""
             """ </peripheral>"""
         )
-        peripheral = cmsisSvdParser.getPeripheral(peripheral_xml)
+        peripheral = cmsissvd.getPeripheral(peripheral_xml)
         self.assertEqual(
             peripheral,
-            structuralModel.Peripheral(name="peripheral_name"),
+            types.Peripheral(
+                name="peripheral_name", structure=types.Struct(name="peripheral_name_t")
+            ),
         )
 
     def test_read_peripheral_with_single_register(self):
@@ -35,19 +39,18 @@ class TestPeripheralParser(unittest.TestCase):
             """     </registers>"""
             """ </peripheral>"""
         )
-        peripheral = cmsisSvdParser.getPeripheral(peripheral_xml)
+        peripheral = cmsissvd.getPeripheral(peripheral_xml)
         self.assertEqual(
             peripheral,
-            structuralModel.Peripheral(
+            types.Peripheral(
                 name="peripheral_name",
-                structure=structuralModel.Struct(
-                    name="",
+                structure=types.Struct(
+                    name="peripheral_name_t",
                     members=[
-                        (
-                            structuralModel.Register(
-                                name="a_reg", reset_value=0, size=8
-                            ),
-                            0,
+                        members.DataMember(
+                            type=types.Register(name="a_reg", size=8, reset_value=0),
+                            name="a_reg",
+                            offset=0,
                         )
                     ],
                 ),
@@ -74,25 +77,23 @@ class TestPeripheralParser(unittest.TestCase):
             """     </registers>"""
             """ </peripheral>"""
         )
-        peripheral = cmsisSvdParser.getPeripheral(peripheral_xml)
+        peripheral = cmsissvd.getPeripheral(peripheral_xml)
         self.assertEqual(
             peripheral,
-            structuralModel.Peripheral(
+            types.Peripheral(
                 name="peripheral_name",
-                structure=structuralModel.Struct(
-                    name="",
+                structure=types.Struct(
+                    name="peripheral_name_t",
                     members=[
-                        (
-                            structuralModel.Register(
-                                name="a_reg", size=8, reset_value=0
-                            ),
-                            0,
+                        members.DataMember(
+                            type=types.Register(name="a_reg", size=8, reset_value=0),
+                            name="a_reg",
+                            offset=0,
                         ),
-                        (
-                            structuralModel.Register(
-                                name="b_reg", size=8, reset_value=0
-                            ),
-                            1,
+                        members.DataMember(
+                            type=types.Register(name="b_reg", size=8, reset_value=0),
+                            name="b_reg",
+                            offset=1,
                         ),
                     ],
                 ),
@@ -111,11 +112,13 @@ class TestPeripheralParser(unittest.TestCase):
             """ </peripherals>"""
             """ </device>"""
         )
-        peripheral = cmsisSvdParser.getAllPeripherals(peripheral_xml)
+        peripheral = cmsissvd.getAllPeripherals(peripheral_xml)
         self.assertEqual(
             peripheral[0],
-            structuralModel.Peripheral(
-                name="peripheral_group", instances={"peripheral123": 0xC0FFEE}
+            types.Peripheral(
+                name="peripheral_group",
+                structure=types.Struct(name="peripheral_group_t"),
+                instances={"peripheral123": 0xC0FFEE},
             ),
         )
 

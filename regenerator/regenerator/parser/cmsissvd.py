@@ -26,7 +26,7 @@ def getAllPeripherals(device_elem):
                 peripherals[p_name].addInstance(
                     p_elem.find("name").text, strToUint(p_elem.find("baseAddress").text)
                 )
-        except:
+        except Exception:
             print(f"failed with an error when parsing {p_name}")
             pass
     return list(peripherals.values())
@@ -34,14 +34,13 @@ def getAllPeripherals(device_elem):
 
 def getPeripheral(peripheral_elem):
     peripheral = types.Peripheral(name=getName(peripheral_elem))
+    peripheral.structure = types.Struct(name=peripheral.name + "_t")
     register_list = mbind(
         peripheral_elem.find("registers"), lambda x: x.findall("register"), []
     )
     register_list.sort(key=offsetof)
-    member_list = [getMember(register) for register in register_list]
-
-    for member in member_list:
-        peripheral.structure = joinMembers(peripheral.structure, 0, *member)[0]
+    for member in [getMember(register) for register in register_list]:
+        peripheral.structure = insertMember(peripheral.structure, member)
     return peripheral
 
 

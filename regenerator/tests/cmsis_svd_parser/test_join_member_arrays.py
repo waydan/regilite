@@ -4,48 +4,62 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import unittest
-from regenerator import cmsisSvdParser, structuralModel
+
+from regenerator.parser import cmsissvd
+from regenerator.model import types, members
+
+Reg = types.Register(name="Register", size=32)
+member_a = members.DataMember(type=Reg, name="a", offset=0)
+member_b = members.DataMember(type=Reg, name="b", offset=4)
 
 
 class TestArrayArrayJoining(unittest.TestCase):
-    a = structuralModel.Register(name="a", size=8, reset_value=0)
-    b = structuralModel.Register(name="b", size=8, reset_value=0)
-
     def test_arrays_with_same_index_and_increment_are_merged(self):
         self.assertEqual(
-            cmsisSvdParser.joinMembers(
-                structuralModel.Array(index=["0", "1"], increment=2, element=self.a),
-                0,
-                structuralModel.Array(index=["0", "1"], increment=2, element=self.b),
-                1,
-            ),
-            (
-                structuralModel.Array(
-                    index=["0", "1"],
-                    increment=2,
-                    element=structuralModel.Struct(members=[(self.a, 0), (self.b, 1)]),
-                ),
-                0,
-            ),
+            cmsissvd.smashMembers(
+                members.MemberArray(member=member_a, index=["0", "1"], increment=4),
+                members.MemberArray(member=member_b, index=["0", "1"], increment=4),
+            ).member,
+            cmsissvd.smashMembers(member_a, member_b),
         )
 
-    def test_arrays_with_different_index_or_increment_yields_union_of_arrays(self):
-        a_array = structuralModel.Array(index=["0", "1"], increment=1, element=self.a)
-        b_array = structuralModel.Array(index=["0"], increment=1, element=self.b)
+    def test_joining_dissimilar_arrays_yields_union_of_arrays(self):
+        a_array = members.MemberArray(
+            member=members.DataMember(type=Reg, name="a", offset=0),
+            index=["0", "1"],
+            increment=4,
+        )
+        b_array = members.MemberArray(
+            member=members.DataMember(type=Reg, name="b", offset=0),
+            index=["0"],
+            increment=4,
+        )
         self.assertEqual(
-            cmsisSvdParser.joinMembers(a_array, 0, b_array, 0),
-            (
-                structuralModel.Union(
-                    members=[(a_array, 0), (b_array, 0)],
-                ),
-                0,
+            cmsissvd.smashMembers(a_array, b_array),
+            members.DataMember(
+                type=types.Union(members=[a_array, b_array]), name="", offset=0
             ),
         )
 
-    def test_raise_exception_when_array_gap_overlaps_joining_member(self):
-        a_array = structuralModel.Array(index=["0", "1"], increment=2, element=self.a)
-        with self.assertRaises(RuntimeError):
-            cmsisSvdParser.joinMembers(a_array, 0, self.b, 1)
+    def test_unioned_arrays_are_renamed_and_offset_rebased_when_combined(self):
+        self.assertEqual(
+            tuple(
+                (array.member.name, array.member.offset)
+                for array in cmsissvd.smashMembers(
+                    members.MemberArray(
+                        member=members.DataMember(type=Reg, name="prefix_a", offset=4),
+                        index=["0", "1"],
+                        increment=4,
+                    ),
+                    members.MemberArray(
+                        member=members.DataMember(type=Reg, name="prefix_b", offset=4),
+                        index=["0"],
+                        increment=4,
+                    ),
+                ).type.members
+            ),
+            (("a", 0), ("b", 0)),
+        )
 
 
 if __name__ == "__main__":
