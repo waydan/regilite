@@ -31,5 +31,18 @@ class MemberArray:
         return self.increment * len(self.index)
 
     def isSimilarTo(self, other):
-        assert other.isArray()
-        return self.index == other.index and self.increment == other.increment
+        return (
+            isinstance(other, MemberArray)
+            and self.index == other.index
+            and self.increment == other.increment
+        )
+
+    def __getattr__(self, __name: str):
+        return getattr(self.member, __name)
+
+    def __setattr__(self, __name: str, __value):
+        # allow write access to DataMember 'name' and 'offset' attributes
+        if __name in ["name", "offset"]:
+            setattr(self.member, __name, __value)
+        else:
+            self.__dict__[__name] = __value

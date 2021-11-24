@@ -46,6 +46,15 @@ def getPeripheral(peripheral_elem):
 
 
 def smashMembers(a, b):
+    if isinstance(a, members.DataMember):
+        return _joinWithDataMember(a, b)
+    elif isinstance(a, members.MemberArray):
+        return _joinWithMemberArray(a, b)
+    else:
+        raise TypeError(f"Function requires a DataMember or MemberArray object")
+
+
+def _joinWithDataMember(a, b):
     def renameMember(member, func):
         member.name = func(member.name)
         return member
@@ -72,6 +81,28 @@ def smashMembers(a, b):
         ),
     )
     return a
+
+
+def _joinWithMemberArray(a, b):
+    if a.isSimilarTo(b):
+        a.member = smashMembers(a.member, b.member)
+        return a
+    else:
+        return _joinWithDataMember(
+            _joinWithDataMember(
+                members.DataMember(
+                    type=types.Union(),
+                    name=getCommonPrefix(a.name, b.name),
+                    offset=a.offset,
+                ),
+                a,
+            ),
+            b,
+        )
+        for array in (a, b):
+            array.member = union_member.type.members.pop(0)
+        union_member.type.members = [a, b]
+        return union_member
 
 
 @singledispatch
