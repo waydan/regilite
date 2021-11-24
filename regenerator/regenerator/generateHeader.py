@@ -4,37 +4,28 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import re
-from functools import singledispatch
 from dataclasses import dataclass
-from .utils import mbind
-from .model.types import Struct, Register, Array, Union
+from functools import singledispatch
+
 from templates import TEMPLATES
+
+from regenerator.model import types
+from regenerator.utils import mbind
 
 
 def getRegisterNamespace(register):
-    return register.typename + "_"
-
-
-@dataclass
-class DataMember:
-    type: str
-    name: str = ""
-    description: str = ""
-
-    def __str__(self):
-        return f"{self.type} {self.name};{mbind(self.description, lambda d: f' // {d}', '')}"
+    return register.name + "_"
 
 
 @singledispatch
-def makeDataMember(model_type):
-    return DataMember(
-        type=generateType(model_type),
-        name=model_type.name,
-        description=getattr(model_type, "description", ""),
-    )
+def makeDataMember(member):
+    string = f"{generateType(member.type)} {member.name};"
+    if hasattr(member.type, "description") and member.type.description:
+        return f"{string} // {member.type.description}"
+    else:
+        return string
 
 
-@makeDataMember.register(Array)
 def _(array):
     def hasSuffix(name):
         return bool(re.match(r"^\w+{}$", name))
@@ -54,7 +45,7 @@ def generateType(model_type):
     raise TypeError(f"Unrecognized argument type: {type(model_type)}")
 
 
-@generateType.register(Struct)
+@generateType.register(types.Struct)
 def _(struct, typename=""):
     member_data = []
     current_offset = 0
@@ -62,10 +53,7 @@ def _(struct, typename=""):
     for member, member_offset in struct.members:
         if member_offset > current_offset:
             member_data.append(
-                DataMember(
-                    type=f"regilite::padding<{member_offset - current_offset}>",
-                    name=f"_reserved_{padding_counter}",
-                )
+                f"regilite::padding<{member_offset - current_offset}> _reserved_{padding_counter}"
             )
             padding_counter += 1
         member_data.append(makeDataMember(member))
@@ -77,7 +65,7 @@ def _(struct, typename=""):
     )
 
 
-@generateType.register(Union)
+@generateType.register(types.Union)
 def _(union):
     member_data = [makeDataMember(member[0]) for member in union.members]
     return TEMPLATES["union_type"].render(
@@ -85,7 +73,7 @@ def _(union):
     )
 
 
-@generateType.register(Register)
+@generateType.register(types.Register)
 def _(register):
     return f"{getRegisterNamespace(register)}::reg{register.sizeof()*8}_t"
 
@@ -128,21 +116,16 @@ def listRegisters(x):
     raise TypeError(f"Unrecognized argument type: {type(x)}")
 
 
-@listRegisters.register(Register)
+@listRegisters.register(types.Register)
 def _(x):
     yield x
 
 
-@listRegisters.register(Struct)
-@listRegisters.register(Union)
+@listRegisters.register(types.Struct)
+@listRegisters.register(types.Union)
 def _(x):
     for member, _ in x.members:
         yield from listRegisters(member)
-
-
-@listRegisters.register(Array)
-def _(x):
-    yield from listRegisters(x.element)
 
 
 def isSequentialNumeric(index: list):
