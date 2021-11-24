@@ -16,11 +16,11 @@ member_b = members.DataMember(type=Reg, name="b", offset=4)
 class TestArrayArrayJoining(unittest.TestCase):
     def test_arrays_with_same_index_and_increment_are_merged(self):
         self.assertEqual(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.MemberArray(member=member_a, index=["0", "1"], increment=4),
                 members.MemberArray(member=member_b, index=["0", "1"], increment=4),
             ).member,
-            cmsissvd.smashMembers(member_a, member_b),
+            cmsissvd.joinMembers(member_a, member_b),
         )
 
     def test_joining_dissimilar_arrays_yields_union_of_arrays(self):
@@ -35,7 +35,7 @@ class TestArrayArrayJoining(unittest.TestCase):
             increment=4,
         )
         self.assertEqual(
-            cmsissvd.smashMembers(a_array, b_array),
+            cmsissvd.joinMembers(a_array, b_array),
             members.DataMember(
                 type=types.Union(members=[a_array, b_array]), name="", offset=0
             ),
@@ -45,7 +45,7 @@ class TestArrayArrayJoining(unittest.TestCase):
         self.assertEqual(
             tuple(
                 (array.member.name, array.member.offset)
-                for array in cmsissvd.smashMembers(
+                for array in cmsissvd.joinMembers(
                     members.MemberArray(
                         member=members.DataMember(type=Reg, name="prefix_a", offset=4),
                         index=["0", "1"],

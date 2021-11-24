@@ -39,7 +39,7 @@ class TestInsertingDataMemberIntoStruct(unittest.TestCase):
                 types.Struct(members=[member_at_0]),
                 member_at_0,
             ),
-            types.Struct(members=[cmsissvd.smashMembers(member_at_0, member_at_0)]),
+            types.Struct(members=[cmsissvd.joinMembers(member_at_0, member_at_0)]),
         )
 
 

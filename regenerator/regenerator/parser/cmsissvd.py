@@ -44,7 +44,7 @@ def getPeripheral(peripheral_elem):
     return peripheral
 
 
-def smashMembers(a, b):
+def joinMembers(a, b):
     if isinstance(a, members.DataMember):
         return _joinWithDataMember(a, b)
     elif isinstance(a, members.MemberArray):
@@ -63,7 +63,7 @@ def _joinWithDataMember(a, b):
         return member
 
     if isinstance(a.type, types.Register):
-        a = smashMembers(
+        a = joinMembers(
             members.DataMember(
                 type=types.Union() if membersOverlap(a, b) else types.Struct(),
                 name=getCommonPrefix(a.name, b.name),
@@ -84,7 +84,7 @@ def _joinWithDataMember(a, b):
 
 def _joinWithMemberArray(a, b):
     if a.isSimilarTo(b):
-        a.member = smashMembers(a.member, b.member)
+        a.member = joinMembers(a.member, b.member)
         return a
     else:
         return _joinWithDataMember(
@@ -108,7 +108,7 @@ def insertMember(any_type, member):
 @insertMember.register(types.Struct)
 def _(struct, member):
     if struct.members and membersOverlap(struct.members[-1], member):
-        return struct.addMember(smashMembers(struct.members.pop(), member))
+        return struct.addMember(joinMembers(struct.members.pop(), member))
     else:
         return struct.addMember(member)
 

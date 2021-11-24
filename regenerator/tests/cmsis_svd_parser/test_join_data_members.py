@@ -14,7 +14,7 @@ Reg = types.Register(name="Register", size=8)
 class TestDataMemberJoining(unittest.TestCase):
     def test_struct_data_member_created_from_nonoverlapping_register_data_members(self):
         self.assertIsInstance(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=Reg, name="a", offset=0),
                 members.DataMember(type=Reg, name="b", offset=1),
             ).type,
@@ -23,7 +23,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_union_data_member_created_from_overlapping_register_data_members(self):
         self.assertIsInstance(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=Reg, name="a", offset=0),
                 members.DataMember(type=Reg, name="b", offset=0),
             ).type,
@@ -32,7 +32,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_register_member_inserted_into_struct_member_when_joining(self):
         self.assertEqual(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=types.Struct(), name="", offset=0),
                 members.DataMember(type=Reg, name="a", offset=0),
             ),
@@ -47,7 +47,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_register_member_inserted_into_union_member_when_joining(self):
         self.assertEqual(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=types.Union(), name="", offset=0),
                 members.DataMember(type=Reg, name="a", offset=0),
             ),
@@ -62,7 +62,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_struct_or_union_member_named_from_common_prefix(self):
         self.assertEqual(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=Reg, name="prefix_a", offset=0),
                 members.DataMember(type=Reg, name="prefix_b", offset=1),
             ).name,
@@ -71,7 +71,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_struct_or_union_name_removed_from_register_member_when_joining(self):
         self.assertEqual(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=types.Union(), name="prefix", offset=0),
                 members.DataMember(type=Reg, name="prefix_a", offset=0),
             )
@@ -82,7 +82,7 @@ class TestDataMemberJoining(unittest.TestCase):
 
     def test_struct_or_union_offset_subtracted_from_register_member_when_joining(self):
         self.assertEqual(
-            cmsissvd.smashMembers(
+            cmsissvd.joinMembers(
                 members.DataMember(type=types.Union(), name="", offset=4),
                 members.DataMember(type=Reg, name="prefix_a", offset=4),
             )
