@@ -63,7 +63,7 @@ def smashMembers(a, b):
             ),
             a,
         )
-
+    # Intentional `if` fallthrough
     # `a` is a type.Struct or types.Union
     a.type = insertMember(
         a.type,
@@ -75,7 +75,12 @@ def smashMembers(a, b):
 
 
 @singledispatch
-def insertMember(struct, member):
+def insertMember(any_type, member):
+    raise TypeError(f"Type {type(any_type)} does not match the domain [Union | Struct]")
+
+
+@insertMember.register(types.Struct)
+def _(struct, member):
     if struct.members and membersOverlap(struct.members[-1], member):
         return struct.addMember(smashMembers(struct.members.pop(), member))
     else:
@@ -89,7 +94,7 @@ def _(union, member):
 
 @singledispatch
 def joinMembers(x, x_position, y, y_position):
-    raise RuntimeError(
+    raise TypeError(
         f"Type {type(x)} does not match the domain [Register | Union | Struct]"
     )
 
