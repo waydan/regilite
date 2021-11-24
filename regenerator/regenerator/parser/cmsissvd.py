@@ -72,11 +72,17 @@ def smashMembers(a, b):
     )
 
 
+@singledispatch
 def insertMember(struct, member):
     if struct.members and membersOverlap(struct.members[-1], member):
         return struct.addMember(smashMembers(struct.members.pop(), member))
     else:
         return struct.addMember(member)
+
+
+@insertMember.register(types.Union)
+def _(union, member):
+    return union.addMember(member)
 
 
 @singledispatch
