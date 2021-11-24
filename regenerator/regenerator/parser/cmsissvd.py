@@ -98,10 +98,6 @@ def _joinWithMemberArray(a, b):
             ),
             b,
         )
-        for array in (a, b):
-            array.member = union_member.type.members.pop(0)
-        union_member.type.members = [a, b]
-        return union_member
 
 
 @singledispatch
@@ -120,66 +116,6 @@ def _(struct, member):
 @insertMember.register(types.Union)
 def _(union, member):
     return union.addMember(member)
-
-
-@singledispatch
-def joinMembers(x, x_position, y, y_position):
-    raise TypeError(
-        f"Type {type(x)} does not match the domain [Register | Union | Struct]"
-    )
-
-
-@joinMembers.register(types.Array)
-def _(x, x_position: int, y, y_position: int):
-    assert x_position <= y_position
-    if isinstance(y, types.Array) and x.similarTo(y):
-        return (
-            x.setElement(joinMembers(x.element, x_position, y.element, y_position)[0]),
-            x_position,
-        )
-    elif x_position == y_position:
-        return (types.Union(members=[(x, 0), (y, 0)]), x_position)
-    else:
-        raise RuntimeError(
-            f"Could not resolve array and overlapping member {x} and {y}"
-        )
-
-
-@joinMembers.register(types.Struct)
-def _(x, x_position: int, y, y_position: int):
-    assert x_position <= y_position
-    renameMember(y, lambda name: removePrefix(x.name, name))
-    y_position -= x_position
-    if x.members and membersOverlap(x.members[-1], (y, y_position)):
-        return (x.addMember(joinMembers(*x.members.pop(), y, y_position)), x_position)
-    else:
-        return (x.addMember((y, y_position)), x_position)
-
-
-@joinMembers.register(types.Union)
-def _(x, x_position: int, y, y_position: int):
-    assert x_position <= y_position
-    y.name = removePrefix(x.name, y.name)
-    return (x.addMember((y, y_position - x_position)), x_position)
-
-
-@joinMembers.register(types.Register)
-def _(x, x_position: int, y, y_position: int):
-    assert x_position <= y_position
-    assert isinstance(y, types.Register)
-    common_prefix = mbind(getCommonPrefix(x.name, y.name), lambda x: x, "")
-    x.name = removePrefix(common_prefix, x.name)
-    y.name = removePrefix(common_prefix, y.name)
-    if membersOverlap((x, x_position), (y, y_position)):
-        return (
-            types.Union(common_prefix, [(x, 0), (y, y_position - x_position)]),
-            x_position,
-        )
-    else:
-        return (
-            types.Struct(common_prefix, [(x, 0), (y, y_position - x_position)]),
-            x_position,
-        )
 
 
 def getMember(register_elem):
@@ -250,7 +186,7 @@ def getField(field_elem):
 
 def getEnum(enum):
     def makeId(name: str):
-        return name if CPP_IDENTIFIER.match(name) else "v" + name
+        return name if _CPP_IDENTIFIER.match(name) else "v" + name
 
     description = enum.find("description")
     return types.Enumeration(
@@ -261,7 +197,7 @@ def getEnum(enum):
 
 
 def strToUint(number: str):
-    integer = UINT_PATTERN.match(number)
+    integer = _UINT_PATTERN.match(number)
     return int(
         integer["num"], base=(16 if integer["hex"] else (2 if integer["bin"] else 10))
     )
@@ -271,15 +207,7 @@ def offsetof(register_elem):
     return strToUint(register_elem.find("addressOffset").text)
 
 
-@singledispatch
-def membersOverlap(x, y):
-    x_obj, x_position = x
-    _, y_position = y
-    return x_position + x_obj.sizeof() > y_position
-
-
-@membersOverlap.register(members.DataMember)
-def _(a, b):
+def membersOverlap(a, b):
     return a.offset + a.sizeof() > b.offset
 
 
@@ -297,14 +225,8 @@ def removePrefix(prefix: str, string: str):
     return re.match(f"({re.escape(prefix)})?(_*)(?P<suffix>.+)", string)["suffix"]
 
 
-@singledispatch
 def renameMember(member, renaming_fn):
     member.name = renaming_fn(member.name)
-
-
-@renameMember.register(types.Array)
-def _(member, renaming_fn):
-    renameMember(member.element, renaming_fn)
 
 
 ACCESS_TYPE = {
@@ -314,8 +236,8 @@ ACCESS_TYPE = {
     "oneToClear": "W1C",
 }
 
-UINT_PATTERN = re.compile(
+_UINT_PATTERN = re.compile(
     r"[+]?" r"((?P<hex>0x|0X)|(?P<bin>(#|0b)))?" r"(?P<num>[a-fA-F\d]+)"
 )
 
-CPP_IDENTIFIER = re.compile(r"[_a-zA-Z][_a-zA-Z0-9]*")
+_CPP_IDENTIFIER = re.compile(r"[_a-zA-Z][_a-zA-Z0-9]*")
