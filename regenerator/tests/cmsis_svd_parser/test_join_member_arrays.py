@@ -47,18 +47,18 @@ class TestArrayArrayJoining(unittest.TestCase):
                 (array.member.name, array.member.offset)
                 for array in cmsissvd.joinMembers(
                     members.MemberArray(
-                        member=members.DataMember(type=Reg, name="prefix_a", offset=4),
+                        member=members.DataMember(type=Reg, name="prefix_ra", offset=4),
                         index=["0", "1"],
                         increment=4,
                     ),
                     members.MemberArray(
-                        member=members.DataMember(type=Reg, name="prefix_b", offset=4),
+                        member=members.DataMember(type=Reg, name="prefix_rb", offset=4),
                         index=["0"],
                         increment=4,
                     ),
                 ).type.members
             ),
-            (("a", 0), ("b", 0)),
+            (("ra", 0), ("rb", 0)),
         )
 
 
