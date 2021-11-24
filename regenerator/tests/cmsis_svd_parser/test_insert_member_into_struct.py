@@ -14,7 +14,16 @@ member_at_0 = members.DataMember(type=Reg, name="a", offset=0)
 member_at_1 = members.DataMember(type=Reg, name="b", offset=1)
 
 
-class TestJoiningStructWithDataMember(unittest.TestCase):
+class TestInsertingDataMemberIntoStruct(unittest.TestCase):
+    def test_insert_member_into_memberless_struct(self):
+        self.assertEqual(
+            cmsissvd.insertMember(
+                types.Struct(),
+                member_at_0,
+            ),
+            types.Struct(members=[member_at_0]),
+        )
+
     def test_nonoverlapping_member_appended_to_member_list(self):
         self.assertEqual(
             cmsissvd.insertMember(
