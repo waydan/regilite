@@ -82,6 +82,58 @@ class TestDataMemberJoining(unittest.TestCase):
             ("a", "b"),
         )
 
+    def test_register_member_inserted_into_struct_member_when_joining(self):
+        self.assertEqual(
+            cmsissvd.smashMembers(
+                members.DataMember(type=types.Struct(), name="", offset=0),
+                members.DataMember(type=Ra, name="a", offset=0),
+            ),
+            members.DataMember(
+                type=types.Struct(
+                    members=[members.DataMember(type=Ra, name="a", offset=0)]
+                ),
+                name="",
+                offset=0,
+            ),
+        )
+
+    def test_register_member_inserted_into_union_member_when_joining(self):
+        self.assertEqual(
+            cmsissvd.smashMembers(
+                members.DataMember(type=types.Union(), name="", offset=0),
+                members.DataMember(type=Ra, name="a", offset=0),
+            ),
+            members.DataMember(
+                type=types.Union(
+                    members=[members.DataMember(type=Ra, name="a", offset=0)]
+                ),
+                name="",
+                offset=0,
+            ),
+        )
+
+    def test_struct_or_union_name_removed_from_register_member_when_joining(self):
+        self.assertEqual(
+            cmsissvd.smashMembers(
+                members.DataMember(type=types.Union(), name="prefix", offset=0),
+                members.DataMember(type=Ra, name="prefix_a", offset=0),
+            )
+            .type.members[-1]
+            .name,
+            "a",
+        )
+
+    def test_struct_or_union_offset_subtracted_from_register_member_when_joining(self):
+        self.assertEqual(
+            cmsissvd.smashMembers(
+                members.DataMember(type=types.Union(), name="", offset=4),
+                members.DataMember(type=Ra, name="prefix_a", offset=4),
+            )
+            .type.members[-1]
+            .offset,
+            0,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

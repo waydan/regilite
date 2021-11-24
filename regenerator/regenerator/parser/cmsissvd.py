@@ -54,22 +54,24 @@ def smashMembers(a, b):
         member.offset += offset_increment
         return member
 
-    new_name = getCommonPrefix(a.name, b.name)
-    new_type = types.Union if membersOverlap(a, b) else types.Struct
-    member_offset = a.offset
-    return members.DataMember(
-        type=new_type(
-            members=[
-                adjustMemberOffset(
-                    renameMember(member, lambda n: removePrefix(new_name, n)),
-                    -member_offset,
-                )
-                for member in (a, b)
-            ]
+    if isinstance(a.type, types.Register):
+        a = smashMembers(
+            members.DataMember(
+                type=types.Union() if membersOverlap(a, b) else types.Struct(),
+                name=getCommonPrefix(a.name, b.name),
+                offset=a.offset,
+            ),
+            a,
+        )
+
+    # `a` is a type.Struct or types.Union
+    a.type = insertMember(
+        a.type,
+        adjustMemberOffset(
+            renameMember(b, lambda n: removePrefix(a.name, n)), -a.offset
         ),
-        name=new_name,
-        offset=member_offset,
     )
+    return a
 
 
 @singledispatch
