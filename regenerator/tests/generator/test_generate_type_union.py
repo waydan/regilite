@@ -7,35 +7,35 @@ import unittest
 from regenerator.model import types, members
 from regenerator import generateHeader
 
+Reg32 = types.Register(name="Register", size=32)
+R1 = members.DataMember(type=Reg32, name="R1", offset=0)
+R2 = members.DataMember(type=Reg32, name="R2", offset=0)
+
 
 class TestUnionTypeGenerator(unittest.TestCase):
-    R1 = members.DataMember(
-        type=types.Register(name="R1", size=32), name="R1", offset=0
-    )
-    R2 = members.DataMember(
-        type=types.Register(name="R2", size=32), name="R2", offset=0
-    )
-
     def test_generating_empty_union(self):
         self.assertRegex(
             generateHeader.generateType(types.Union()),
             r"^union\s*{\s*}$",
         )
 
+    def test_union_name_used_as_type_name(self):
+        self.assertRegex(
+            generateHeader.generateType(types.Union(name="UnionType")),
+            r"^union UnionType {\s*}$",
+        )
+
     def test_generating_struct_with_single_member(self):
         self.assertRegex(
-            generateHeader.generateType(types.Union(members=[(self.R1, 0)])),
-            r"^union\s*{{\s*{}\s*}}$".format(generateHeader.makeDataMember(self.R1)),
+            generateHeader.generateType(types.Union(members=[R1])),
+            r"^union\s*{{\s*{}\s*}}$".format(generateHeader.makeDataMember(R1)),
         )
 
     def test_generating_struct_with_two_same_position_members(self):
         self.assertRegex(
-            generateHeader.generateType(
-                types.Union(members=[(self.R1, 0), (self.R2, 0)])
-            ),
+            generateHeader.generateType(types.Union(members=[R1, R2])),
             r"^union\s*{{\s*{}\s*{}\s*}}$".format(
-                generateHeader.makeDataMember(self.R1),
-                generateHeader.makeDataMember(self.R2),
+                *map(generateHeader.makeDataMember, (R1, R2))
             ),
         )
 
