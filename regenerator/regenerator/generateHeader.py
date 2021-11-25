@@ -90,15 +90,19 @@ def _(register):
 def generatePeripheral(peripheral):
     return TEMPLATES["peripheral"].render(
         peripheral=peripheral,
-        field_definitions=generateFields(listRegisters(peripheral.structure)),
-        structure_definition=generateType(
-            peripheral.structure, typename=f"{peripheral.name}_t"
+        field_definitions=mbind(
+            peripheral.structure, lambda s: generateFields(listRegisters(s)), []
+        ),
+        structure_definition=mbind(
+            peripheral.structure,
+            generateType,
+            "",
         ),
     )
 
 
 def generateFields(register_list):
-    return [generateRegisterFieldGroup(reg) for reg in register_list]
+    return [generateRegisterFieldGroup(register) for register in register_list]
 
 
 def generateField(field, register_key=None):
@@ -133,8 +137,8 @@ def _(x):
 @listRegisters.register(types.Struct)
 @listRegisters.register(types.Union)
 def _(x):
-    for member, _ in x.members:
-        yield from listRegisters(member)
+    for member in x.members:
+        yield from listRegisters(member.type)
 
 
 def isSequentialNumeric(index: list):

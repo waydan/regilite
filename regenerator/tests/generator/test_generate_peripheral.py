@@ -4,42 +4,35 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import unittest
-from regenerator import structuralModel, generateHeader
+
+from regenerator import generateHeader
+from regenerator.model import members, types
+
+R1 = members.DataMember(type=types.Register(name="R1", size=16), name="R1", offset=0)
+R2 = members.DataMember(type=types.Register(name="R2", size=8), name="R2", offset=2)
 
 
 class TestPeripheralGenreator(unittest.TestCase):
-    empty_peripheral = structuralModel.Peripheral(name="peripheral")
-    R1 = structuralModel.Register(name="R1", size=16)
-    R2 = structuralModel.Register(name="R2", size=8)
-
     def test_peripheral_name_is_outermost_namespace(self):
         self.assertRegex(
-            generateHeader.generatePeripheral(self.empty_peripheral),
+            generateHeader.generatePeripheral(types.Peripheral(name="peripheral")),
             r"(?s)^(inline)?\s+namespace\s+peripheral\s*{.*}\s*//\s*peripheral$",
-        )
-
-    def test_struct_type_is_peripheral_name_with_underscore_t(self):
-        self.assertRegex(
-            generateHeader.generatePeripheral(self.empty_peripheral),
-            r"struct\s+peripheral_t\s*{\s*};",
         )
 
     def test_register_definitions_listed_in_peripheral_before_struct(self):
         self.assertRegex(
             generateHeader.generatePeripheral(
-                structuralModel.Peripheral(
+                types.Peripheral(
                     name="p",
-                    structure=structuralModel.Struct(
-                        members=[(self.R1, 0), (self.R2, 2)]
-                    ),
+                    structure=types.Struct(members=[R1, R2]),
                 )
             ),
             r"(?s)^inline\s+namespace\s+p\s*{\s*"
             + r"inline namespace\s*{0:}\s*{{.*?}}\s*//\s*{0:}\s*".format(
-                generateHeader.getRegisterNamespace(self.R1)
+                generateHeader.getRegisterNamespace(R1.type)
             )
             + r"inline namespace\s*{0:}\s*{{.*?}}\s*//\s*{0:}\s*".format(
-                generateHeader.getRegisterNamespace(self.R2)
+                generateHeader.getRegisterNamespace(R2.type)
             ),
         )
 
