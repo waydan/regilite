@@ -9,7 +9,7 @@ from functools import singledispatch
 
 from templates import TEMPLATES
 
-from regenerator.model import types
+from regenerator.model import members, types
 from regenerator.utils import mbind
 
 
@@ -17,27 +17,32 @@ def getRegisterNamespace(register):
     return register.name + "_"
 
 
-@singledispatch
 def makeDataMember(member):
-    string = f"{generateType(member.type)} {member.name};"
-    if hasattr(member.type, "description") and member.type.description:
-        return f"{string} // {member.type.description}"
-    else:
-        return string
-
-
-def _(array):
-    def hasSuffix(name):
+    def _hasSuffix(name):
         return bool(re.match(r"^\w+{}$", name))
 
-    data_member = makeDataMember(array.element)
-    if hasSuffix(data_member.name) and isSequentialNumeric(array.index):
-        data_member.name = data_member.name.format(f"[{len(array.index)}]")
-    else:
-        data_member.name = ", ".join(
-            [data_member.name.format(index) for index in array.index]
+    def _getMemberName(member):
+        if isinstance(member, members.MemberArray):
+            return (
+                member.name.format(f"[{len(member.index)}]")
+                if _hasSuffix(member.name) and isSequentialNumeric(member.index)
+                else ", ".join([member.name.format(index) for index in member.index])
+            )
+        else:
+            return member.name
+
+    def _getDescriptionComment(member_type):
+        return (
+            " // " + member_type.description
+            if hasattr(member_type, "description") and member_type.description
+            else ""
         )
-    return data_member
+
+    return "{type} {name};{description}".format(
+        type=generateType(member.type),
+        name=_getMemberName(member),
+        description=_getDescriptionComment(member.type),
+    )
 
 
 @singledispatch
