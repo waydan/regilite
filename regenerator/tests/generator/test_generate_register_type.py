@@ -3,17 +3,20 @@ Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
 
-import unittest
 import re
+import unittest
+
+from regenerator import generateHeader
+from regenerator.model import types
+
 from . import string_unittest_utils
-from regenerator import structuralModel, generateHeader
 
 
 class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
     def test_generating_register_type_without_fields(self):
         register_namespace = self.assertRegexExtractMatch(
             generateHeader.generateRegisterFieldGroup(
-                structuralModel.Register(name="r1", size=32, reset_value=0)
+                types.Register(name="r1", size=32, reset_value=0)
             ),
             r"^(inline)?\s+namespace\s+r1_\s*{(?P<type_alias>.*)}",
             re.S,
@@ -28,17 +31,17 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
 
     def test_generating_register_type_with_fields(self):
         field_types = [
-            structuralModel.Field(name="f0", mask=1, access="WriteOnly"),
-            structuralModel.Field(
+            types.Field(name="f0", mask=1, access="WriteOnly"),
+            types.Field(
                 name="f1",
                 mask=0b110,
                 access="ReadOnly",
-                value_type=[structuralModel.Enumeration(name="e0", value=0)],
+                value_type=[types.Enumeration(name="e0", value=0)],
             ),
         ]
         register_namespace = self.assertRegexExtractMatch(
             generateHeader.generateRegisterFieldGroup(
-                structuralModel.Register(
+                types.Register(
                     name="r2",
                     size=16,
                     reset_value=10,
@@ -68,7 +71,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
     def test_generating_register_type_for_array(self):
         self.assertRegex(
             generateHeader.generateRegisterFieldGroup(
-                structuralModel.Register(name="REGISTER{}_TYPE", size=32, reset_value=0)
+                types.Register(name="REGISTER{}_TYPE", size=32, reset_value=0)
             ),
             r"(?s)^(inline)?\s+namespace\s+REGISTERx_TYPE_\s*{.*}",
         )

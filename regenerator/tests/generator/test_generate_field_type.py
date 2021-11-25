@@ -2,17 +2,20 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-import unittest
-from . import string_unittest_utils
 import re
-from regenerator import structuralModel, generateHeader
+import unittest
+
+from regenerator import generateHeader
+from regenerator.model import types
+
+from . import string_unittest_utils
 
 
 class TestFieldGenerator(string_unittest_utils.TestCase):
     def test_non_enum_field_definition(self):
         test_alias = self.assertRegexExtractMatch(
             generateHeader.generateField(
-                structuralModel.Field(name="field_name", mask=1, access="ReadWrite"),
+                types.Field(name="field_name", mask=1, access="ReadWrite"),
                 "register_key",
             ),
             r"^using\s+field_name\s*=\s*regilite::Field<\s*(?P<parameters>.*?)\s*>;",
@@ -24,13 +27,13 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
         self.assertRegex(key, r"struct\s*register_key")
 
     def test_enum_field_definition(self):
-        field = structuralModel.Field(
+        field = types.Field(
             name="field_name",
             mask=1,
             access="ReadWrite",
             value_type=[
-                structuralModel.Enumeration(name="e0", value=0),
-                structuralModel.Enumeration(name="e1", value=1),
+                types.Enumeration(name="e0", value=0),
+                types.Enumeration(name="e1", value=1),
             ],
         )
         field_text = generateHeader.generateField(field, "register_key")
