@@ -1,4 +1,4 @@
-struct {{ typename + ' ' if typename else '' }}{
+struct {{ struct.name + ' ' if struct.name else '' }}{
     {%- for member_data in data_member_list %}
     {{ member_data | indent(4)}}
     {%- endfor %}

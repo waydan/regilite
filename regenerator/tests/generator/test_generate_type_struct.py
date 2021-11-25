@@ -4,74 +4,84 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import unittest
-from regenerator import structuralModel, generateHeader
+
+from regenerator import generateHeader
+from regenerator.model import members, types
+
+Reg16 = types.Register(name="Register", size=16)
+Reg32 = types.Register(name="Register", size=32)
+member_at_0 = members.DataMember(type=Reg32, name="MR0", offset=0)
+member_at_2 = members.DataMember(type=Reg16, name="MR2", offset=2)
+member_at_4 = members.DataMember(type=Reg32, name="MR4", offset=4)
+member_at_6 = members.DataMember(type=Reg16, name="MR6", offset=6)
+member_at_8 = members.DataMember(type=Reg16, name="MR8", offset=8)
 
 
 class TestStructTypeGenerator(unittest.TestCase):
-    R1 = structuralModel.Register(name="R1", size=32)
-    R2 = structuralModel.Register(name="R2", size=32)
-    R3 = structuralModel.Register(name="R3", size=16)
-
     def test_generating_empty_struct(self):
         self.assertRegex(
-            generateHeader.generateType(structuralModel.Struct()),
-            r"^struct\s*{\s*}$",
+            generateHeader.generateType(types.Struct()),
+            r"^struct {\s*}$",
+        )
+
+    def test_struct_name_used_as_type_name(self):
+        self.assertRegex(
+            generateHeader.generateType(types.Struct(name="StructType")),
+            r"^struct StructType {\s*}$",
         )
 
     def test_generating_struct_with_single_zero_offset_member(self):
         self.assertRegex(
-            generateHeader.generateType(structuralModel.Struct(members=[(self.R1, 0)])),
-            r"^struct\s*{{\s*{}\s*}}$".format(generateHeader.makeDataMember(self.R1)),
+            generateHeader.generateType(types.Struct(members=[member_at_0])),
+            r"^struct\s*{{\s*{}\s*}}$".format(
+                generateHeader.makeDataMember(member_at_0)
+            ),
         )
 
     def test_generating_struct_with_two_adjacent_members(self):
         self.assertRegex(
             generateHeader.generateType(
-                structuralModel.Struct(members=[(self.R1, 0), (self.R2, 4)])
+                types.Struct(members=[member_at_0, member_at_4])
             ),
             r"^struct\s*{{\s*{}\s*{}\s*}}$".format(
-                generateHeader.makeDataMember(self.R1),
-                generateHeader.makeDataMember(self.R2),
+                *map(generateHeader.makeDataMember, (member_at_0, member_at_4))
             ),
+        )
+
+    def test_assertion_raised_if_adjacent_struct_members_have_same_offset(self):
+        self.assertRaises(
+            AssertionError,
+            generateHeader.generateType,
+            types.Struct(members=[member_at_0, member_at_0]),
         )
 
     def test_add_padding_if_first_member_not_at_zero_offset(self):
         self.assertRegex(
-            generateHeader.generateType(structuralModel.Struct(members=[(self.R1, 4)])),
+            generateHeader.generateType(types.Struct(members=[member_at_4])),
             r"^struct\s*{{\s*regilite::padding<4> _reserved_\d+;\s*{}\s*}}".format(
-                generateHeader.makeDataMember(self.R1)
+                generateHeader.makeDataMember(member_at_4)
             ),
         )
 
     def test_padding_sized_to_fill_gap_between_data_members(self):
         self.assertRegex(
             generateHeader.generateType(
-                structuralModel.Struct(members=[(self.R1, 0), (self.R3, 6)])
+                types.Struct(members=[member_at_0, member_at_6])
             ),
             r"^struct\s*{{\s*{}\s*regilite::padding<2> _reserved_\d+;\s*{}\s*}}".format(
-                generateHeader.makeDataMember(self.R1),
-                generateHeader.makeDataMember(self.R3),
+                *map(generateHeader.makeDataMember, (member_at_0, member_at_6)),
             ),
         )
 
     def test_padding_identifier_made_unique_by_incrementing_suffix(self):
         self.assertRegex(
             generateHeader.generateType(
-                structuralModel.Struct(members=[(self.R3, 2), (self.R2, 8)])
+                types.Struct(members=[member_at_2, member_at_8])
             ),
             r"^struct\s*{{\s*regilite::padding<2> _reserved_0;\s*{}"
             r"\s*regilite::padding<4> _reserved_1;\s*{}\s*}}".format(
-                generateHeader.makeDataMember(self.R3),
-                generateHeader.makeDataMember(self.R2),
+                *map(generateHeader.makeDataMember, (member_at_2, member_at_8))
             ),
-        )
-
-    def test_type_is_named_when_passed_non_empty_string(self):
-        self.assertRegex(
-            generateHeader.generateType(
-                structuralModel.Struct(), typename="named_struct"
-            ),
-            r"^struct named_struct\s*{\s*}",
         )
 
 
