@@ -84,6 +84,19 @@ class TestStructTypeGenerator(unittest.TestCase):
             ),
         )
 
+    def test_struct_offset_increments_properly_for_three_registers(self):
+        self.assertRegex(
+            generateHeader.generateType(
+                types.Struct(members=[member_at_0, member_at_4, member_at_8])
+            ),
+            r"^struct\s*{{\s*{}\s*{}\s*{}\s*}}".format(
+                *map(
+                    generateHeader.makeDataMember,
+                    (member_at_0, member_at_4, member_at_8),
+                )
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

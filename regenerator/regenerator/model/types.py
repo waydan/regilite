@@ -71,6 +71,9 @@ class Register:
         """returns size in bytes of object"""
         return self.storage_type.sizeof()
 
+    def alignof(self):
+        return self.storage_type.sizeof()
+
 
 @dataclass
 class Struct:
@@ -79,7 +82,10 @@ class Struct:
 
     def sizeof(self):
         """returns size in bytes of object"""
-        return self.members[-1].position + self.members[-1].sizeof()
+        return self.members[-1].offset + self.members[-1].sizeof()
+
+    def alignof(self):
+        return max(member.alignof() for member in self.members)
 
     def addMember(self, member):
         self.members.append(member)
@@ -93,7 +99,13 @@ class Union(object):
 
     def sizeof(self):
         """returns size in bytes of object"""
-        return max([position + member.sizeof() for member, position in self.members])
+        return max(
+            _alignAs(member.offset + member.sizeof(), self.alignof())
+            for member in self.members
+        )
+
+    def alignof(self):
+        return max(member.alignof() for member in self.members)
 
     def addMember(self, member):
         self.members.append(member)
@@ -115,5 +127,5 @@ class Peripheral:
             self.instances[name] = address
 
 
-class Array:
-    pass
+def _alignAs(position: int, alignment: int):
+    return (position + 1) // alignment * alignment

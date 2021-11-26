@@ -60,14 +60,13 @@ def _(struct):
             f"Trying to place member {member.name} at offset {member.offset} "
             f"but current position is {current_offset}"
         )
-
         if member.offset > current_offset:
             member_data.append(
                 f"regilite::padding<{member.offset - current_offset}> _reserved_{padding_counter};"
             )
             padding_counter += 1
         member_data.append(makeDataMember(member))
-        current_offset += member.offset + member.sizeof()
+        current_offset = member.offset + member.sizeof()
     return TEMPLATES["struct_type"].render(
         struct=struct,
         data_member_list=member_data,
