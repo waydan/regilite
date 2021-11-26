@@ -3,25 +3,8 @@ Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
 import typing
-from dataclasses import InitVar, dataclass, field
+from dataclasses import dataclass, field
 from math import floor, log2
-
-
-@dataclass
-class Uint:
-    size: int
-
-    def __post_init__(self):
-        def isPow2(x):
-            return floor(log2(x)) == log2(x)
-
-        assert self.size != 0
-        assert self.size % 8 == 0
-        assert isPow2(self.size)
-
-    def sizeof(self):
-        """returns size in bytes of object"""
-        return self.size // 8
 
 
 @dataclass
@@ -56,21 +39,25 @@ class Field:
 @dataclass
 class Register:
     name: str
-    size: InitVar[int]
+    size: int
     reset_value: int = 0
     fields: "list[Field]" = field(default_factory=list)
     description: str = field(compare=False, default="")
-    storage_type: Uint = field(init=False)
 
-    def __post_init__(self, size):
-        self.storage_type = Uint(size)
+    def __post_init__(self):
+        def isPow2(x):
+            return floor(log2(x)) == log2(x)
+
+        assert self.size != 0
+        assert self.size % 8 == 0
+        assert isPow2(self.size)
 
     def sizeof(self):
         """returns size in bytes of object"""
-        return self.storage_type.sizeof()
+        return self.size // 8
 
     def alignof(self):
-        return self.storage_type.sizeof()
+        return self.sizeof()
 
 
 @dataclass
