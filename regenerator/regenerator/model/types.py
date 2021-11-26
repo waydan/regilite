@@ -3,9 +3,8 @@ Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
 import typing
-from dataclasses import dataclass, field, InitVar
+from dataclasses import InitVar, dataclass, field
 from math import floor, log2
-import re
 
 
 @dataclass
@@ -65,7 +64,6 @@ class Register:
 
     def __post_init__(self, size):
         self.storage_type = Uint(size)
-        self.name = "x".join(re.split(r"{}", self.name))
 
     def sizeof(self):
         """returns size in bytes of object"""

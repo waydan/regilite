@@ -2,8 +2,9 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-from dataclasses import dataclass, field
 import typing
+from dataclasses import dataclass
+
 from regenerator.model import types
 
 
@@ -15,6 +16,9 @@ class DataMember:
 
     def sizeof(self):
         return self.type.sizeof()
+
+    def alignof(self):
+        return self.type.alignof()
 
     def rename(self, func):
         self.name = func(self.name)

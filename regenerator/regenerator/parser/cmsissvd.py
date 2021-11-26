@@ -26,7 +26,8 @@ def getAllPeripherals(device_elem):
             if p_name not in peripherals:
                 peripherals[p_name] = getPeripheral(p_elem)
                 peripherals[p_name].addInstance(
-                    p_elem.find("name").text, strToUint(p_elem.find("baseAddress").text)
+                    p_elem.find("name").text,
+                    _strToUint(p_elem.find("baseAddress").text),
                 )
         except Exception:
             print(f"failed with an error when parsing {p_name}")
@@ -81,8 +82,8 @@ def _joinWithDataMember(a, b):
             _joinWithDataMember,
             (a, b),
             members.DataMember(
-                type=types.Union() if membersOverlap(a, b) else types.Struct(),
-                name=findCommonPrefix(a.name, b.name),
+                type=types.Union() if _membersOverlap(a, b) else types.Struct(),
+                name=_findCommonPrefix(a.name, b.name),
                 offset=a.offset,
             ),
         )
@@ -104,7 +105,7 @@ def _joinWithMemberArray(a, b):
             (a, b),
             members.DataMember(
                 type=types.Union(),
-                name=findCommonPrefix(a.name, b.name),
+                name=_findCommonPrefix(a.name, b.name),
                 offset=a.offset,
             ),
         )
@@ -117,7 +118,7 @@ def insertMember(any_type, member):
 
 @insertMember.register(types.Struct)
 def _(struct, member):
-    if struct.members and membersOverlap(struct.members[-1], member):
+    if struct.members and _membersOverlap(struct.members[-1], member):
         return struct.addMember(joinMembers(struct.members.pop(), member))
     else:
         return struct.addMember(member)
@@ -133,18 +134,20 @@ def getMember(register_elem):
         return register_elem.find("dim") != None
 
     def _offsetof(register_elem):
-        return strToUint(register_elem.find("addressOffset").text)
+        return _strToUint(register_elem.find("addressOffset").text)
 
     register = getRegister(register_elem)
     data_member = members.DataMember(
-        type=register, name=register.name, offset=_offsetof(register_elem)
+        type=register,
+        name=_getRegisterName(register_elem),
+        offset=_offsetof(register_elem),
     )
 
     return (
         members.MemberArray(
             member=data_member,
             index=re.split(r",\s*", register_elem.find("dimIndex").text),
-            increment=strToUint(register_elem.find("dimIncrement").text),
+            increment=_strToUint(register_elem.find("dimIncrement").text),
         )
         if isArray(register_elem)
         else data_member
@@ -160,22 +163,11 @@ def getRegister(register_elem):
         )
 
     return types.Register(
-        name="{}".join(re.split("%s", register_elem.find("name").text)),
-        size=strToUint(register_elem.find("size").text),
-        reset_value=strToUint(register_elem.find("resetValue").text),
+        name="x".join(re.split(r"{}", _getRegisterName(register_elem))),
+        size=_strToUint(register_elem.find("size").text),
+        reset_value=_strToUint(register_elem.find("resetValue").text),
         fields=getAllFields(register_elem),
         description=mbind(register_elem.find("description"), lambda x: x.text, ""),
-    )
-
-
-def getArray(register_elem):
-    def getIndex(register_elem):
-        return re.split(r",\s*", register_elem.find("dimIndex").text)
-
-    return types.Array(
-        index=getIndex(register_elem),
-        increment=strToUint(register_elem.find("dimIncrement").text),
-        element=getRegister(register_elem),
     )
 
 
@@ -195,8 +187,8 @@ def getField(field_elem):
     }
     return types.Field(
         name=field_elem.find("name").text,
-        mask=((1 << strToUint(field_elem.find("bitWidth").text)) - 1)
-        << strToUint(field_elem.find("bitOffset").text),
+        mask=((1 << _strToUint(field_elem.find("bitWidth").text)) - 1)
+        << _strToUint(field_elem.find("bitOffset").text),
         access=_access_type_mapping[field_elem.find("access").text],
         value_type=_getValueType(field_elem),
         description=mbind(field_elem.find("description"), lambda x: x.text, ""),
@@ -211,12 +203,12 @@ def getEnum(enum):
     description = enum.find("description")
     return types.Enumeration(
         _makeId(enum.find("name").text),
-        strToUint(enum.find("value").text),
+        _strToUint(enum.find("value").text),
         description.text if description else "",
     )
 
 
-def strToUint(number: str):
+def _strToUint(number: str):
     _uint_pattern = re.compile(
         r"[+]?((?P<hex>0x|0X)|(?P<bin>(#|0b)))?(?P<num>[a-fA-F\d]+)"
     )
@@ -226,11 +218,15 @@ def strToUint(number: str):
     )
 
 
-def membersOverlap(a, b):
+def _membersOverlap(a, b):
     return a.offset + a.sizeof() > b.offset
 
 
-def findCommonPrefix(x: str, y: str):
+def _findCommonPrefix(x: str, y: str):
     return "".join(
         char for char, _ in takewhile(lambda c: c[0] == c[1] and c[0] != "_", zip(x, y))
     )
+
+
+def _getRegisterName(register_elem):
+    return "{}".join(re.split("%s", register_elem.find("name").text))

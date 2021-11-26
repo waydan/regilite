@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 import unittest
 from xml.etree import ElementTree
 
+from regenerator.model import members, types
 from regenerator.parser import cmsissvd
-from regenerator.model import types, members
 
 
 class TestCreateDataMember(unittest.TestCase):
@@ -22,9 +22,8 @@ class TestCreateDataMember(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        member = cmsissvd.getMember(member_xml)
         self.assertEqual(
-            member,
+            cmsissvd.getMember(member_xml),
             members.DataMember(
                 type=self.example_register,
                 name="register_name",
@@ -32,7 +31,7 @@ class TestCreateDataMember(unittest.TestCase):
             ),
         )
 
-    def test_read_array_member_tuple(self):
+    def test_read_array_member(self):
         member_xml = ElementTree.fromstring(
             """ <register>"""
             """     <dim>3</dim>"""
@@ -44,9 +43,8 @@ class TestCreateDataMember(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        member = cmsissvd.getMember(member_xml)
         self.assertEqual(
-            member,
+            cmsissvd.getMember(member_xml),
             members.MemberArray(
                 members.DataMember(
                     type=self.example_register, name="register_name", offset=0
@@ -55,6 +53,20 @@ class TestCreateDataMember(unittest.TestCase):
                 increment=4,
             ),
         ),
+
+    def test_member_array_gets_formatable_name_from_register(self):
+        member_xml = ElementTree.fromstring(
+            """ <register>"""
+            """     <dim>3</dim>"""
+            """     <dimIndex>1, 2, 3</dimIndex>"""
+            """     <dimIncrement>0x4</dimIncrement>"""
+            """     <name>R%s</name>"""
+            """     <size>32</size>"""
+            """     <addressOffset>0</addressOffset>"""
+            """     <resetValue>0</resetValue>"""
+            """ </register>"""
+        )
+        self.assertEqual(cmsissvd.getMember(member_xml).name, "R{}")
 
 
 if __name__ == "__main__":
