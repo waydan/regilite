@@ -7,7 +7,7 @@ using {{ field.name }} = regilite::Field<{{ underlying_type }}, {{ mask }}, regi
 {%- set enum_type = field.name + '_e' -%}
 enum class {{ enum_type }} : {{ underlying_type }} {
     {%- for enum in field.value_type %}
-    {{ enum.name }} = {{ '0b{:b}'.format(enum.value) }}{{ ',' if not loop.last else ' '}}{{ '\t// ' + enum.description if enum.description }}
+    {{ enum.name }} = {{ '0b{:b}'.format(enum.value) }}{{ ',' if not loop.last else ' '}}{{ ' // ' + enum.description if enum.description }}
     {%- endfor %}
 };
 {%- set base_field = field.name + '_' %}
@@ -16,7 +16,7 @@ using {{ base_field }} = regilite::Field<{{ enum_type }}, {{ mask }}, regilite::
 struct {{ field.name }} : {{ base_field }} {
     constexpr explicit {{ field.name }}({{ enum_type }} value) : {{ base_field }}(value) {}
     {%- for enum in field.value_type %}
-    constexpr static {{ base_field }} {{ enum.name }}{ {{- enum_type }}::{{ enum.name -}} };{{ '\t// ' + enum.description if enum.description }}
+    constexpr static {{ base_field }} {{ enum.name }}{ {{- enum_type }}::{{ enum.name -}} };{{ ' // ' + enum.description if enum.description }}
     {%- endfor %}
 };
 {%- endif %}
