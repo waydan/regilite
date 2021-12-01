@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import re
 import unittest
 
-from regenerator.generator import memberfield
+from regenerator.generator import fieldtype
 from regenerator.model import types
 
 from . import string_unittest_utils
@@ -33,7 +33,7 @@ enum_field_with_comments = types.Field(
 class TestFieldGenerator(string_unittest_utils.TestCase):
     def test_non_enum_field_definition(self):
         test_alias = self.assertRegexExtractMatch(
-            memberfield.generate_field_definition(
+            fieldtype.fmt_field(
                 types.Field(name="field_name", mask=1, access="ReadWrite"),
                 "register_key",
             ),
@@ -47,7 +47,7 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
 
     def test_classed_enum_generated_when_field_has_value_type(self):
         self.assertRegex(
-            memberfield.generate_field_definition(enum_field, ""),
+            fieldtype.fmt_field(enum_field, ""),
             rf"(?s)^enum class {enum_field.name}_e : std::uint\d{{1,2}}_t {{.*?}};",
         )
 
@@ -55,7 +55,7 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
         self,
     ):
         self.assertRegex(
-            memberfield.generate_field_definition(enum_field, ""),
+            fieldtype.fmt_field(enum_field, ""),
             f"^enum class.*?{{\s*"
             + r",\s*".join(
                 map(
@@ -67,7 +67,7 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
         )
 
     def test_enumerated_values_may_be_followed_by_description_comments(self):
-        field_text = memberfield.generate_field_definition(enum_field_with_comments)
+        field_text = fieldtype.fmt_field(enum_field_with_comments)
         for enum in enum_field.value_type:
             with self.subTest(enum=enum):
                 self.assertRegex(
@@ -75,7 +75,7 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
                 )
 
     def test_enum_field_definition(self):
-        field_text = memberfield.generate_field_definition(enum_field, "register_key")
+        field_text = fieldtype.fmt_field(enum_field, "register_key")
 
         # The enum_field base type is given a named alias for ease of use
         test_base = self.assertRegexExtractMatch(

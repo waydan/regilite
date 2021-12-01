@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import re
 from functools import singledispatch
 
-from regenerator.generator import memberfield
+from regenerator.generator import fieldtype
 from regenerator.model import members, types
 from regenerator.utils import mbind
 from templates import TEMPLATES
@@ -113,9 +113,7 @@ def generate_register_field_group(register):
         field_definitions=mbind(
             register.fields,
             lambda fields: (
-                memberfield.generate_field_definition(
-                    field=field, register_key=namespace
-                )
+                fieldtype.fmt_field(field=field, register_key=namespace)
                 for field in fields
             ),
             (),
