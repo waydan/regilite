@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 
-from regenerator import generateHeader
+from regenerator.generator import cppstruct
 from regenerator.model import members, types
 
 Reg16 = types.Register(name="Register", size=16)
@@ -20,78 +20,70 @@ member_at_8 = members.DataMember(type=Reg16, name="MR8", offset=8)
 class TestStructTypeGenerator(unittest.TestCase):
     def test_generating_empty_struct(self):
         self.assertRegex(
-            generateHeader.generateType(types.Struct()),
+            cppstruct.generateType(types.Struct()),
             r"^struct {\s*}$",
         )
 
     def test_struct_name_used_as_type_name(self):
         self.assertRegex(
-            generateHeader.generateType(types.Struct(name="StructType")),
+            cppstruct.generateType(types.Struct(name="StructType")),
             r"^struct StructType {\s*}$",
         )
 
     def test_generating_struct_with_single_zero_offset_member(self):
         self.assertRegex(
-            generateHeader.generateType(types.Struct(members=[member_at_0])),
-            r"^struct\s*{{\s*{}\s*}}$".format(
-                generateHeader.makeDataMember(member_at_0)
-            ),
+            cppstruct.generateType(types.Struct(members=[member_at_0])),
+            r"^struct\s*{{\s*{}\s*}}$".format(cppstruct.makeDataMember(member_at_0)),
         )
 
     def test_generating_struct_with_two_adjacent_members(self):
         self.assertRegex(
-            generateHeader.generateType(
-                types.Struct(members=[member_at_0, member_at_4])
-            ),
+            cppstruct.generateType(types.Struct(members=[member_at_0, member_at_4])),
             r"^struct\s*{{\s*{}\s*{}\s*}}$".format(
-                *map(generateHeader.makeDataMember, (member_at_0, member_at_4))
+                *map(cppstruct.makeDataMember, (member_at_0, member_at_4))
             ),
         )
 
     def test_assertion_raised_if_adjacent_struct_members_have_same_offset(self):
         self.assertRaises(
             AssertionError,
-            generateHeader.generateType,
+            cppstruct.generateType,
             types.Struct(members=[member_at_0, member_at_0]),
         )
 
     def test_add_padding_if_first_member_not_at_zero_offset(self):
         self.assertRegex(
-            generateHeader.generateType(types.Struct(members=[member_at_4])),
+            cppstruct.generateType(types.Struct(members=[member_at_4])),
             r"^struct\s*{{\s*regilite::padding<4> _reserved_\d+;\s*{}\s*}}".format(
-                generateHeader.makeDataMember(member_at_4)
+                cppstruct.makeDataMember(member_at_4)
             ),
         )
 
     def test_padding_sized_to_fill_gap_between_data_members(self):
         self.assertRegex(
-            generateHeader.generateType(
-                types.Struct(members=[member_at_0, member_at_6])
-            ),
+            cppstruct.generateType(types.Struct(members=[member_at_0, member_at_6])),
             r"^struct\s*{{\s*{}\s*regilite::padding<2> _reserved_\d+;\s*{}\s*}}".format(
-                *map(generateHeader.makeDataMember, (member_at_0, member_at_6)),
+                *map(cppstruct.makeDataMember, (member_at_0, member_at_6)),
             ),
         )
 
     def test_padding_identifier_made_unique_by_incrementing_suffix(self):
         self.assertRegex(
-            generateHeader.generateType(
-                types.Struct(members=[member_at_2, member_at_8])
-            ),
+            cppstruct.generateType(types.Struct(members=[member_at_2, member_at_8])),
             r"^struct\s*{{\s*regilite::padding<2> _reserved_0;\s*{}"
             r"\s*regilite::padding<4> _reserved_1;\s*{}\s*}}".format(
-                *map(generateHeader.makeDataMember, (member_at_2, member_at_8))
+                *map(cppstruct.makeDataMember, (member_at_2, member_at_8))
             ),
         )
 
     def test_struct_offset_increments_properly_for_three_registers(self):
         self.assertRegex(
-            generateHeader.generateType(
+            cppstruct.generateType(
                 types.Struct(members=[member_at_0, member_at_4, member_at_8])
             ),
             r"^struct\s*{{\s*{}\s*{}\s*{}\s*}}".format(
                 *map(
-                    generateHeader.makeDataMember,
+                    cppstruct.makeDataMember,
                     (member_at_0, member_at_4, member_at_8),
                 )
             ),

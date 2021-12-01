@@ -4,13 +4,12 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import re
-from dataclasses import dataclass
 from functools import singledispatch
 
-from templates import TEMPLATES
-
+from regenerator.generator import memberfield
 from regenerator.model import members, types
 from regenerator.utils import mbind
+from templates import TEMPLATES
 
 
 def getRegisterNamespace(register):
@@ -52,24 +51,25 @@ def generateType(model_type):
 
 @generateType.register(types.Struct)
 def _(struct):
-    member_data = []
-    current_offset = 0
-    padding_counter = 0
-    for member in struct.members:
-        assert member.offset >= current_offset, (
-            f"Trying to place member {member.name} at offset {member.offset} "
-            f"but current position is {current_offset}"
-        )
-        if member.offset > current_offset:
-            member_data.append(
-                f"regilite::padding<{member.offset - current_offset}> _reserved_{padding_counter};"
+    def listMembersWithPadding(member_list):
+        current_offset = 0
+        padding_counter = 0
+        for member in member_list:
+            assert member.offset >= current_offset, (
+                f"Trying to place member {member.name} at offset {member.offset} "
+                f"but current position is {current_offset}"
             )
-            padding_counter += 1
-        member_data.append(makeDataMember(member))
-        current_offset = member.offset + member.sizeof()
+            if member.offset > current_offset:
+                yield (
+                    f"regilite::padding<{member.offset - current_offset}> _reserved_{padding_counter};"
+                )
+                padding_counter += 1
+            yield makeDataMember(member)
+            current_offset = member.offset + member.sizeof()
+
     return TEMPLATES["struct_type"].render(
         struct=struct,
-        data_member_list=member_data,
+        data_member_list=listMembersWithPadding(struct.members),
     )
 
 
@@ -83,14 +83,19 @@ def _(union):
 
 @generateType.register(types.Register)
 def _(register):
-    return f"{getRegisterNamespace(register)}::reg{register.sizeof()*8}_t"
+    return f"{getRegisterNamespace(register)}::reg{register.size}_t"
 
 
 def generatePeripheral(peripheral):
     return TEMPLATES["peripheral"].render(
         peripheral=peripheral,
         field_definitions=mbind(
-            peripheral.structure, lambda s: generateFields(listRegisters(s)), []
+            peripheral.structure,
+            lambda struct: (
+                generateRegisterFieldGroup(register)
+                for register in listRegisters(struct)
+            ),
+            (),
         ),
         structure_definition=mbind(
             peripheral.structure,
@@ -98,14 +103,6 @@ def generatePeripheral(peripheral):
             "",
         ),
     )
-
-
-def generateFields(register_list):
-    return [generateRegisterFieldGroup(register) for register in register_list]
-
-
-def generateField(field, register_key=None):
-    return TEMPLATES["field"].render(field=field, register_key=register_key)
 
 
 def generateRegisterFieldGroup(register):
@@ -116,9 +113,10 @@ def generateRegisterFieldGroup(register):
         field_definitions=mbind(
             register.fields,
             lambda fields: (
-                generateField(field=field, register_key=namespace) for field in fields
+                memberfield.generateFieldDefinition(field=field, register_key=namespace)
+                for field in fields
             ),
-            [],
+            (),
         ),
     )
 
@@ -143,6 +141,6 @@ def _(x):
 
 def isSequentialNumeric(index: list):
     try:
-        return all(map(lambda x: x[0] == x[1], zip(map(int, index), range(len(index)))))
+        return all(map(lambda x: x[0] == x[1], enumerate(map(int, index))))
     except ValueError:
         return False

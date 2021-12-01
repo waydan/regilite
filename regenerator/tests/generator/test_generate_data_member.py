@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 
-from regenerator import generateHeader
+from regenerator.generator import cppstruct
 from regenerator.model import members, types
 
 
@@ -21,21 +21,19 @@ class TestDataMember(unittest.TestCase):
 
     def test_creating_data_member_without_description(self):
         self.assertRegex(
-            generateHeader.makeDataMember(self.R1),
-            r"^{}\s+R1;$".format(generateHeader.generateType(self.R1.type)),
+            cppstruct.makeDataMember(self.R1),
+            r"^{}\s+R1;$".format(cppstruct.generateType(self.R1.type)),
         )
 
     def test_creating_data_member_with_description(self):
         self.assertRegex(
-            generateHeader.makeDataMember(self.R2),
-            r"^{}\s+R2; *// description$".format(
-                generateHeader.generateType(self.R2.type)
-            ),
+            cppstruct.makeDataMember(self.R2),
+            r"^{}\s+R2; *// description$".format(cppstruct.generateType(self.R2.type)),
         )
 
     def test_creating_data_member_from_object_with_no_description_attribute(self):
         self.assertTrue(
-            generateHeader.makeDataMember(
+            cppstruct.makeDataMember(
                 members.DataMember(type=types.Union(name="union"), name="", offset=0)
             )
         )

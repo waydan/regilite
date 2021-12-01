@@ -7,7 +7,7 @@ import re
 import unittest
 from itertools import zip_longest
 
-from regenerator import generateHeader
+from regenerator.generator import cppstruct
 from regenerator.model import types
 
 from . import string_unittest_utils
@@ -18,7 +18,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
         for register_size in 8, 16, 32, 64:
             with self.subTest(register_size=register_size):
                 self.assertRegex(
-                    generateHeader.generateRegisterFieldGroup(
+                    cppstruct.generateRegisterFieldGroup(
                         types.Register(name="r1", size=register_size)
                     ),
                     rf"using reg{register_size}_t =",
@@ -26,9 +26,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
 
     def test_fields_and_register_alias_wrapped_in_namespace(self):
         self.assertRegex(
-            generateHeader.generateRegisterFieldGroup(
-                types.Register(name="r1", size=32)
-            ),
+            cppstruct.generateRegisterFieldGroup(types.Register(name="r1", size=32)),
             r"(?s)^(inline)?\s+namespace\s+r1_\s*{.*} // r1_$",
         )
 
@@ -37,7 +35,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
             for reset_value in range(0, 2 ** size - 1, (2 ** size) // 3):
                 with self.subTest(size=size, reset_value=reset_value):
                     self.assertRegex(
-                        generateHeader.generateRegisterFieldGroup(
+                        cppstruct.generateRegisterFieldGroup(
                             types.Register(
                                 name="r1", size=size, reset_value=reset_value
                             )
@@ -56,7 +54,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
             ),
         ]
         register_type = self.assertRegexExtractMatch(
-            generateHeader.generateRegisterFieldGroup(
+            cppstruct.generateRegisterFieldGroup(
                 types.Register(
                     name="r2",
                     size=16,

@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 import os
 from xml.etree import ElementTree
 
-from generateHeader import generatePeripheral
+from regenerator.generator.cppstruct import generatePeripheral
 from regenerator.parser import cmsissvd
 
 
-def generateHeaders(file_name):
+def cppstructs(file_name):
     device_xml = ElementTree.fromstring(open(file_name, "r").read())
     peripherals = cmsissvd.getAllPeripherals(device_xml)
     device_name = device_xml.find("name").text
