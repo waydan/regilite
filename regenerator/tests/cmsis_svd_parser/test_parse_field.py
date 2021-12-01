@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 import unittest
 from xml.etree import ElementTree
 
-from regenerator.parser import cmsissvd
 from regenerator.model import types
+from regenerator.parser import cmsissvd
 
 
 class TestFieldParser(unittest.TestCase):

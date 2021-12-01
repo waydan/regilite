@@ -4,8 +4,9 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import unittest
-from regenerator.model import types, members
+
 from regenerator import generateHeader
+from regenerator.model import members, types
 
 Reg32 = types.Register(name="Register", size=32)
 R1 = members.DataMember(type=Reg32, name="R1", offset=0)

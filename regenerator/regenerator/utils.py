@@ -3,8 +3,8 @@ Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
 
-from typing import Any, Callable
 from functools import singledispatch
+from typing import Any, Callable
 
 
 @singledispatch

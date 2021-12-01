@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 
 import unittest
 
+from regenerator.model import members, types
 from regenerator.parser import cmsissvd
-from regenerator.model import types, members
 
 Reg = types.Register(name="Register", size=32)
 member_a = members.DataMember(type=Reg, name="a", offset=0)

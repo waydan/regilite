@@ -5,8 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 import os
 from xml.etree import ElementTree
-from regenerator.parser import cmsissvd
+
 from generateHeader import generatePeripheral
+from regenerator.parser import cmsissvd
 
 
 def generateHeaders(file_name):

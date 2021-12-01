@@ -4,13 +4,11 @@ SPDX-License-Identifier: Apache-2.0
 """
 import re
 import unittest
-from functools import reduce
 
 from regenerator import generateHeader
 from regenerator.model import types
 
 from . import string_unittest_utils
-
 
 enum_field = types.Field(
     name="field_name",
