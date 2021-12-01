@@ -3,10 +3,10 @@ inline namespace {{ register_namespace }} {
 {{ field }}
 {%- endfor %}
 using reg = regilite::DefaultRegister<std::uint{{ register.sizeof() * 8 }}_t, {{ '0x{:X}'.format(register.reset_value) -}}
-{%- if not register.fields is none %}>;
+{%- if not register.fields is none %}
 {%- for field in register.fields -%}
 , {{ field.name }}
 {%- endfor %}
 {%- endif -%}
-
+>;
 } // {{ register_namespace }}

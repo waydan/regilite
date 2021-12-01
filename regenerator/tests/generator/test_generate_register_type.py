@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import re
 import unittest
+from itertools import zip_longest
 
 from regenerator import generateHeader
 from regenerator.model import types
@@ -18,8 +19,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
             generateHeader.generateRegisterFieldGroup(
                 types.Register(name="r1", size=32, reset_value=0)
             ),
-            r"^(inline)?\s+namespace\s+r1_\s*{(?P<type_alias>.*)}",
-            re.S,
+            r"(?s)^(inline)?\s+namespace\s+r1_\s*{(?P<type_alias>.*)}",
         )
         register_type = self.assertRegexExtractMatch(
             register_namespace["type_alias"],
@@ -48,8 +48,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
                     fields=field_types,
                 )
             ),
-            r"^(inline)?\s+namespace\s+r2_\s*{(?P<fields_and_register>.*)}",
-            re.S,
+            r"(?s)^(inline)?\s+namespace\s+r2_\s*{(?P<fields_and_register>.*)}",
         )
         register_type = self.assertRegexExtractMatch(
             register_namespace["fields_and_register"],
@@ -58,15 +57,16 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
         storage_type, reset_value, *fields = re.split(
             r"\s*,\s*", register_type["parameters"]
         )
-        self.assertRegex(storage_type, r"^std::uint16_t$")
+        self.assertEqual(storage_type, "std::uint16_t")
         self.assertRegex(reset_value, r"^(10|0b0*1010|0x0*A)$")
 
         # Each field appears exactly once as a template parameter
-        for field_text, field_model in zip(fields, field_types):
-            self.assertRegex(
-                field_text,
-                rf"\b{field_model.name}{'_' if field_model.value_type else ''}\b",
-            )
+        for field_text, field_model in zip_longest(fields, field_types):
+            with self.subTest(field_text=field_text):
+                self.assertEqual(
+                    field_text,
+                    field_model.name,
+                )
 
 
 if __name__ == "__main__":
