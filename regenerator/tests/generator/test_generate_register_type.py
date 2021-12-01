@@ -14,20 +14,36 @@ from . import string_unittest_utils
 
 
 class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
-    def test_generating_register_type_without_fields(self):
-        register_namespace = self.assertRegexExtractMatch(
+    def test_register_type_alias_shows_size(self):
+        for register_size in 8, 16, 32, 64:
+            with self.subTest(register_size=register_size):
+                self.assertRegex(
+                    generateHeader.generateRegisterFieldGroup(
+                        types.Register(name="r1", size=register_size)
+                    ),
+                    rf"using reg{register_size}_t =",
+                )
+
+    def test_fields_and_register_alias_wrapped_in_namespace(self):
+        self.assertRegex(
             generateHeader.generateRegisterFieldGroup(
-                types.Register(name="r1", size=32, reset_value=0)
+                types.Register(name="r1", size=32)
             ),
-            r"(?s)^(inline)?\s+namespace\s+r1_\s*{(?P<type_alias>.*)}",
+            r"(?s)^(inline)?\s+namespace\s+r1_\s*{.*} // r1_$",
         )
-        register_type = self.assertRegexExtractMatch(
-            register_namespace["type_alias"],
-            r"using\s+reg\s*=\s*regilite::DefaultRegister<\s*(?P<parameters>.*?)\s*>;",
-        )
-        storage_type, reset_value = re.split(r"\s*,\s*", register_type["parameters"])
-        self.assertRegex(storage_type, r"^std::uint32_t$")
-        self.assertRegex(reset_value, r"^(0|0b0+|0x0+)$")
+
+    def test_storage_type_and_reset_value_included_in_register_alias(self):
+        for size in 8, 16, 32:
+            for reset_value in range(0, 2 ** size - 1, (2 ** size) // 3):
+                with self.subTest(size=size, reset_value=reset_value):
+                    self.assertRegex(
+                        generateHeader.generateRegisterFieldGroup(
+                            types.Register(
+                                name="r1", size=size, reset_value=reset_value
+                            )
+                        ),
+                        rf"(?m)^using \w+ = regilite::DefaultRegister<std::uint{size}_t, 0x{reset_value:X}>;$",
+                    )
 
     def test_generating_register_type_with_fields(self):
         field_types = [
@@ -39,7 +55,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
                 value_type=[types.Enumeration(name="e0", value=0)],
             ),
         ]
-        register_namespace = self.assertRegexExtractMatch(
+        register_type = self.assertRegexExtractMatch(
             generateHeader.generateRegisterFieldGroup(
                 types.Register(
                     name="r2",
@@ -48,17 +64,11 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
                     fields=field_types,
                 )
             ),
-            r"(?s)^(inline)?\s+namespace\s+r2_\s*{(?P<fields_and_register>.*)}",
+            r"(?m)^using\s+\w+\s*=\s*regilite::DefaultRegister<\s*(?P<parameters>.*?)\s*>;$",
         )
-        register_type = self.assertRegexExtractMatch(
-            register_namespace["fields_and_register"],
-            r"using\s+reg\s*=\s*regilite::DefaultRegister<\s*(?P<parameters>.*?)\s*>;",
-        )
-        storage_type, reset_value, *fields = re.split(
+        _storage_type, _reset_value, *fields = re.split(
             r"\s*,\s*", register_type["parameters"]
         )
-        self.assertEqual(storage_type, "std::uint16_t")
-        self.assertRegex(reset_value, r"^(10|0b0*1010|0x0*A)$")
 
         # Each field appears exactly once as a template parameter
         for field_text, field_model in zip_longest(fields, field_types):

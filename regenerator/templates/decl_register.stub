@@ -2,7 +2,7 @@ inline namespace {{ register_namespace }} {
 {%- for field in field_definitions %}
 {{ field }}
 {%- endfor %}
-using reg = regilite::DefaultRegister<std::uint{{ register.sizeof() * 8 }}_t, {{ '0x{:X}'.format(register.reset_value) -}}
+using reg{{ register.size }}_t = regilite::DefaultRegister<std::uint{{ register.size }}_t, {{ '0x{:X}'.format(register.reset_value) -}}
 {%- if not register.fields is none %}
 {%- for field in register.fields -%}
 , {{ field.name }}
