@@ -20,7 +20,7 @@ class TestFieldParser(unittest.TestCase):
             """     <access>read-write</access>"""
             """ </field>"""
         )
-        field = cmsissvd.getField(field_xml)
+        field = cmsissvd.get_field(field_xml)
         self.assertEqual(field, types.Field(name="field_name", mask=1792, access="RW"))
 
     def test_read_enum_field_from_svd(self):
@@ -42,7 +42,7 @@ class TestFieldParser(unittest.TestCase):
             """     </enumeratedValues>"""
             """ </field>"""
         )
-        field = cmsissvd.getField(field_xml)
+        field = cmsissvd.get_field(field_xml)
         self.assertEqual(
             field,
             types.Field(

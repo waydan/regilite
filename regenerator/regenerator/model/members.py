@@ -34,7 +34,7 @@ class MemberArray:
     def sizeof(self):
         return self.increment * len(self.index)
 
-    def isSimilarTo(self, other):
+    def is_similar_to(self, other):
         return (
             isinstance(other, MemberArray)
             and self.index == other.index

@@ -15,13 +15,13 @@ R2 = members.DataMember(type=types.Register(name="R2", size=8), name="R2", offse
 class TestPeripheralGenreator(unittest.TestCase):
     def test_peripheral_name_is_outermost_namespace(self):
         self.assertRegex(
-            cppstruct.generatePeripheral(types.Peripheral(name="peripheral")),
+            cppstruct.generate_peripheral(types.Peripheral(name="peripheral")),
             r"(?s)^(inline)?\s+namespace\s+peripheral\s*{.*}\s*//\s*peripheral$",
         )
 
     def test_register_definitions_listed_in_peripheral_before_struct(self):
         self.assertRegex(
-            cppstruct.generatePeripheral(
+            cppstruct.generate_peripheral(
                 types.Peripheral(
                     name="p",
                     structure=types.Struct(members=[R1, R2]),
@@ -29,10 +29,10 @@ class TestPeripheralGenreator(unittest.TestCase):
             ),
             r"(?s)^inline\s+namespace\s+p\s*{\s*"
             + r"inline namespace\s*{0:}\s*{{.*?}}\s*//\s*{0:}\s*".format(
-                cppstruct.getRegisterNamespace(R1.type)
+                cppstruct.get_register_namespace(R1.type)
             )
             + r"inline namespace\s*{0:}\s*{{.*?}}\s*//\s*{0:}\s*".format(
-                cppstruct.getRegisterNamespace(R2.type)
+                cppstruct.get_register_namespace(R2.type)
             ),
         )
 

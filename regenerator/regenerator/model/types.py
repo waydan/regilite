@@ -45,12 +45,12 @@ class Register:
     description: str = field(compare=False, default="")
 
     def __post_init__(self):
-        def isPow2(x):
+        def is_pow2(x):
             return floor(log2(x)) == log2(x)
 
         assert self.size != 0
         assert self.size % 8 == 0
-        assert isPow2(self.size)
+        assert is_pow2(self.size)
 
     def sizeof(self):
         """returns size in bytes of object"""
@@ -72,7 +72,7 @@ class Struct:
     def alignof(self):
         return max(member.alignof() for member in self.members)
 
-    def addMember(self, member):
+    def add_member(self, member):
         self.members.append(member)
         return self
 
@@ -85,14 +85,14 @@ class Union(object):
     def sizeof(self):
         """returns size in bytes of object"""
         return max(
-            _alignAs(member.offset + member.sizeof(), self.alignof())
+            _align_as(member.offset + member.sizeof(), self.alignof())
             for member in self.members
         )
 
     def alignof(self):
         return max(member.alignof() for member in self.members)
 
-    def addMember(self, member):
+    def add_member(self, member):
         self.members.append(member)
         return self
 
@@ -103,7 +103,7 @@ class Peripheral:
     structure: Struct = None
     instances: dict = field(default_factory=dict)
 
-    def addInstance(self, name: str, address: int):
+    def add_instance(self, name: str, address: int):
         if name in self.instances:
             raise RuntimeError(
                 "{:s} is already included in the peripheral".format(name)
@@ -112,5 +112,5 @@ class Peripheral:
             self.instances[name] = address
 
 
-def _alignAs(position: int, alignment: int):
+def _align_as(position: int, alignment: int):
     return (position + 1) // alignment * alignment

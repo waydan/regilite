@@ -19,7 +19,7 @@ class TestRegisterParser(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        register = cmsissvd.getRegister(register_xml)
+        register = cmsissvd.get_register(register_xml)
         self.assertEqual(
             register,
             types.Register(name="register_name", size=32, reset_value=0),
@@ -34,7 +34,7 @@ class TestRegisterParser(unittest.TestCase):
             """     <description>test description</description>"""
             """ </register>"""
         )
-        register = cmsissvd.getRegister(register_xml)
+        register = cmsissvd.get_register(register_xml)
         self.assertEqual(register.description, "test description")
 
     def test_array_index_replaced_by_lowercase_x(self):
@@ -49,7 +49,7 @@ class TestRegisterParser(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        self.assertEqual(cmsissvd.getRegister(register_xml).name, "RxR")
+        self.assertEqual(cmsissvd.get_register(register_xml).name, "RxR")
 
 
 if __name__ == "__main__":

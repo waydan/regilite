@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 import os
 from xml.etree import ElementTree
 
-from regenerator.generator.cppstruct import generatePeripheral
+from regenerator.generator.cppstruct import generate_peripheral
 from regenerator.parser import cmsissvd
 
 
 def cppstructs(file_name):
     device_xml = ElementTree.fromstring(open(file_name, "r").read())
-    peripherals = cmsissvd.getAllPeripherals(device_xml)
+    peripherals = cmsissvd.get_all_peripherals(device_xml)
     device_name = device_xml.find("name").text
 
     directory = os.path.join(os.getcwd(), device_name)
@@ -21,7 +21,7 @@ def cppstructs(file_name):
     for peripheral in peripherals:
         try:
             with open(os.path.join(directory, f"{peripheral.name}.hpp"), "w") as header:
-                header.write(generatePeripheral(peripheral, device_name))
+                header.write(generate_peripheral(peripheral, device_name))
         except:
             print(f"failed to generate {peripheral.name}.hpp")
             pass

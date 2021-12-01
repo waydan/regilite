@@ -17,7 +17,7 @@ class TestPeripheralParser(unittest.TestCase):
             """     <name>peripheral_name</name>"""
             """ </peripheral>"""
         )
-        peripheral = cmsissvd.getPeripheral(peripheral_xml)
+        peripheral = cmsissvd.get_peripherals(peripheral_xml)
         self.assertEqual(
             peripheral,
             types.Peripheral(
@@ -39,7 +39,7 @@ class TestPeripheralParser(unittest.TestCase):
             """     </registers>"""
             """ </peripheral>"""
         )
-        peripheral = cmsissvd.getPeripheral(peripheral_xml)
+        peripheral = cmsissvd.get_peripherals(peripheral_xml)
         self.assertEqual(
             peripheral,
             types.Peripheral(
@@ -77,7 +77,7 @@ class TestPeripheralParser(unittest.TestCase):
             """     </registers>"""
             """ </peripheral>"""
         )
-        peripheral = cmsissvd.getPeripheral(peripheral_xml)
+        peripheral = cmsissvd.get_peripherals(peripheral_xml)
         self.assertEqual(
             peripheral,
             types.Peripheral(
@@ -112,7 +112,7 @@ class TestPeripheralParser(unittest.TestCase):
             """ </peripherals>"""
             """ </device>"""
         )
-        peripheral = cmsissvd.getAllPeripherals(peripheral_xml)
+        peripheral = cmsissvd.get_all_peripherals(peripheral_xml)
         self.assertEqual(
             peripheral[0],
             types.Peripheral(

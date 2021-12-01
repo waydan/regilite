@@ -17,7 +17,7 @@ RxR = members.DataMember(
 class TestArrayMember(unittest.TestCase):
     def test_suffix_appended_to_register_name(self):
         self.assertRegex(
-            cppstruct.makeDataMember(
+            cppstruct.make_data_member(
                 members.MemberArray(
                     member=Rx,
                     index=["1"],
@@ -29,7 +29,7 @@ class TestArrayMember(unittest.TestCase):
 
     def test_multiple_suffixed_names_appear_on_single_line(self):
         self.assertRegex(
-            cppstruct.makeDataMember(
+            cppstruct.make_data_member(
                 members.MemberArray(
                     member=Rx,
                     index=["1", "2", "3"],
@@ -41,7 +41,7 @@ class TestArrayMember(unittest.TestCase):
 
     def test_use_array_syntax_when_index_is_sequential_and_zero_ordinal(self):
         self.assertRegex(
-            cppstruct.makeDataMember(
+            cppstruct.make_data_member(
                 members.MemberArray(
                     member=Rx,
                     index=["0", "1", "2"],
@@ -53,7 +53,7 @@ class TestArrayMember(unittest.TestCase):
 
     def test_do_not_use_array_syntax_for_infix(self):
         self.assertRegex(
-            cppstruct.makeDataMember(
+            cppstruct.make_data_member(
                 members.MemberArray(
                     member=RxR,
                     index=["0", "1", "2"],
@@ -70,14 +70,14 @@ class TestArrayMember(unittest.TestCase):
             offset=0,
         )
         self.assertRegex(
-            cppstruct.makeDataMember(
+            cppstruct.make_data_member(
                 members.MemberArray(
                     member=Rx_description,
                     index=["1"],
                     increment=4,
                 )
             ),
-            rf"^{cppstruct.generateType(Rx.type)}\s+R1\s*;\s*//\s*description$",
+            rf"^{cppstruct.generate_type(Rx.type)}\s+R1\s*;\s*//\s*description$",
         )
 
 

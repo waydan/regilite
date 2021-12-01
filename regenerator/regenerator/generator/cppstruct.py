@@ -12,25 +12,25 @@ from regenerator.utils import mbind
 from templates import TEMPLATES
 
 
-def getRegisterNamespace(register):
+def get_register_namespace(register):
     return register.name + "_"
 
 
-def makeDataMember(member):
-    def _hasSuffix(name):
+def make_data_member(member):
+    def has_suffix(name):
         return bool(re.match(r"^\w+{}$", name))
 
-    def _getMemberName(member):
+    def get_member_name(member):
         if isinstance(member, members.MemberArray):
             return (
                 member.name.format(f"[{len(member.index)}]")
-                if _hasSuffix(member.name) and isSequentialNumeric(member.index)
+                if has_suffix(member.name) and is_sequential_numeric(member.index)
                 else ", ".join([member.name.format(index) for index in member.index])
             )
         else:
             return member.name
 
-    def _getDescriptionComment(member_type):
+    def get_description_comment(member_type):
         return (
             " // " + member_type.description
             if hasattr(member_type, "description") and member_type.description
@@ -38,20 +38,20 @@ def makeDataMember(member):
         )
 
     return "{type} {name};{description}".format(
-        type=generateType(member.type),
-        name=_getMemberName(member),
-        description=_getDescriptionComment(member.type),
+        type=generate_type(member.type),
+        name=get_member_name(member),
+        description=get_description_comment(member.type),
     )
 
 
 @singledispatch
-def generateType(model_type):
+def generate_type(model_type):
     raise TypeError(f"Unrecognized argument type: {type(model_type)}")
 
 
-@generateType.register(types.Struct)
+@generate_type.register(types.Struct)
 def _(struct):
-    def listMembersWithPadding(member_list):
+    def list_members_with_padding(member_list):
         current_offset = 0
         padding_counter = 0
         for member in member_list:
@@ -64,56 +64,58 @@ def _(struct):
                     f"regilite::padding<{member.offset - current_offset}> _reserved_{padding_counter};"
                 )
                 padding_counter += 1
-            yield makeDataMember(member)
+            yield make_data_member(member)
             current_offset = member.offset + member.sizeof()
 
     return TEMPLATES["struct_type"].render(
         struct=struct,
-        data_member_list=listMembersWithPadding(struct.members),
+        data_member_list=list_members_with_padding(struct.members),
     )
 
 
-@generateType.register(types.Union)
+@generate_type.register(types.Union)
 def _(union):
     return TEMPLATES["union_type"].render(
         union=union,
-        data_member_list=[makeDataMember(member) for member in union.members],
+        data_member_list=[make_data_member(member) for member in union.members],
     )
 
 
-@generateType.register(types.Register)
+@generate_type.register(types.Register)
 def _(register):
-    return f"{getRegisterNamespace(register)}::reg{register.size}_t"
+    return f"{get_register_namespace(register)}::reg{register.size}_t"
 
 
-def generatePeripheral(peripheral):
+def generate_peripheral(peripheral):
     return TEMPLATES["peripheral"].render(
         peripheral=peripheral,
         field_definitions=mbind(
             peripheral.structure,
             lambda struct: (
-                generateRegisterFieldGroup(register)
-                for register in listRegisters(struct)
+                generate_register_field_group(register)
+                for register in list_registers(struct)
             ),
             (),
         ),
         structure_definition=mbind(
             peripheral.structure,
-            generateType,
+            generate_type,
             "",
         ),
     )
 
 
-def generateRegisterFieldGroup(register):
-    namespace = getRegisterNamespace(register)
+def generate_register_field_group(register):
+    namespace = get_register_namespace(register)
     return TEMPLATES["decl_reg"].render(
         register_namespace=namespace,
         register=register,
         field_definitions=mbind(
             register.fields,
             lambda fields: (
-                memberfield.generateFieldDefinition(field=field, register_key=namespace)
+                memberfield.generate_field_definition(
+                    field=field, register_key=namespace
+                )
                 for field in fields
             ),
             (),
@@ -122,24 +124,24 @@ def generateRegisterFieldGroup(register):
 
 
 @singledispatch
-def listRegisters(x):
+def list_registers(x):
     """returns a flat generator of all Register objects in the peripheral"""
     raise TypeError(f"Unrecognized argument type: {type(x)}")
 
 
-@listRegisters.register(types.Register)
+@list_registers.register(types.Register)
 def _(x):
     yield x
 
 
-@listRegisters.register(types.Struct)
-@listRegisters.register(types.Union)
+@list_registers.register(types.Struct)
+@list_registers.register(types.Union)
 def _(x):
     for member in x.members:
-        yield from listRegisters(member.type)
+        yield from list_registers(member.type)
 
 
-def isSequentialNumeric(index: list):
+def is_sequential_numeric(index: list):
     try:
         return all(map(lambda x: x[0] == x[1], enumerate(map(int, index))))
     except ValueError:

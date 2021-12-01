@@ -15,7 +15,7 @@ member = members.DataMember(type=Reg, name="member", offset=0)
 class TestInsertingDataMemberIntoUnion(unittest.TestCase):
     def test_insert_member_into_memberless_union(self):
         self.assertEqual(
-            cmsissvd.insertMember(
+            cmsissvd.insert_member(
                 types.Union(),
                 member,
             ),
@@ -24,7 +24,7 @@ class TestInsertingDataMemberIntoUnion(unittest.TestCase):
 
     def test_insert_member_into_union_with_other_member(self):
         self.assertEqual(
-            cmsissvd.insertMember(
+            cmsissvd.insert_member(
                 types.Union(members=[member]),
                 member,
             ),

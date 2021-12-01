@@ -23,7 +23,7 @@ class TestCreateDataMember(unittest.TestCase):
             """ </register>"""
         )
         self.assertEqual(
-            cmsissvd.getMember(member_xml),
+            cmsissvd.get_member(member_xml),
             members.DataMember(
                 type=self.example_register,
                 name="register_name",
@@ -44,7 +44,7 @@ class TestCreateDataMember(unittest.TestCase):
             """ </register>"""
         )
         self.assertEqual(
-            cmsissvd.getMember(member_xml),
+            cmsissvd.get_member(member_xml),
             members.MemberArray(
                 members.DataMember(
                     type=self.example_register, name="register_name", offset=0
@@ -66,7 +66,7 @@ class TestCreateDataMember(unittest.TestCase):
             """     <resetValue>0</resetValue>"""
             """ </register>"""
         )
-        self.assertEqual(cmsissvd.getMember(member_xml).name, "R{}")
+        self.assertEqual(cmsissvd.get_member(member_xml).name, "R{}")
 
 
 if __name__ == "__main__":
