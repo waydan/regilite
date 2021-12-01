@@ -20,14 +20,14 @@ class TestRegisterTypeGenerator(unittest.TestCase):
 
     def test_generating_8bit_register_type(self):
         self.assertEqual(
-            cppstruct.generate_type(types.Register(name="R1", size=8, reset_value=0)),
+            cppstruct.fmt_member_type(types.Register(name="R1", size=8, reset_value=0)),
             "R1_::reg8_t",
         )
 
     def test_generating_16bit_register_type(self):
         R1 = types.Register(name="R1", size=16, reset_value=0)
         self.assertEqual(
-            cppstruct.generate_type(R1),
+            cppstruct.fmt_member_type(R1),
             "{}::reg16_t".format(cppstruct.get_register_namespace(R1)),
         )
 

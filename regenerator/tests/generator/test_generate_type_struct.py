@@ -20,70 +20,70 @@ member_at_8 = members.DataMember(type=Reg16, name="MR8", offset=8)
 class TestStructTypeGenerator(unittest.TestCase):
     def test_generating_empty_struct(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct()),
+            cppstruct.fmt_member_type(types.Struct()),
             r"^struct {\s*}$",
         )
 
     def test_struct_name_used_as_type_name(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct(name="StructType")),
+            cppstruct.fmt_member_type(types.Struct(name="StructType")),
             r"^struct StructType {\s*}$",
         )
 
     def test_generating_struct_with_single_zero_offset_member(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct(members=[member_at_0])),
-            r"^struct\s*{{\s*{}\s*}}$".format(cppstruct.make_data_member(member_at_0)),
+            cppstruct.fmt_member_type(types.Struct(members=[member_at_0])),
+            r"^struct\s*{{\s*{}\s*}}$".format(cppstruct.fmt_data_member(member_at_0)),
         )
 
     def test_generating_struct_with_two_adjacent_members(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct(members=[member_at_0, member_at_4])),
+            cppstruct.fmt_member_type(types.Struct(members=[member_at_0, member_at_4])),
             r"^struct\s*{{\s*{}\s*{}\s*}}$".format(
-                *map(cppstruct.make_data_member, (member_at_0, member_at_4))
+                *map(cppstruct.fmt_data_member, (member_at_0, member_at_4))
             ),
         )
 
     def test_assertion_raised_if_adjacent_struct_members_have_same_offset(self):
         self.assertRaises(
             AssertionError,
-            cppstruct.generate_type,
+            cppstruct.fmt_member_type,
             types.Struct(members=[member_at_0, member_at_0]),
         )
 
     def test_add_padding_if_first_member_not_at_zero_offset(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct(members=[member_at_4])),
+            cppstruct.fmt_member_type(types.Struct(members=[member_at_4])),
             r"^struct\s*{{\s*regilite::padding<4> _reserved_\d+;\s*{}\s*}}".format(
-                cppstruct.make_data_member(member_at_4)
+                cppstruct.fmt_data_member(member_at_4)
             ),
         )
 
     def test_padding_sized_to_fill_gap_between_data_members(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct(members=[member_at_0, member_at_6])),
+            cppstruct.fmt_member_type(types.Struct(members=[member_at_0, member_at_6])),
             r"^struct\s*{{\s*{}\s*regilite::padding<2> _reserved_\d+;\s*{}\s*}}".format(
-                *map(cppstruct.make_data_member, (member_at_0, member_at_6)),
+                *map(cppstruct.fmt_data_member, (member_at_0, member_at_6)),
             ),
         )
 
     def test_padding_identifier_made_unique_by_incrementing_suffix(self):
         self.assertRegex(
-            cppstruct.generate_type(types.Struct(members=[member_at_2, member_at_8])),
+            cppstruct.fmt_member_type(types.Struct(members=[member_at_2, member_at_8])),
             r"^struct\s*{{\s*regilite::padding<2> _reserved_0;\s*{}"
             r"\s*regilite::padding<4> _reserved_1;\s*{}\s*}}".format(
-                *map(cppstruct.make_data_member, (member_at_2, member_at_8))
+                *map(cppstruct.fmt_data_member, (member_at_2, member_at_8))
             ),
         )
 
     def test_struct_offset_increments_properly_for_three_registers(self):
         self.assertRegex(
-            cppstruct.generate_type(
+            cppstruct.fmt_member_type(
                 types.Struct(members=[member_at_0, member_at_4, member_at_8])
             ),
             r"^struct\s*{{\s*{}\s*{}\s*{}\s*}}".format(
                 *map(
-                    cppstruct.make_data_member,
+                    cppstruct.fmt_data_member,
                     (member_at_0, member_at_4, member_at_8),
                 )
             ),

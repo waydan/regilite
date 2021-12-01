@@ -18,7 +18,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
         for register_size in 8, 16, 32, 64:
             with self.subTest(register_size=register_size):
                 self.assertRegex(
-                    cppstruct.generate_register_field_group(
+                    cppstruct.fmt_field_set(
                         types.Register(name="r1", size=register_size)
                     ),
                     rf"using reg{register_size}_t =",
@@ -26,7 +26,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
 
     def test_fields_and_register_alias_wrapped_in_namespace(self):
         self.assertRegex(
-            cppstruct.generate_register_field_group(types.Register(name="r1", size=32)),
+            cppstruct.fmt_field_set(types.Register(name="r1", size=32)),
             r"(?s)^(inline)?\s+namespace\s+r1_\s*{.*} // r1_$",
         )
 
@@ -35,7 +35,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
             for reset_value in range(0, 2 ** size - 1, (2 ** size) // 3):
                 with self.subTest(size=size, reset_value=reset_value):
                     self.assertRegex(
-                        cppstruct.generate_register_field_group(
+                        cppstruct.fmt_field_set(
                             types.Register(
                                 name="r1", size=size, reset_value=reset_value
                             )
@@ -54,7 +54,7 @@ class TestRegisterTypeGenerator(string_unittest_utils.TestCase):
             ),
         ]
         register_type = self.assertRegexExtractMatch(
-            cppstruct.generate_register_field_group(
+            cppstruct.fmt_field_set(
                 types.Register(
                     name="r2",
                     size=16,

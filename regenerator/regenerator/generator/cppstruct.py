@@ -16,7 +16,7 @@ def get_register_namespace(register):
     return register.name + "_"
 
 
-def make_data_member(member):
+def fmt_data_member(member):
     def has_suffix(name):
         return bool(re.match(r"^\w+{}$", name))
 
@@ -24,7 +24,7 @@ def make_data_member(member):
         if isinstance(member, members.MemberArray):
             return (
                 member.name.format(f"[{len(member.index)}]")
-                if has_suffix(member.name) and is_sequential_numeric(member.index)
+                if has_suffix(member.name) and _is_sequential_numeric(member.index)
                 else ", ".join([member.name.format(index) for index in member.index])
             )
         else:
@@ -38,18 +38,18 @@ def make_data_member(member):
         )
 
     return "{type} {name};{description}".format(
-        type=generate_type(member.type),
+        type=fmt_member_type(member.type),
         name=get_member_name(member),
         description=get_description_comment(member.type),
     )
 
 
 @singledispatch
-def generate_type(model_type):
+def fmt_member_type(model_type):
     raise TypeError(f"Unrecognized argument type: {type(model_type)}")
 
 
-@generate_type.register(types.Struct)
+@fmt_member_type.register(types.Struct)
 def _(struct):
     def list_members_with_padding(member_list):
         current_offset = 0
@@ -64,7 +64,7 @@ def _(struct):
                     f"regilite::padding<{member.offset - current_offset}> _reserved_{padding_counter};"
                 )
                 padding_counter += 1
-            yield make_data_member(member)
+            yield fmt_data_member(member)
             current_offset = member.offset + member.sizeof()
 
     return TEMPLATES["struct_type"].render(
@@ -73,39 +73,53 @@ def _(struct):
     )
 
 
-@generate_type.register(types.Union)
+@fmt_member_type.register(types.Union)
 def _(union):
     return TEMPLATES["union_type"].render(
         union=union,
-        data_member_list=[make_data_member(member) for member in union.members],
+        data_member_list=[fmt_data_member(member) for member in union.members],
     )
 
 
-@generate_type.register(types.Register)
+@fmt_member_type.register(types.Register)
 def _(register):
     return f"{get_register_namespace(register)}::reg{register.size}_t"
 
 
 def generate_peripheral(peripheral):
+    @singledispatch
+    def list_registers(x):
+        """returns a flat generator of all Register objects in the peripheral"""
+        raise TypeError(f"Unrecognized argument type: {type(x)}")
+
+    @list_registers.register(types.Register)
+    def _(x):
+        yield x
+
+    @list_registers.register(types.Struct)
+    @list_registers.register(types.Union)
+    def _(x):
+        for member in x.members:
+            yield from list_registers(member.type)
+
     return TEMPLATES["peripheral"].render(
         peripheral=peripheral,
         field_definitions=mbind(
             peripheral.structure,
             lambda struct: (
-                generate_register_field_group(register)
-                for register in list_registers(struct)
+                fmt_field_set(register) for register in list_registers(struct)
             ),
             (),
         ),
         structure_definition=mbind(
             peripheral.structure,
-            generate_type,
+            fmt_member_type,
             "",
         ),
     )
 
 
-def generate_register_field_group(register):
+def fmt_field_set(register):
     namespace = get_register_namespace(register)
     return TEMPLATES["decl_reg"].render(
         register_namespace=namespace,
@@ -121,25 +135,7 @@ def generate_register_field_group(register):
     )
 
 
-@singledispatch
-def list_registers(x):
-    """returns a flat generator of all Register objects in the peripheral"""
-    raise TypeError(f"Unrecognized argument type: {type(x)}")
-
-
-@list_registers.register(types.Register)
-def _(x):
-    yield x
-
-
-@list_registers.register(types.Struct)
-@list_registers.register(types.Union)
-def _(x):
-    for member in x.members:
-        yield from list_registers(member.type)
-
-
-def is_sequential_numeric(index: list):
+def _is_sequential_numeric(index: list):
     try:
         return all(map(lambda x: x[0] == x[1], enumerate(map(int, index))))
     except ValueError:
