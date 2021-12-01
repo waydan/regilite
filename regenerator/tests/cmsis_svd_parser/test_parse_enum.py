@@ -20,8 +20,9 @@ class TestEnumParser(unittest.TestCase):
             """     <value>#001</value>"""
             """ </enumeratedValue>"""
         )
-        enum = cmsissvd.getEnum(enum_xml)
-        self.assertEqual(enum, types.Enumeration(name="enum_name", value=1))
+        self.assertEqual(
+            cmsissvd.getEnum(enum_xml), types.Enumeration(name="enum_name", value=1)
+        )
 
     def test_append_v_to_numeric_name(self):
         enum_xml = ElementTree.fromstring(
@@ -30,8 +31,17 @@ class TestEnumParser(unittest.TestCase):
             """     <value>#001</value>"""
             """ </enumeratedValue>"""
         )
-        enum = cmsissvd.getEnum(enum_xml)
-        self.assertEqual("v001", enum.name)
+        self.assertEqual(cmsissvd.getEnum(enum_xml).name, "v001")
+
+    def test_description_included_when_present_in_svd(self):
+        enum_xml = ElementTree.fromstring(
+            """ <enumeratedValue>"""
+            """     <name>001</name>"""
+            """     <value>#001</value>"""
+            """     <description>enum description</description>"""
+            """ </enumeratedValue>"""
+        )
+        self.assertEqual(cmsissvd.getEnum(enum_xml).description, "enum description")
 
 
 if __name__ == "__main__":

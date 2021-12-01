@@ -4,11 +4,32 @@ SPDX-License-Identifier: Apache-2.0
 """
 import re
 import unittest
+from functools import reduce
 
 from regenerator import generateHeader
 from regenerator.model import types
 
 from . import string_unittest_utils
+
+
+enum_field = types.Field(
+    name="field_name",
+    mask=1,
+    access="ReadWrite",
+    value_type=[
+        types.Enumeration(name="e0", value=0),
+        types.Enumeration(name="e1", value=1),
+    ],
+)
+enum_field_with_comments = types.Field(
+    name="field_name",
+    mask=1,
+    access="ReadWrite",
+    value_type=[
+        types.Enumeration(name="e0", value=0, description="enum 0"),
+        types.Enumeration(name="e1", value=1, description="enum 1"),
+    ],
+)
 
 
 class TestFieldGenerator(string_unittest_utils.TestCase):
@@ -26,38 +47,45 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
         self.assertRegex(access, r"regilite::ReadWrite")
         self.assertRegex(key, r"struct\s*register_key")
 
-    def test_enum_field_definition(self):
-        field = types.Field(
-            name="field_name",
-            mask=1,
-            access="ReadWrite",
-            value_type=[
-                types.Enumeration(name="e0", value=0),
-                types.Enumeration(name="e1", value=1),
-            ],
+    def test_classed_enum_generated_when_field_has_value_type(self):
+        self.assertRegex(
+            generateHeader.generateField(enum_field, ""),
+            rf"(?s)^enum class {enum_field.name}_e : std::uint\d{{1,2}}_t {{.*?}};",
         )
-        field_text = generateHeader.generateField(field, "register_key")
 
-        # An enun class type is defined including all legal values
-        test_enum = self.assertRegexExtractMatch(
-            field_text,
-            r"^enum\s+class\s+(?P<type>[_a-z]\w*)\s*:\s*std::uint8_t\s*{(?P<body>.*?)};",
-            re.S,
-        )
-        for enum in field.value_type:
-            self.assertRegex(
-                test_enum["body"],
-                rf"{enum.name}\s*=\s*({enum.value:d}|0b0*{enum.value:b}|0x0*{enum.value:x})\s*",
+    def test_generated_enum_includes_all_specified_values_in_binary_representation(
+        self,
+    ):
+        self.assertRegex(
+            generateHeader.generateField(enum_field, ""),
+            f"^enum class.*?{{\s*"
+            + r",\s*".join(
+                map(
+                    lambda e: r"{} = 0b{:b}".format(e.name, e.value),
+                    (enum for enum in enum_field.value_type),
+                )
             )
+            + r"\s*};",
+        )
 
-        # The field base type is given a named alias for ease of use
+    def test_enumerated_values_may_be_followed_by_description_comments(self):
+        field_text = generateHeader.generateField(enum_field_with_comments)
+        for enum in enum_field.value_type:
+            with self.subTest(enum=enum):
+                self.assertRegex(
+                    field_text, rf"{enum.name}\s*=\s*.*?,?[ \t]// {enum.description}"
+                )
+
+    def test_enum_field_definition(self):
+        field_text = generateHeader.generateField(enum_field, "register_key")
+
+        # The enum_field base type is given a named alias for ease of use
         test_base = self.assertRegexExtractMatch(
             field_text,
-            rf"using\s+(?P<name>[_a-z]\w*)\s*=\s*regilite::Field<\s*(?P<parameters>.*?)\s*>\s*;",
-            re.S,
+            rf"(?s)using\s+(?P<name>[_a-z]\w*)\s*=\s*regilite::Field<\s*(?P<parameters>.*?)\s*>\s*;",
         )
         value_type, mask, access, key = re.split(r"\s*,\s*", test_base["parameters"])
-        self.assertRegex(value_type, rf"\b{test_enum['type']}\b")
+        self.assertRegex(value_type, rf"\b{enum_field.name}_e\b")
         self.assertRegex(mask, r"regilite::Mask<(\d+,)?\s*\d+>{}")
         self.assertRegex(access, r"regilite::ReadWrite")
         self.assertRegex(key, r"struct\s*register_key")
@@ -65,26 +93,26 @@ class TestFieldGenerator(string_unittest_utils.TestCase):
         # Field type is properly declared during definition
         test_field = self.assertRegexExtractMatch(
             field_text,
-            rf"struct\s+field_name\s*:\s*{test_base['name']}\s*{{(?P<body>.*)}};$",
-            re.S,
+            rf"(?s)struct\s+field_name\s*:\s*{test_base['name']}\s*{{(?P<body>.*)}};$",
         )
 
         # Field body contains a construct which delegates to base class
         self.assertRegex(
             test_field["body"],
             r"(explicit\s+constexpr|constexpr\s+explicit)\s+"
-            rf"field_name\s*\(\s*{test_enum['type']}\s+(?P<argument>\w+)\s*\)\s*"
+            rf"field_name\s*\(\s*{enum_field.name}_e\s+(?P<argument>\w+)\s*\)\s*"
             rf":\s*{test_base['name']}\s*\(\s*(?P=argument)\s*\)\s*{{\s*}}",
         )
 
         # Constexpr static member is created for each possible enum value
-        for enum in field.value_type:
-            self.assertRegex(
-                test_field["body"],
-                rf"(static\s+constexpr|constexpr\s+static)\s+"
-                rf"{test_base['name']}\s+{enum.name}\s*"
-                rf"{{\s*{test_enum['type']}::{enum.name}\s*}};",
-            )
+        for enum in enum_field.value_type:
+            with self.subTest(enum=enum):
+                self.assertRegex(
+                    test_field["body"],
+                    rf"(static\s+constexpr|constexpr\s+static)\s+"
+                    rf"{test_base['name']}\s+{enum.name}\s*"
+                    rf"{{\s*{enum_field.name}_e::{enum.name}\s*}};",
+                )
 
 
 if __name__ == "__main__":

@@ -200,11 +200,10 @@ def getEnum(enum):
         _cpp_identifier = re.compile(r"[_a-zA-Z][_a-zA-Z0-9]*")
         return name if _cpp_identifier.match(name) else "v" + name
 
-    description = enum.find("description")
     return types.Enumeration(
-        _makeId(enum.find("name").text),
-        _strToUint(enum.find("value").text),
-        description.text if description else "",
+        name=_makeId(enum.find("name").text),
+        value=_strToUint(enum.find("value").text),
+        description=mbind(enum.find("description"), lambda x: x.text, ""),
     )
 
 
