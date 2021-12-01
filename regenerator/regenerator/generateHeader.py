@@ -109,16 +109,17 @@ def generateField(field, register_key=None):
 
 
 def generateRegisterFieldGroup(register):
-    field_definitions = (
-        [
-            generateField(field=field, register_key=register.name + "_")
-            for field in register.fields
-        ]
-        if register.fields
-        else []
-    )
+    namespace = getRegisterNamespace(register)
     return TEMPLATES["decl_reg"].render(
-        register=register, field_definitions=field_definitions
+        register_namespace=namespace,
+        register=register,
+        field_definitions=mbind(
+            register.fields,
+            lambda fields: (
+                generateField(field=field, register_key=namespace) for field in fields
+            ),
+            [],
+        ),
     )
 
 
