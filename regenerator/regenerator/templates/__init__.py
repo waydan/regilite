@@ -1,7 +1,7 @@
 from jinja2 import Template
 from os import path
 
-TEMPLATE_DIR = path.dirname(path.abspath(__file__))
+TEMPLATE_DIR = path.dirname(__file__)
 
 TEMPLATES = {
     "header": Template(open(path.join(TEMPLATE_DIR, "header.stub")).read()),
