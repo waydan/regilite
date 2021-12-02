@@ -5,9 +5,18 @@ SPDX-License-Identifier: Apache-2.0
 import re
 from functools import reduce, singledispatch
 from itertools import takewhile
+from xml.etree import ElementTree
 
 from regenerator.model import members, types
 from regenerator.utils import mbind
+
+
+def decode_file(file_text: str):
+    return ElementTree.fromstring(file_text)
+
+
+def get_device_name(device_elem):
+    return device_elem.find("name").text
 
 
 def get_name(peripheral_elem):
