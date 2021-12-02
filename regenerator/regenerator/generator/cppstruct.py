@@ -9,7 +9,7 @@ from functools import singledispatch
 from regenerator.generator import fieldtype
 from regenerator.model import members, types
 from regenerator.utils import mbind
-from templates import TEMPLATES
+from regenerator.templates import TEMPLATES
 
 
 def get_register_namespace(register):

@@ -2,7 +2,7 @@
 Copyright 2021 Daniel Way
 SPDX-License-Identifier: Apache-2.0
 """
-from templates import TEMPLATES
+from regenerator.templates import TEMPLATES
 
 
 def fmt_header(device_name, peripheral_name, peripheral_body, includes):

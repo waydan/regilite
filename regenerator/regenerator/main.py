@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import os
-from xml.etree import ElementTree
+import argparse
 
 from regenerator.generator import cppstruct, header
 from regenerator.parser import cmsissvd
@@ -17,18 +17,49 @@ def read_register_definition_file(pathname) -> str:
         return file.read()
 
 
-def main(file_name):
-    device_xml = ElementTree.fromstring(open(file_name, "r").read())
-    peripherals = cmsissvd.get_all_peripherals(device_xml)
-    device_name = cmsissvd.get_device_name(device_xml)
+def export_header_file(dir_path, file_name, text):
+    with open(
+        os.path.join(
+            dir_path,
+            file_name,
+        ),
+        "w",
+    ) as header:
+        header.write(text)
+
+
+def main():
+    cli_input = argparse.ArgumentParser()
+    cli_input.add_argument(
+        "input_file",
+        type=str,
+        help="relative or absolue path to the register definition file",
+    )
+    cli_args = cli_input.parse_args()
+
+    definition_text = read_register_definition_file(cli_args.input_file)
+    device_name = cmsissvd.get_device_name(definition_text)
 
     directory = os.path.join(os.getcwd(), device_name)
     if not os.path.exists(directory):
         os.mkdir(directory)
-    for peripheral in peripherals:
+    for peripheral in cmsissvd.get_all_peripherals(definition_text):
         try:
-            with open(os.path.join(directory, f"{peripheral.name}.hpp"), "w") as header:
-                header.write(cppstruct.generate_peripheral(peripheral, device_name))
-        except:
+            export_header_file(
+                directory,
+                f"{peripheral.name}.hpp",
+                header.fmt_header(
+                    device_name=device_name,
+                    peripheral_name=peripheral.name,
+                    peripheral_body=cppstruct.generate_peripheral(
+                        peripheral, device_name
+                    ),
+                    includes=["<cstdint>", "<regilite/everyting.hpp>"],
+                ),
+            )
+        except Exception:
             print(f"failed to generate {peripheral.name}.hpp")
-            pass
+
+
+if __name__ == "__main__":
+    main()
