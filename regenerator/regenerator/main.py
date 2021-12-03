@@ -37,12 +37,15 @@ def main():
     )
     cli_args = cli_input.parse_args()
 
-    definition_text = read_register_definition_file(cli_args.input_file)
+    definition_text = cmsissvd.decode_file(
+        read_register_definition_file(cli_args.input_file)
+    )
     device_name = cmsissvd.get_device_name(definition_text)
 
     directory = os.path.join(os.getcwd(), device_name)
     if not os.path.exists(directory):
         os.mkdir(directory)
+    assert os.path.exists(directory), f"Could not find directory {directory}"
     for peripheral in cmsissvd.get_all_peripherals(definition_text):
         try:
             export_header_file(
@@ -51,14 +54,13 @@ def main():
                 header.fmt_header(
                     device_name=device_name,
                     peripheral_name=peripheral.name,
-                    peripheral_body=cppstruct.generate_peripheral(
-                        peripheral, device_name
-                    ),
+                    peripheral_body=cppstruct.generate_peripheral(peripheral),
                     includes=["<cstdint>", "<regilite/everyting.hpp>"],
                 ),
             )
-        except Exception:
+        except Exception as e:
             print(f"failed to generate {peripheral.name}.hpp")
+            print(e)
 
 
 if __name__ == "__main__":
