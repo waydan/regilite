@@ -6,7 +6,12 @@ RUN apt-get update && apt-get -y install \
     build-essential \
     cmake ninja-build \
     clang-format clang-tidy \
-    git
+    git \
+    python3 python3-pip
+
+RUN pip install \
+    black \
+    build
 
 #Install test framework
 RUN git clone https://github.com/cpputest/cpputest.git && \
